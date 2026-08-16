@@ -57,8 +57,7 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
-| 2026-08-15 | [Fix Mongo AppHost startup drift](docs/blogs/2026-08-15-pr-2-fix-mongo-apphost-startup-drift.md) | release,automation |
-| 2026-08-15 | [Add MongoDbContext and Extensions for service defaults and health checks](docs/blogs/2026-08-15-pr-1-add-mongodbcontext-and-extensions-for-service-defaults-and-health-checks.md) | release,automation |
+| 2026-08-16 | [Fix CI coverage report discovery](docs/blogs/2026-08-16-pr-6-fix-ci-coverage-report-discovery.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -110,8 +109,7 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
-| 2026-08-15 | [Fix Mongo AppHost startup drift](docs/blogs/2026-08-15-pr-2-fix-mongo-apphost-startup-drift.md) | release,automation |
-| 2026-08-15 | [Add MongoDbContext and Extensions for service defaults and health checks](docs/blogs/2026-08-15-pr-1-add-mongodbcontext-and-extensions-for-service-defaults-and-health-checks.md) | release,automation |
+| 2026-08-16 | [Fix CI coverage report discovery](docs/blogs/2026-08-16-pr-6-fix-ci-coverage-report-discovery.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
