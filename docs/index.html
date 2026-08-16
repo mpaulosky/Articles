@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Articles | Release Notes & Blog</title>
+    <style>
+      :root {
+        --bg: #0b1120;
+        --panel: #111827;
+        --panel-alt: #172033;
+        --surface: #f8fafc;
+        --ink: #e2e8f0;
+        --muted: #94a3b8;
+        --brand: #63b3ed;
+        --brand-strong: #2b6cb0;
+        --accent: #8b5cf6;
+        --border: rgba(148, 163, 184, 0.2);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(180deg, #0b1120 0%, #111827 100%);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+
+      a {
+        color: var(--brand);
+        text-decoration: none;
+      }
+
+      a:hover { text-decoration: underline; }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 0 30px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand {
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 0.95rem;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.6fr 0.9fr;
+        gap: 24px;
+        padding: 40px 0 28px;
+        align-items: center;
+      }
+
+      .hero h1 {
+        margin: 0 0 16px;
+        font-size: clamp(2.1rem, 4vw, 3.4rem);
+        line-height: 1.1;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.08rem;
+        max-width: 60ch;
+      }
+
+      .pillbox {
+        background: rgba(99, 179, 237, 0.1);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 20px;
+      }
+
+      .pillbox h2 {
+        margin: 0 0 10px;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 6px 10px;
+        background: rgba(139, 92, 246, 0.12);
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        border-radius: 999px;
+        color: #d8c6ff;
+        font-size: 0.78rem;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 28px;
+        padding-top: 12px;
+      }
+
+      .panel {
+        background: rgba(17, 24, 39, 0.75);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 22px 22px 18px;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+      }
+
+      .panel h2,
+      .panel h3 {
+        margin-top: 0;
+      }
+
+      .panel p,
+      .panel li {
+        color: #dfe7f4;
+      }
+
+      .panel ul {
+        padding-left: 20px;
+        margin-bottom: 0;
+      }
+
+      .blog-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .blog-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .blog-list li:last-child {
+        border-bottom: none;
+      }
+
+      .mini-meta {
+        display: block;
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-bottom: 4px;
+      }
+
+      .release-notes article {
+        border-top: 1px solid var(--border);
+        padding-top: 18px;
+        margin-top: 18px;
+      }
+
+      .release-notes article:first-of-type {
+        border-top: none;
+        padding-top: 0;
+        margin-top: 0;
+      }
+
+      .release-notes h3 {
+        margin-bottom: 8px;
+      }
+
+      .quick-links {
+        display: grid;
+        gap: 12px;
+      }
+
+      .quick-links a {
+        display: block;
+        padding: 10px 12px;
+        background: rgba(148, 163, 184, 0.06);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+
+      @media (max-width: 820px) {
+        .hero,
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="topbar">
+        <div class="brand">Articles</div>
+        <nav class="nav" aria-label="Project navigation">
+          <a href="#overview">Overview</a>
+          <a href="#release-notes">Release notes</a>
+          <a href="#blogs">Blogs</a>
+          <a href="../README.md">README</a>
+          <a href="blogs/README.md">Blog index</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div>
+            <h1>Articles</h1>
+            <p>
+              Articles is a production-ready .NET 10 starter repository for building
+              Aspire-hosted, Auth0-enabled Blazor applications with a disciplined testing
+              strategy from the start.
+            </p>
+          </div>
+          <aside class="pillbox" aria-label="Project highlights">
+            <h2>Release highlights</h2>
+            <div class="tag-row">
+              <span class="tag">.NET 10</span>
+              <span class="tag">Aspire</span>
+              <span class="tag">Blazor Server</span>
+              <span class="tag">Auth0</span>
+              <span class="tag">Tailwind v4</span>
+              <span class="tag">xUnit v3</span>
+            </div>
+          </aside>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel" id="overview">
+            <h2>Project overview</h2>
+            <p>
+              The repository is intentionally shaped as a foundation for real engineering work:
+              a composition root, a domain layer, an application UI, and a layered test suite that
+              keeps dependencies and boundaries explicit.
+            </p>
+            <ul>
+              <li><strong>AppHost:</strong> .NET Aspire orchestration with service discovery and local resource configuration.</li>
+              <li><strong>Domain:</strong> application-focused domain contracts and model boundaries.</li>
+              <li><strong>UI:</strong> Blazor Server experience with Auth0 authentication and responsive layout work.</li>
+              <li><strong>Tests:</strong> architecture, integration, unit, component, and E2E coverage across the project.</li>
+            </ul>
+          </div>
+
+          <aside class="panel">
+            <h2>Quick links</h2>
+            <div class="quick-links">
+              <a href="../README.md">Project README</a>
+              <a href="../CONTRIBUTING.md">Contributing guide</a>
+              <a href="../AUTH0_SETUP.md">Auth0 setup</a>
+              <a href="../SECURITY.md">Security policy</a>
+              <a href="blogs/README.md">Release blog index</a>
+            </div>
+          </aside>
+        </section>
+
+        <section class="panel release-notes" id="release-notes" style="margin-top: 28px;">
+          <h2>Release notes</h2>
+
+          <article>
+            <h3>2026-07-18 — Tailwind v4, build repair, and workflow hardening</h3>
+            <p>
+              The project moved through a focused stabilization pass: dependency cleanup, xUnit v3
+              normalization, build repairs, and a refreshed Tailwind CSS v4 presentation layer. The
+              result was a cleaner repository with a more dependable UI and a stronger CI path.
+            </p>
+          </article>
+
+          <article>
+            <h3>2026-07-17 — Frontend polish and system-level clean-up</h3>
+            <p>
+              The UI team improved the layout and navigation, refreshed the responsive styling, and
+              integrated a more modern utility-first design system while keeping the application
+              grounded in the existing .NET project structure.
+            </p>
+          </article>
+
+          <article>
+            <h3>2026-07-09 — Initial template foundation</h3>
+            <p>
+              The project was first scaffolded as a full-blown template with AppHost, Domain, UI,
+              Auth0 setup docs, and five distinct test projects. That milestone established the
+              project as a reusable, production-oriented .NET 10 starting point.
+            </p>
+          </article>
+        </section>
+
+        <section class="panel" id="blogs" style="margin-top: 28px;">
+          <h2>Latest blog posts</h2>
+          <ul class="blog-list">
+            <li>
+              <span class="mini-meta">2026-07-18</span>
+              <a href="blogs/2026-07-18-Articles-tailwind-and-test-stability.md">Build repairs, Tailwind v4, and workflow hardening shape the latest Articles release</a>
+            </li>
+            <li>
+              <span class="mini-meta">2026-07-09</span>
+              <a href="blogs/2026-07-09-Articles-template-foundation.md">Articles establishes a production-ready .NET 10 starter</a>
+            </li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
