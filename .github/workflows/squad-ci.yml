@@ -362,13 +362,21 @@ jobs:
           name: coverage-reports
           path: coverage-output
 
+      - name: Warn when Codecov is not configured
+        if: always() && secrets.CODECOV_TOKEN == ''
+        run: |
+          echo "::warning::CODECOV_TOKEN is not configured for this repository."
+          echo "::warning::Add the repository secret in GitHub, then rerun the workflow."
+
       - name: Publish to Codecov
         uses: codecov/codecov-action@v7
-        if: always()
+        if: always() && secrets.CODECOV_TOKEN != ''
         with:
-          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage-output/Cobertura.xml
-          verbose: false
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
 
   report:
     if: ${{ always() && github.actor != 'dependabot[bot]' }}
