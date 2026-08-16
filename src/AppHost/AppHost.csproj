@@ -5,21 +5,16 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<UserSecretsId>1f384bfd-6231-4c0d-a92a-3e789f5d2b1a</UserSecretsId>
+		<UserSecretsId>9d23fd99-a98f-42ef-bc1f-6303b9907945</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Web\Web.csproj"/>
+		<PackageReference Include="Aspire.Hosting.MongoDB" />
+		<PackageReference Include="Aspire.Hosting.Redis" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.Redis"/>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Reference Include="Aspire.Hosting">
-			<HintPath>..\..\..\..\.nuget\packages\aspire.hosting\13.4.6\lib\net8.0\Aspire.Hosting.dll</HintPath>
-		</Reference>
+		<ProjectReference Include="..\Web\Web.csproj" />
 	</ItemGroup>
 
 </Project>
