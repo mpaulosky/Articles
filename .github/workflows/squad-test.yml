@@ -26,8 +26,7 @@ permissions:
       - "docs/**"
 
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "docs/**"
 
@@ -67,7 +66,6 @@ env:
 
 jobs:
   build:
-    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Build Solution
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -129,6 +127,7 @@ jobs:
             ${{ runner.os }}-build-
 
   discover-tests:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Discover Test Projects
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -186,6 +185,7 @@ jobs:
           echo "::notice::tests/"
 
   test:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: "Tests: ${{ matrix.test_name }}"
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -199,7 +199,8 @@ jobs:
     env:
       ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"
       # Enable Playwright trace/video/screenshot capture for E2E jobs
-      PLAYWRIGHT_ARTIFACTS: ${{ matrix.requires_playwright && 'true' || 'false' }}
+      PLAYWRIGHT_ARTIFACTS: >-
+        ${{ matrix.requires_playwright && 'true' || 'false' }}
 
     steps:
       - name: Checkout code
@@ -285,6 +286,7 @@ jobs:
           if-no-files-found: ignore
 
   coverage:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Coverage Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -292,8 +294,6 @@ jobs:
       - build
       - discover-tests
       - test
-    if: always()
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -368,6 +368,7 @@ jobs:
           verbose: false
 
   report:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Test Report Summary
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -375,8 +376,6 @@ jobs:
       - build
       - discover-tests
       - test
-    if: always()
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
