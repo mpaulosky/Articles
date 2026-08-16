@@ -1,5 +1,5 @@
 ---
-name: Test Suite
+name: Build and Test Suite
 
 # NOTE: All test projects now use 'dotnet test' consistently.
 # This was updated to fix issues with direct executable execution that were
