@@ -459,7 +459,7 @@ jobs:
             exit 0
           fi
 
-          if echo "$PUSH_OUTPUT" | grep -Eqi 'Repository rule violations found|Changes must be made through a pull request|Protected branch update failed|pre-receive hook declined|GH006'; then
+          if echo "$PUSH_OUTPUT" | grep -Eqi 'Repository rule violations found|Changes must be made through a pull request|Protected branch update failed|pre-receive hook declined|Required status check|GH006|GH013'; then
             echo "::warning::Direct push to main is blocked by repository rules; release proceeds without the docs commit."
             echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
