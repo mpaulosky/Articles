@@ -11,10 +11,14 @@ using Web;
 using Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+var disableRedis = builder.Configuration.GetValue("DisableRedis", false);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
-builder.AddRedisOutputCache("cache");
+if (!disableRedis)
+{
+	builder.AddRedisOutputCache("cache");
+}
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -33,7 +37,10 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-app.UseOutputCache();
+if (!app.Configuration.GetValue("DisableRedis", false))
+{
+	app.UseOutputCache();
+}
 
 app.MapStaticAssets();
 

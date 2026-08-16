@@ -1,5 +1,5 @@
 ---
-name: Test Suite
+name: Build and Test Suite
 
 # NOTE: All test projects now use 'dotnet test' consistently.
 # This was updated to fix issues with direct executable execution that were
@@ -253,16 +253,19 @@ jobs:
             no_build_arg="--no-build"
           fi
 
-          # Microsoft.Testing.Platform does not support the legacy VSTest
-          # coverage collector arguments used by the older dotnet test flow.
-          # Keep the runner on the MTP-compatible command path and let the
-          # coverage stage warn/skip when no coverage files are produced.
+          # Microsoft Testing Platform is enabled via global.json for .NET 10, so
+          # the coverage and xUnit report args are passed directly to the MTP runner
+          # instead of the legacy VSTest collector/Logger syntax.
           dotnet test "${{ matrix.project_path }}" \
             --configuration Release \
             $no_build_arg \
             --verbosity "${{ matrix.verbosity }}" \
-            --logger "trx;LogFileName=${{ matrix.test_id }}.trx" \
-            --results-directory "$GITHUB_WORKSPACE/test-results"
+            --results-directory "$GITHUB_WORKSPACE/test-results" \
+            --report-xunit-trx \
+            --report-xunit-trx-filename "${{ matrix.test_id }}.trx" \
+            --coverage \
+            --coverage-output-format cobertura \
+            --coverage-output "$GITHUB_WORKSPACE/test-results/${{ matrix.test_id }}.cobertura.xml"
           exit_code=$?
           if [ $exit_code -ne 0 ]; then
             echo "::error::Test project failed: ${{ matrix.project_path }}"
