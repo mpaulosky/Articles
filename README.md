@@ -6,7 +6,6 @@
 [![Latest Release](https://img.shields.io/github/v/release/mpaulosky/Articles?logo=github&color=blue&label=Release)](https://github.com/mpaulosky/Articles/releases/latest)
 
 [![CI/CD](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
-[![Test Suite](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
 [![CodeCov Coverage](https://codecov.io/gh/mpaulosky/Articles/branch/main/graph/badge.svg)](https://codecov.io/gh/mpaulosky/Articles)
 [![Coverage Gate](https://img.shields.io/badge/Coverage%20Gate-≥80%25-brightgreen?logo=codecov)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
 

@@ -316,7 +316,7 @@ jobs:
       - name: Generate coverage report
         run: |
           reportgenerator \
-            -reports:"coverage-reports/**/**/coverage.cobertura.xml" \
+            -reports:"coverage-reports/**/*.cobertura.xml" \
             -targetdir:"./coverage-output" \
             -reporttypes:"Html;Cobertura;JsonSummary" \
             -filefilters:"-**/obj/**/*.cs;-**/*.generated.cs" \
