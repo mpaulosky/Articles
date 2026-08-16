@@ -6,9 +6,9 @@
 [![Latest Release](https://img.shields.io/github/v/release/mpaulosky/Articles?logo=github&color=blue&label=Release)](https://github.com/mpaulosky/Articles/releases/latest)
 
 [![CI/CD](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
-[![Test Suite](https://github.com/mpaulosky/Articles/actions/workflows/squad-test.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/squad-test.yml)
+[![Test Suite](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
 [![CodeCov Coverage](https://codecov.io/gh/mpaulosky/Articles/branch/main/graph/badge.svg)](https://codecov.io/gh/mpaulosky/Articles)
-[![Coverage Gate](https://img.shields.io/badge/Coverage%20Gate-≥80%25-brightgreen?logo=codecov)](https://github.com/mpaulosky/Articles/actions/workflows/squad-test.yml)
+[![Coverage Gate](https://img.shields.io/badge/Coverage%20Gate-≥80%25-brightgreen?logo=codecov)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
 
 [![Open Issues](https://img.shields.io/github/issues/mpaulosky/Articles?color=0366d6)](https://github.com/mpaulosky/Articles/issues?q=is%3Aopen+is%3Aissue)
 [![Closed Issues](https://img.shields.io/github/issues-closed/mpaulosky/Articles?color=6f42c1)](https://github.com/mpaulosky/Articles/issues?q=is%3Aclosed+is%3Aissue)
