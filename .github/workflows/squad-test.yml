@@ -253,17 +253,16 @@ jobs:
             no_build_arg="--no-build"
           fi
 
-          coverage_arg="DataCollectionRunSettings.DataCollectors.DataCollector."
-          coverage_arg+="Configuration.Format=cobertura"
-
+          # Microsoft.Testing.Platform does not support the legacy VSTest
+          # coverage collector arguments used by the older dotnet test flow.
+          # Keep the runner on the MTP-compatible command path and let the
+          # coverage stage warn/skip when no coverage files are produced.
           dotnet test "${{ matrix.project_path }}" \
             --configuration Release \
             $no_build_arg \
             --verbosity "${{ matrix.verbosity }}" \
             --logger "trx;LogFileName=${{ matrix.test_id }}.trx" \
-            --results-directory "$GITHUB_WORKSPACE/test-results" \
-            --collect:"XPlat Code Coverage" \
-            -- "$coverage_arg"
+            --results-directory "$GITHUB_WORKSPACE/test-results"
           exit_code=$?
           if [ $exit_code -ne 0 ]; then
             echo "::error::Test project failed: ${{ matrix.project_path }}"
