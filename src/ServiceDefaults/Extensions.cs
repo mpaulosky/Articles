@@ -28,6 +28,9 @@ public static class Extensions
 	private const string HealthEndpointPath = "/health";
 	private const string AlivenessEndpointPath = "/alive";
 
+	/// <summary>
+	/// Configures the default Aspire, resilience, service discovery, and health-check pipeline for a host.
+	/// </summary>
 	public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
 	{
 		builder.ConfigureOpenTelemetry();
@@ -54,6 +57,9 @@ public static class Extensions
 		return builder;
 	}
 
+	/// <summary>
+	/// Configures OpenTelemetry tracing and metrics to include ASP.NET Core, HTTP client, and runtime instrumentation.
+	/// </summary>
 	public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder)
 		where TBuilder : IHostApplicationBuilder
 	{
@@ -109,6 +115,9 @@ public static class Extensions
 		return builder;
 	}
 
+	/// <summary>
+	/// Adds the default app health checks used for liveness and readiness signaling.
+	/// </summary>
 	public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder)
 		where TBuilder : IHostApplicationBuilder
 	{
@@ -119,6 +128,9 @@ public static class Extensions
 		return builder;
 	}
 
+	/// <summary>
+	/// Maps the default development health endpoints and returns the application for chaining.
+	/// </summary>
 	public static WebApplication MapDefaultEndpoints(this WebApplication app)
 	{
 		// Adding health checks endpoints to applications in non-development environments has security implications.
