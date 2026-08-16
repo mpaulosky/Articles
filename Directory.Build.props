@@ -14,7 +14,7 @@
         <BaseIntermediateOutputPath>$(MSBuildProjectDirectory)/obj/</BaseIntermediateOutputPath>
         <BaseOutputPath>$(MSBuildProjectDirectory)/bin/</BaseOutputPath>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <UseAppHost>true</UseAppHost>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <UseAppHost>true</UseAppHost>
     </PropertyGroup>
 </Project>
