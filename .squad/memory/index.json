@@ -1,0 +1,142 @@
+[
+  {
+    "id": "29ef1bd9-f09e-44d5-a493-b45299b3c81a",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Post-merge trigger mode",
+    "path": ".squad/decisions/inbox/squad-post-merge-trigger-mode-29ef1bd9.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:01:44.801Z",
+    "updatedAt": "2026-08-04T15:01:44.801Z"
+  },
+  {
+    "id": "4c9ad30b-5839-410e-bdc8-94295048e9e6",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Blog generation strategy",
+    "path": ".squad/decisions/inbox/squad-blog-generation-strategy-4c9ad30b.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:03:15.857Z",
+    "updatedAt": "2026-08-04T15:03:15.857Z"
+  },
+  {
+    "id": "22ad979f-52c9-4983-b2d9-76491edb57fc",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Release cadence",
+    "path": ".squad/decisions/inbox/squad-release-cadence-22ad979f.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:04:17.420Z",
+    "updatedAt": "2026-08-04T15:04:17.420Z"
+  },
+  {
+    "id": "187310f7-f582-4205-abcf-53e26afad920",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Blog highlights source",
+    "path": ".squad/decisions/inbox/squad-blog-highlights-source-187310f7.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:07:24.669Z",
+    "updatedAt": "2026-08-04T15:07:24.669Z"
+  },
+  {
+    "id": "066f8922-41ad-4cf9-a5dd-12a72b4cf2bd",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Release-worthy change gate",
+    "path": ".squad/decisions/inbox/squad-release-worthy-change-gate-066f8922.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:12:19.275Z",
+    "updatedAt": "2026-08-04T15:12:19.275Z"
+  },
+  {
+    "id": "06a7d3f7-175d-4fbc-ac76-38e7dacebd20",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Docs update write path",
+    "path": ".squad/decisions/inbox/squad-docs-update-write-path-06a7d3f7.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:12:47.559Z",
+    "updatedAt": "2026-08-04T15:12:47.559Z"
+  },
+  {
+    "id": "9a608e7f-01b6-4cf8-bfbe-16690f0334be",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Release failure policy",
+    "path": ".squad/decisions/inbox/squad-release-failure-policy-9a608e7f.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:14:34.925Z",
+    "updatedAt": "2026-08-04T15:14:34.925Z"
+  },
+  {
+    "id": "367dbf41-3dfb-4bd5-96a9-5aa90935a45a",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Root README blog rendering",
+    "path": ".squad/decisions/inbox/squad-root-readme-blog-rendering-367dbf41.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:15:07.704Z",
+    "updatedAt": "2026-08-04T15:15:07.704Z"
+  },
+  {
+    "id": "49bb71ff-3777-46f5-b093-1ef9cce61f5d",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Retire milestone release/blog flows",
+    "path": ".squad/decisions/inbox/squad-retire-milestone-release-blog-flows-49bb71ff.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:15:38.454Z",
+    "updatedAt": "2026-08-04T15:15:38.454Z"
+  },
+  {
+    "id": "6c55df42-bfba-4eb8-b711-406b94a7d0ac",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Version bump policy",
+    "path": ".squad/decisions/inbox/squad-version-bump-policy-6c55df42.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:17:05.298Z",
+    "updatedAt": "2026-08-04T15:17:05.298Z"
+  },
+  {
+    "id": "6ff88827-a864-4227-bf10-20f27fb57872",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Release updates docs index",
+    "path": ".squad/decisions/inbox/squad-release-updates-docs-index-6ff88827.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:17:12.771Z",
+    "updatedAt": "2026-08-04T15:17:12.771Z"
+  },
+  {
+    "id": "2ec2c592-62d9-4903-81e2-391758405769",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Canonical blog table columns",
+    "path": ".squad/decisions/inbox/squad-canonical-blog-table-columns-2ec2c592.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:21:57.541Z",
+    "updatedAt": "2026-08-04T15:21:57.541Z"
+  },
+  {
+    "id": "f26ef9f3-8bc5-4081-a505-c30fd8a95595",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Repository purpose redefinition",
+    "path": ".squad/decisions/inbox/squad-repository-purpose-redefinition-f26ef9f3.md",
+    "status": "active",
+    "createdAt": "2026-08-04T15:47:56.985Z",
+    "updatedAt": "2026-08-04T15:47:56.985Z"
+  },
+  {
+    "id": "798b4ed5-2f30-4e54-8f78-4c0a9c40a825",
+    "class": "DECISION",
+    "loadGuidance": "ALWAYS",
+    "title": "Tailwind shared component style direction",
+    "path": ".squad/decisions/inbox/squad-tailwind-shared-component-style-direction-798b4ed5.md",
+    "status": "active",
+    "createdAt": "2026-08-04T20:13:03.808Z",
+    "updatedAt": "2026-08-04T20:13:03.808Z"
+  }
+]
