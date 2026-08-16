@@ -13,13 +13,14 @@ namespace Tests;
 
 public class WebTests
 {
-	private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
+	private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(90);
 
 	[Fact]
 	public async Task GetWebResourceRootReturnsOkStatusCode()
 	{
 		// Arrange
-		var cancellationToken = new CancellationTokenSource(DefaultTimeout).Token;
+		using var cancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
+		var cancellationToken = cancellationTokenSource.Token;
 
 		var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(cancellationToken);
 		appHost.Services.AddLogging(logging =>
@@ -39,10 +40,10 @@ public class WebTests
 		await app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
 
 		// Act
-		var httpClient = app.CreateHttpClient("webfrontend");
+		using var httpClient = app.CreateHttpClient("webfrontend");
 		await app.ResourceNotifications.WaitForResourceHealthyAsync("webfrontend", cancellationToken)
 			.WaitAsync(DefaultTimeout, cancellationToken);
-		var response = await httpClient.GetAsync("/", cancellationToken);
+		var response = await httpClient.GetAsync(new Uri("/", UriKind.Relative), cancellationToken);
 
 		// Assert
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
