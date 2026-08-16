@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 ---
 name: Build and Test Suite
 
@@ -316,7 +317,7 @@ jobs:
       - name: Generate coverage report
         run: |
           reportgenerator \
-            -reports:"coverage-reports/**/**/coverage.cobertura.xml" \
+            -reports:"coverage-reports/**/*.cobertura.xml" \
             -targetdir:"./coverage-output" \
             -reporttypes:"Html;Cobertura;JsonSummary" \
             -filefilters:"-**/obj/**/*.cs;-**/*.generated.cs" \
@@ -365,9 +366,10 @@ jobs:
         uses: codecov/codecov-action@v7
         if: always()
         with:
-          fail_ci_if_error: false
           files: ./coverage-output/Cobertura.xml
-          verbose: false
+          disable_search: true
+          fail_ci_if_error: false
+          verbose: true
 
   report:
     if: ${{ always() && github.actor != 'dependabot[bot]' }}
