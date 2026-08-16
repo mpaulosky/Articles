@@ -286,7 +286,7 @@ jobs:
           if-no-files-found: ignore
 
   coverage:
-    if: ${{ github.actor != 'dependabot[bot]' }}
+    if: ${{ always() && github.actor != 'dependabot[bot]' }}
     name: Coverage Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -368,7 +368,7 @@ jobs:
           verbose: false
 
   report:
-    if: ${{ github.actor != 'dependabot[bot]' }}
+    if: ${{ always() && github.actor != 'dependabot[bot]' }}
     name: Test Report Summary
     runs-on: ubuntu-latest
     timeout-minutes: 10
