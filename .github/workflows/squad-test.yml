@@ -67,6 +67,7 @@ env:
 
 jobs:
   build:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     name: Build Solution
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -288,6 +289,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
+      - build
+      - discover-tests
       - test
     if: always()
 
