@@ -7,6 +7,7 @@
 // Project Name :  AppHost.Tests
 // =============================================
 
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Tests;
@@ -19,33 +20,60 @@ public class WebTests
 	public async Task GetWebResourceRootReturnsOkStatusCode()
 	{
 		// Arrange
-		using var cancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
-		var cancellationToken = cancellationTokenSource.Token;
-
-		var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(cancellationToken);
-		appHost.Services.AddLogging(logging =>
+		var originalEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+		var originalDotnetEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+		Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", Environments.Development);
+		Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", Environments.Development);
+		try
 		{
-			logging.SetMinimumLevel(LogLevel.Debug);
-			// Override the logging filters from the app's configuration
-			logging.AddFilter(appHost.Environment.ApplicationName, LogLevel.Debug);
-			logging.AddFilter("Aspire.", LogLevel.Debug);
-			// To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
-		});
-		appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+			using var cancellationTokenSource = new CancellationTokenSource(DefaultTimeout);
+			var cancellationToken = cancellationTokenSource.Token;
+
+			var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(cancellationToken);
+			appHost.Services.AddLogging(logging =>
+			{
+				logging.SetMinimumLevel(LogLevel.Debug);
+				// Override the logging filters from the app's configuration
+				logging.AddFilter(appHost.Environment.ApplicationName, LogLevel.Debug);
+				logging.AddFilter("Aspire.", LogLevel.Debug);
+				// To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
+			});
+			appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+			{
+				clientBuilder.AddStandardResilienceHandler();
+			});
+
+			await using var app = await appHost.BuildAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+			await app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+
+			// Act
+			using var httpClient = app.CreateHttpClient("webfrontend");
+			await app.ResourceNotifications.WaitForResourceHealthyAsync("webfrontend", cancellationToken)
+				.WaitAsync(DefaultTimeout, cancellationToken);
+			var response = await httpClient.GetAsync(new Uri("/", UriKind.Relative), cancellationToken);
+
+			// Assert
+			Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		}
+		finally
 		{
-			clientBuilder.AddStandardResilienceHandler();
-		});
+			if (originalEnvironment is null)
+			{
+				Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+			}
+			else
+			{
+				Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", originalEnvironment);
+			}
 
-		await using var app = await appHost.BuildAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-		await app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
-
-		// Act
-		using var httpClient = app.CreateHttpClient("webfrontend");
-		await app.ResourceNotifications.WaitForResourceHealthyAsync("webfrontend", cancellationToken)
-			.WaitAsync(DefaultTimeout, cancellationToken);
-		var response = await httpClient.GetAsync(new Uri("/", UriKind.Relative), cancellationToken);
-
-		// Assert
-		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+			if (originalDotnetEnvironment is null)
+			{
+				Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+			}
+			else
+			{
+				Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", originalDotnetEnvironment);
+			}
+		}
 	}
 }
