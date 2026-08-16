@@ -23,4 +23,3 @@ global using Microsoft.Extensions.Options;
 global using NSubstitute;
 global using OpenTelemetry.Instrumentation.AspNetCore;
 global using OpenTelemetry.Logs;
-global using ServiceDefaults;
