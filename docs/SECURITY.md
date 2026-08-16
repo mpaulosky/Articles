@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The following versions of ProjectName are currently supported with security updates:
+The following versions of Articles are currently supported with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -13,7 +13,7 @@ The following versions of ProjectName are currently supported with security upda
 
 ## Security Features
 
-ProjectName implements the following security measures:
+Articles implements the following security measures:
 
 ### Authentication & Authorization
 
@@ -43,12 +43,12 @@ ProjectName implements the following security measures:
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ProjectName, please report it responsibly:
+If you discover a security vulnerability in Articles, please report it responsibly:
 
 ### How to Report
 
 **Email:** <matthew.paulosky@outlook.com>  
-**Subject:** [SECURITY] ProjectName Vulnerability Report
+**Subject:** [SECURITY] Articles Vulnerability Report
 
 **Please do NOT open a public GitHub issue for security vulnerabilities.**
 
@@ -83,13 +83,13 @@ When reporting a security vulnerability, please include:
 
 Security updates will be published:
 
-- In the [GitHub Security Advisories](https://github.com/mpaulosky/ProjectName/security/advisories)
+- In the [GitHub Security Advisories](https://github.com/mpaulosky/Articles/security/advisories)
 - In the project [CHANGELOG.md](../CHANGELOG.md) (if one exists)
 - In release notes for security-related releases
 
 ## Security Best Practices for Contributors
 
-When contributing to ProjectName, please follow these security guidelines:
+When contributing to Articles, please follow these security guidelines:
 
 ### Code Review
 
@@ -150,4 +150,4 @@ When contributing to ProjectName, please follow these security guidelines:
 
 ---
 
-Thank you for helping keep ProjectName secure!
+Thank you for helping keep Articles secure!

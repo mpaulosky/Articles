@@ -1,4 +1,4 @@
-# ProjectName — References
+# Articles — References
 
 ## Core Platform
 
