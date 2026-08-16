@@ -1,0 +1,16 @@
+---
+name: Blog → README Sync (Deprecated)
+
+"on":
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deprecated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notice
+        run: |
+          echo "Deprecated. README blog sync is handled by squad-release.yml."

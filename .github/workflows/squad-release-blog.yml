@@ -1,0 +1,16 @@
+---
+name: Release Blog Brief (Deprecated)
+
+"on":
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deprecated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notice
+        run: |
+          echo "Deprecated. Release/blog automation is handled by squad-release.yml."
