@@ -1,35 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
+		<RootNamespace>AppHost</RootNamespace>
 	</PropertyGroup>
 
-
 	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.Testing"/>
-		<PackageReference Include="coverlet.collector"/>
+		<PackageReference Include="coverlet.collector">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="FluentAssertions"/>
+		<PackageReference Include="FluentValidation"/>
 		<PackageReference Include="Microsoft.NET.Test.Sdk"/>
-		<PackageReference Include="xunit"/>
+		<PackageReference Include="NSubstitute"/>
+		<PackageReference Include="xunit.v3"/>
 		<PackageReference Include="xunit.runner.visualstudio">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\AppHost\AppHost.csproj"/>
+		<Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
 	</ItemGroup>
 
 	<ItemGroup>
-		<Using Include="System.Net"/>
-		<Using Include="Microsoft.Extensions.DependencyInjection"/>
-		<Using Include="Aspire.Hosting.ApplicationModel"/>
-		<Using Include="Aspire.Hosting.Testing"/>
 		<Using Include="Xunit"/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../../src/AppHost/AppHost.csproj"/>
+		<ProjectReference Include="../../src/Domain/Domain.csproj"/>
+		<ProjectReference Include="../../src/Web/Web.csproj"/>
 	</ItemGroup>
 
 </Project>
