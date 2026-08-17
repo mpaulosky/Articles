@@ -22,8 +22,12 @@
 @code {
 	private int CurrentYear => DateTime.UtcNow.Year;
 	private string CompanyName => "from mpaulosky.org";
-	private string ReleaseTag => GetGitValue("describe", "--tags", "--abbrev=0") ?? "no release";
-	private string LastCommit => GetGitValue("rev-parse", "--short", "HEAD") ?? "unknown";
+
+	private string? _releaseTag;
+	private string? _lastCommit;
+
+	private string ReleaseTag => _releaseTag ??= GetGitValue("describe", "--tags", "--abbrev=0") ?? "no release";
+	private string LastCommit => _lastCommit ??= GetGitValue("rev-parse", "--short", "HEAD") ?? "unknown";
 
 	private static string? GetGitValue(params string[] args)
 	{

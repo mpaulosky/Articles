@@ -11,7 +11,7 @@
     <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" />
   </ItemGroup>
   <Target Name="TailwindBuild" BeforeTargets="Build">
-    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')" />
+    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')" />
     <Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')" />
   </Target>
 </Project>

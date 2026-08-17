@@ -60,7 +60,7 @@ public class MainLayoutThemeTests : BunitContext
 	}
 
 	[Fact]
-	public void MainLayoutUsesThemeHooksWithoutHardcodedCssAssertions()
+	public void MainLayoutRendersPageShellWithHiddenNavAndDarkThemeToggle()
 	{
 		// Arrange
 		JSInterop.Setup<string>("getTheme").SetResult("light");

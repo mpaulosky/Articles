@@ -54,7 +54,7 @@ public sealed class Article
 	/// <summary>
 	///     Gets the assigned category identifier, when the article has a category.
 	/// </summary>
-	public CategoryDto Category { get; private set; } = CategoryDto.Empty;
+	public ObjectId? CategoryId { get; private set; }
 
 	private Article()
 	{
