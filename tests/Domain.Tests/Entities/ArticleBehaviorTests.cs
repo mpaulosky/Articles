@@ -9,6 +9,8 @@
 
 using Domain.Models;
 
+using Domain.Models;
+
 namespace Domain.Entities;
 
 public class ArticleBehaviorTests
@@ -32,10 +34,7 @@ public class ArticleBehaviorTests
 		article.CreatedAt.Should().BeAfter(DateTime.MinValue);
 		article.UpdatedAt.Should().BeNull();
 		article.IsPublished.Should().BeFalse();
-		article.Category.Id.Should().Be(ObjectId.Empty);
-		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 	}
 
 	[Fact]
@@ -85,10 +84,9 @@ public class ArticleBehaviorTests
 		var article = Article.Create("Post", "Body", author);
 
 		// Assert
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 		article.Category.Id.Should().Be(ObjectId.Empty);
 		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
 	}
 
 	[Fact]
@@ -165,10 +163,8 @@ public class ArticleBehaviorTests
 		article.RemoveCategory();
 
 		// Assert
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 		article.Category.Id.Should().Be(ObjectId.Empty);
-		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
 		article.UpdatedAt.Should().NotBeNull();
 	}
 
@@ -238,10 +234,7 @@ public class ArticleBehaviorTests
 		// Assert
 		article.Title.Should().Be("Updated");
 		article.Content.Should().Be("Body updated");
-		article.Category.Id.Should().Be(ObjectId.Empty);
-		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 		article.UpdatedAt.Should().NotBeNull();
 	}
 
