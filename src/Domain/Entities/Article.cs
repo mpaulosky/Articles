@@ -8,6 +8,7 @@
 // =============================================
 
 using Domain.ValueObjects;
+using Domain.Models;
 
 namespace Domain.Entities;
 
@@ -52,14 +53,9 @@ public sealed class Article
 	public bool IsPublished { get; private set; }
 
 	/// <summary>
-	///     Gets the version number of the article as it evolves over time.
-	/// </summary>
-	public int Version { get; private set; }
-
-	/// <summary>
 	///     Gets the assigned category identifier, when the article has a category.
 	/// </summary>
-	public ObjectId? CategoryId { get; private set; }
+	public CategoryDto Category { get; private set; } = CategoryDto.Empty;
 
 	private Article()
 	{
@@ -85,8 +81,7 @@ public sealed class Article
 			Title = title.Trim(),
 			Content = content.Trim(),
 			Author = author,
-			CreatedAt = DateTime.UtcNow,
-			Version = 0,
+			CreatedAt = DateTime.UtcNow
 		};
 	}
 
@@ -123,23 +118,27 @@ public sealed class Article
 	/// </summary>
 	/// <param name="title">The updated article title.</param>
 	/// <param name="content">The updated article body content.</param>
-	/// <param name="categoryId">The category identifier to assign.</param>
+	/// <param name="category">The category metadata to assign.</param>
 	/// <param name="clearCategory">When true, clears any assigned category.</param>
-	public void Update(string title, string content, ObjectId? categoryId = null, bool clearCategory = false)
+	public void Update(string title, string content, CategoryDto? category = null, bool clearCategory = false)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(title);
 		ArgumentException.ThrowIfNullOrWhiteSpace(content);
+		if (category is not null)
+		{
+			ArgumentNullException.ThrowIfNull(category);
+		}
 
 		Title = title.Trim();
 		Content = content.Trim();
 
 		if (clearCategory)
 		{
-			CategoryId = null;
+			Category = CategoryDto.Empty;
 		}
-		else if (categoryId.HasValue)
+		else if (category != null)
 		{
-			CategoryId = categoryId;
+			Category = category;
 		}
 
 		Touch();
@@ -148,10 +147,11 @@ public sealed class Article
 	/// <summary>
 	///     Assigns the article to the specified category.
 	/// </summary>
-	/// <param name="categoryId">The category identifier to assign.</param>
-	public void AssignCategory(ObjectId categoryId)
+	/// <param name="category">The category metadata to assign.</param>
+	public void AssignCategory(CategoryDto category)
 	{
-		CategoryId = categoryId;
+		ArgumentNullException.ThrowIfNull(category);
+		Category = category;
 		Touch();
 	}
 
@@ -160,13 +160,12 @@ public sealed class Article
 	/// </summary>
 	public void RemoveCategory()
 	{
-		CategoryId = null;
+		Category = CategoryDto.Empty;
 		Touch();
 	}
 
 	private void Touch()
 	{
 		UpdatedAt = DateTime.UtcNow;
-		Version++;
 	}
 }

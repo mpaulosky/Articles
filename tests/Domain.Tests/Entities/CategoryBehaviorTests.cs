@@ -7,10 +7,77 @@
 // Project Name :  Domain.Tests
 // =============================================
 
+using System.ComponentModel.DataAnnotations;
+using Domain.Models;
+
 namespace Domain.Entities;
 
 public class CategoryBehaviorTests
 {
+	[Fact]
+	public void CategoryDtoEmptyIsFreshBlankState()
+	{
+		// Arrange
+
+		// Act
+		var empty = CategoryDto.Empty;
+
+		// Assert
+		empty.Id.Should().Be(ObjectId.Empty);
+		empty.CategoryName.Should().BeEmpty();
+		empty.Slug.Should().BeEmpty();
+		empty.CreatedOn.Should().NotBe(default(DateTimeOffset));
+		empty.ModifiedOn.Should().BeNull();
+		empty.IsArchived.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CategoryDtoValidatesSlugFormat()
+	{
+		// Arrange
+		var category = new CategoryDto
+		{
+			Id = ObjectId.GenerateNewId(),
+			CategoryName = "Technology",
+			Slug = "Technology!"
+		};
+		var validationContext = new ValidationContext(category);
+		var validationResults = new List<ValidationResult>();
+
+		// Act
+		var isValid = Validator.TryValidateObject(category, validationContext, validationResults, true);
+
+		// Assert
+		isValid.Should().BeFalse();
+		validationResults.Should().Contain(result => result.MemberNames.Contains(nameof(CategoryDto.Slug)));
+	}
+
+	[Fact]
+	public void AuthorInfoEmptyUsesBlankValues()
+	{
+		// Arrange
+
+		// Act
+		var empty = AuthorInfo.Empty;
+
+		// Assert
+		empty.UserId.Should().BeEmpty();
+		empty.Name.Should().BeEmpty();
+	}
+
+	[Fact]
+	public void AuthorInfoRetainsProvidedValues()
+	{
+		// Arrange
+		var authorInfo = new AuthorInfo("auth-123", "Ada Lovelace");
+
+		// Act
+
+		// Assert
+		authorInfo.UserId.Should().Be("auth-123");
+		authorInfo.Name.Should().Be("Ada Lovelace");
+	}
+
 	[Fact]
 	public void CreateSetsTrimmedValues()
 	{
