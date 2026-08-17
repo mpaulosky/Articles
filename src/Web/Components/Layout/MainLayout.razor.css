@@ -1,15 +1,3 @@
-.theme-surface {
-	@apply rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-lg shadow-slate-200/50 md:p-8;
-}
-
-.theme-nav-link {
-	@apply inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[var(--app-text-muted)] transition-colors duration-200 hover:bg-[var(--app-surface-muted)] hover:text-[var(--app-text)];
-}
-
-.theme-toggle {
-	@apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--app-border)] bg-[var(--app-surface)] text-lg shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:text-[var(--app-brand)];
-}
-
 #blazor-error-ui {
 	background: #fef3c7;
 	bottom: 0;
@@ -27,10 +15,4 @@
 	position: absolute;
 	right: 0.75rem;
 	top: 0.5rem;
-}
-
-@media (min-width: 768px) {
-	.theme-surface {
-		@apply p-8;
-	}
 }
