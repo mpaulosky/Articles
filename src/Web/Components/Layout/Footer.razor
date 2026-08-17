@@ -1,4 +1,5 @@
-@using System.Diagnostics
+@using Web.Services
+@inject HttpClient Http
 
 <footer class="app-footer">
 	<div class="app-footer-inner">
@@ -23,50 +24,16 @@
 	private int CurrentYear => DateTime.UtcNow.Year;
 	private string CompanyName => "from mpaulosky.org";
 
-	private string? _releaseTag;
-	private string? _lastCommit;
+	private string _releaseTag = "no release";
+	private string _lastCommit = "unknown";
 
-	private string ReleaseTag => _releaseTag ??= GetGitValue("describe", "--tags", "--abbrev=0") ?? "no release";
-	private string LastCommit => _lastCommit ??= GetGitValue("rev-parse", "--short", "HEAD") ?? "unknown";
+	private string ReleaseTag => _releaseTag;
+	private string LastCommit => _lastCommit;
 
-	private static string? GetGitValue(params string[] args)
+	protected override async Task OnInitializedAsync()
 	{
-		try
-		{
-			var startInfo = new ProcessStartInfo("git")
-			{
-				WorkingDirectory = Environment.CurrentDirectory,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				UseShellExecute = false,
-				CreateNoWindow = true,
-			};
-
-			foreach (var arg in args)
-			{
-				startInfo.ArgumentList.Add(arg);
-			}
-
-			using var process = Process.Start(startInfo);
-			if (process is null)
-			{
-				return null;
-			}
-
-			var output = process.StandardOutput.ReadToEnd().Trim();
-			var error = process.StandardError.ReadToEnd();
-			process.WaitForExit();
-
-			if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
-			{
-				return null;
-			}
-
-			return output;
-		}
-		catch
-		{
-			return null;
-		}
+		var metadata = await GitHubMetadataProvider.GetMetadataAsync(Http);
+		_releaseTag = metadata?.ReleaseTag ?? "no release";
+		_lastCommit = metadata?.LastCommit ?? "unknown";
 	}
 }
