@@ -1,19 +1,19 @@
 ﻿@inherits Microsoft.AspNetCore.Components.LayoutComponentBase
 
-<div class="page">
-	<div class="sidebar">
-		<NavMenu/>
+<div class="app-shell">
+	<div class="app-page">
+		<NavMenu />
+
+		<main class="flex-1">
+			<div class="app-content-shell">
+				<article class="app-article">
+					@Body
+				</article>
+			</div>
+		</main>
+
+		<Footer />
 	</div>
-
-	<main>
-		<div class="top-row px-4">
-			<a href="https://learn.microsoft.com/aspnet/core/" target="_blank" rel="noopener noreferrer">About</a>
-		</div>
-
-		<article class="content px-4">
-			@Body
-		</article>
-	</main>
 </div>
 
 <div id="blazor-error-ui">
