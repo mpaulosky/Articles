@@ -52,14 +52,9 @@ public sealed class Article
 	public bool IsPublished { get; private set; }
 
 	/// <summary>
-	///     Gets the optimistic concurrency version for the article.
-	/// </summary>
-	public int Version { get; private set; }
-
-	/// <summary>
 	///     Gets the assigned category identifier, when the article has a category.
 	/// </summary>
-	public ObjectId? CategoryId { get; private set; }
+	public CategoryDto Category { get; private set; } = CategoryDto.Empty;
 
 	private Article()
 	{
@@ -87,61 +82,5 @@ public sealed class Article
 			Author = author,
 			CreatedAt = DateTime.UtcNow,
 		};
-	}
-
-	/// <summary>
-	///     Updates the article title, content, and optional category assignment.
-	/// </summary>
-	/// <param name="title">The updated article title.</param>
-	/// <param name="content">The updated article body content.</param>
-	/// <param name="categoryId">The category identifier to assign when provided.</param>
-	/// <param name="clearCategory">Whether to remove the existing category when no category identifier is provided.</param>
-	public void Update(string title, string content, ObjectId? categoryId = null, bool clearCategory = false)
-	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(title);
-		ArgumentException.ThrowIfNullOrWhiteSpace(content);
-		Title = title;
-		Content = content;
-		UpdatedAt = DateTime.UtcNow;
-
-		if (categoryId.HasValue)
-		{
-			CategoryId = categoryId.Value;
-		}
-		else if (clearCategory)
-		{
-			CategoryId = null;
-		}
-
-		Version++;
-	}
-
-	/// <summary>
-	///     Marks the article as published.
-	/// </summary>
-	public void Publish() => IsPublished = true;
-
-	/// <summary>
-	///     Marks the article as unpublished.
-	/// </summary>
-	public void Unpublish() => IsPublished = false;
-
-	/// <summary>
-	///     Assigns the article to a category.
-	/// </summary>
-	/// <param name="categoryId">The category identifier to assign.</param>
-	public void AssignCategory(ObjectId categoryId)
-	{
-		CategoryId = categoryId;
-		Version++;
-	}
-
-	/// <summary>
-	///     Removes the article category assignment.
-	/// </summary>
-	public void RemoveCategory()
-	{
-		CategoryId = null;
-		Version++;
 	}
 }
