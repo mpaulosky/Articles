@@ -1,0 +1,72 @@
+@using System.Diagnostics
+
+<footer class="app-footer">
+	<div class="app-footer-inner">
+		<div class="app-footer-brand">
+			<span>© @CurrentYear Articles</span>
+			<span>@(CompanyName)</span>
+		</div>
+
+		<div class="app-footer-meta">
+			<span class="app-footer-label">GitHub Release</span>
+			<span class="app-footer-value">@ReleaseTag</span>
+		</div>
+
+		<div class="app-footer-meta">
+			<span class="app-footer-label">Last Commit</span>
+			<span class="app-footer-value">@LastCommit</span>
+		</div>
+	</div>
+</footer>
+
+@code {
+	private int CurrentYear => DateTime.UtcNow.Year;
+	private string CompanyName => "from mpaulosky.org";
+
+	private string? _releaseTag;
+	private string? _lastCommit;
+
+	private string ReleaseTag => _releaseTag ??= GetGitValue("describe", "--tags", "--abbrev=0") ?? "no release";
+	private string LastCommit => _lastCommit ??= GetGitValue("rev-parse", "--short", "HEAD") ?? "unknown";
+
+	private static string? GetGitValue(params string[] args)
+	{
+		try
+		{
+			var startInfo = new ProcessStartInfo("git")
+			{
+				WorkingDirectory = Environment.CurrentDirectory,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				UseShellExecute = false,
+				CreateNoWindow = true,
+			};
+
+			foreach (var arg in args)
+			{
+				startInfo.ArgumentList.Add(arg);
+			}
+
+			using var process = Process.Start(startInfo);
+			if (process is null)
+			{
+				return null;
+			}
+
+			var output = process.StandardOutput.ReadToEnd().Trim();
+			var error = process.StandardError.ReadToEnd();
+			process.WaitForExit();
+
+			if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+			{
+				return null;
+			}
+
+			return output;
+		}
+		catch
+		{
+			return null;
+		}
+	}
+}

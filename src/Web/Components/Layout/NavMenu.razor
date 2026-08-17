@@ -1,24 +1,46 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-	<div class="container-fluid">
-		<a class="navbar-brand" href="">AspireApp1</a>
+@inject IJSRuntime JS
+
+<header class="app-header">
+	<div class="flex items-center justify-between gap-3 px-4 py-3 md:px-6">
+		<a href="/" class="app-brand">
+			<span class="app-brand-mark">A</span>
+			Articles
+		</a>
+
+		<div class="flex items-center gap-3">
+			<nav class="app-nav hidden items-center gap-2 md:flex">
+				<a href="/" class="theme-nav-link">Overview</a>
+				<a href="/counter" class="theme-nav-link">Counter</a>
+			</nav>
+			<button
+				type="button"
+				class="theme-toggle"
+				aria-label="@(isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
+				title="@(isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
+				@onclick="ToggleTheme">
+				@(isDarkMode ? "☀️" : "🌙")
+			</button>
+		</div>
 	</div>
-</div>
+</header>
 
-<input type="checkbox" title="Navigation menu" aria-label="Toggle navigation menu" class="navbar-toggler"/>
+@code {
+	private bool isDarkMode;
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-	<nav class="nav flex-column">
-		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-				<span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
-			</NavLink>
-		</div>
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var theme = await JS.InvokeAsync<string>("getTheme");
+			isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
+			StateHasChanged();
+		}
+	}
 
-		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="counter">
-				<span class="bi bi-plus-square-fill" aria-hidden="true"></span> Counter
-			</NavLink>
-		</div>
-
-	</nav>
-</div>
+	private async Task ToggleTheme()
+	{
+		isDarkMode = !isDarkMode;
+		await JS.InvokeVoidAsync("applyTheme", isDarkMode ? "dark" : "light");
+		StateHasChanged();
+	}
+}
