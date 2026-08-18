@@ -1,6 +1,26 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+﻿
+@using Web.Security
+
+@inject IConfiguration Configuration
+
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
 	<Found Context="routeData">
-		<RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
-		<FocusOnNavigate RouteData="routeData" Selector="h1"/>
+		<AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
+			<NotAuthorized>
+				@if (!Auth0ConfigurationHelper.IsAuthenticationEnabled(Configuration["Auth0:Domain"], Configuration["Auth0:ClientId"], Configuration["Auth0:ClientSecret"]))
+				{
+					<p role="alert">You are not authorized to access this resource.</p>
+				}
+				else if (!context.User.Identity?.IsAuthenticated ?? true)
+				{
+					<a href="/Account/Login" aria-label="Login">Login</a>
+				}
+				else
+				{
+					<p role="alert">You are not authorized to access this resource.</p>
+				}
+			</NotAuthorized>
+		</AuthorizeRouteView>
+		<FocusOnNavigate RouteData="routeData" Selector="#main-content"/>
 	</Found>
 </Router>

@@ -17,10 +17,12 @@ namespace Domain.Models;
 [Serializable]
 public sealed class CategoryDto
 {
+	private static readonly DateTime EmptyCreatedOn = DateTime.UnixEpoch;
+
 	/// <summary>
 	///   Parameterless constructor for serialization and test data generation.
 	/// </summary>
-	public CategoryDto() : this(ObjectId.Empty, string.Empty, string.Empty, DateTime.UtcNow, null, false)
+	public CategoryDto() : this(ObjectId.Empty, string.Empty, string.Empty, EmptyCreatedOn, null, false)
 	{
 	}
 
@@ -92,7 +94,7 @@ public sealed class CategoryDto
 
 
 	/// <summary>
-	///   Gets a fresh empty category instance.
+	///   Gets a fresh empty category instance with a stable creation timestamp.
 	/// </summary>
-	public static CategoryDto Empty => new(ObjectId.Empty, string.Empty, string.Empty, DateTime.UtcNow, null, false);
+	public static CategoryDto Empty => new(ObjectId.Empty, string.Empty, string.Empty, EmptyCreatedOn, null, false);
 }

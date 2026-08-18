@@ -32,10 +32,7 @@ public class ArticleBehaviorTests
 		article.CreatedAt.Should().BeAfter(DateTime.MinValue);
 		article.UpdatedAt.Should().BeNull();
 		article.IsPublished.Should().BeFalse();
-		article.Category.Id.Should().Be(ObjectId.Empty);
-		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 	}
 
 	[Fact]
@@ -85,10 +82,9 @@ public class ArticleBehaviorTests
 		var article = Article.Create("Post", "Body", author);
 
 		// Assert
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 		article.Category.Id.Should().Be(ObjectId.Empty);
 		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
 	}
 
 	[Fact]
@@ -97,12 +93,7 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Post", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 
 		// Act
 		var originalUpdatedAt = article.UpdatedAt;
@@ -124,16 +115,9 @@ public class ArticleBehaviorTests
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
 		var firstCategory = new CategoryDto
 		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
+			Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology"
 		};
-		var secondCategory = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Science",
-			Slug = "science"
-		};
+		var secondCategory = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Science", Slug = "science" };
 
 		// Act
 		article.AssignCategory(firstCategory);
@@ -153,22 +137,15 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Post", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 
 		// Act
 		article.RemoveCategory();
 
 		// Assert
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 		article.Category.Id.Should().Be(ObjectId.Empty);
-		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
 		article.UpdatedAt.Should().NotBeNull();
 	}
 
@@ -178,12 +155,7 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Post", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 		var afterAssignmentTime = article.UpdatedAt;
 
@@ -201,12 +173,7 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Original", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 
 		// Act
 		article.Update("Updated", "Body updated", category: category, clearCategory: false);
@@ -224,12 +191,7 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Original", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 
 		// Act
@@ -238,10 +200,7 @@ public class ArticleBehaviorTests
 		// Assert
 		article.Title.Should().Be("Updated");
 		article.Content.Should().Be("Body updated");
-		article.Category.Id.Should().Be(ObjectId.Empty);
-		article.Category.CategoryName.Should().BeEmpty();
-		article.Category.Slug.Should().BeEmpty();
-		article.Category.IsArchived.Should().BeFalse();
+		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 		article.UpdatedAt.Should().NotBeNull();
 	}
 
@@ -251,12 +210,7 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Original", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 
 		// Act
@@ -276,16 +230,9 @@ public class ArticleBehaviorTests
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
 		var firstCategory = new CategoryDto
 		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
+			Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology"
 		};
-		var secondCategory = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Science",
-			Slug = "science"
-		};
+		var secondCategory = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Science", Slug = "science" };
 		article.AssignCategory(firstCategory);
 
 		// Act
@@ -354,12 +301,7 @@ public class ArticleBehaviorTests
 		// Arrange
 		var article = Article.Create("Post", "Body",
 			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 
 		// Act
 		article.AssignCategory(category);

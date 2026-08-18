@@ -1,17 +1,56 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" />
-  </ItemGroup>
-  <Target Name="TailwindBuild" BeforeTargets="Build">
-    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')" />
-    <Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')" />
-  </Target>
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../Domain/Domain.csproj"/>
+		<ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj"/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.StackExchange.Redis.OutputCaching"/>
+		<PackageReference Include="Aspire.MongoDB.Driver"/>
+		<PackageReference Include="Auth0.AspNetCore.Authentication"/>
+		<PackageReference Include="Auth0.ManagementApi"/>
+		<PackageReference Include="Bogus"/>
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
+		<PackageReference Include="HtmlSanitizer"/>
+		<PackageReference Include="Markdig"/>
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid"/>
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces"/>
+		<PackageReference Include="MongoDB.Driver"/>
+		<PackageReference Include="MongoDB.EntityFrameworkCore"/>
+		<PackageReference Include="MyMediator"/>
+		<PackageReference Include="PSC.Blazor.Components.MarkdownEditor"/>
+		<PackageReference Include="Snappier"/>
+		<PackageReference Include="WaffleGenerator.Bogus"/>
+	</ItemGroup>
+
+	<Target Name="DetectNpm" BeforeTargets="EnsureNpmPackages;BuildTailwind" Condition="'$(CI)' != 'true' AND '$(CI)' != '1'">
+		<Exec Command="$(NpmCommand) --version" IgnoreExitCode="true">
+			<Output TaskParameter="ExitCode" PropertyName="NpmExitCode"/>
+		</Exec>
+		<PropertyGroup>
+			<NpmAvailable Condition="'$(NpmExitCode)' == '0'">true</NpmAvailable>
+			<NpmAvailable Condition="'$(NpmExitCode)' != '0'">false</NpmAvailable>
+		</PropertyGroup>
+		<Error Condition="'$(NpmAvailable)' != 'true' AND !Exists('$(MSBuildProjectDirectory)/wwwroot/css/app.css')" Text="npm was not found and no pre-built app.css exists. Install Node.js/npm and run 'cd src/Web &amp;&amp; npm ci' before building."/>
+		<Warning Condition="'$(NpmAvailable)' != 'true' AND Exists('$(MSBuildProjectDirectory)/wwwroot/css/app.css')" Text="npm was not found. Skipping Tailwind build and using the existing generated CSS at wwwroot/css/app.css."/>
+	</Target>
+
+	<!-- On a fresh machine, node_modules won't exist. Auto-run npm install before Tailwind builds. -->
+	<Target Name="EnsureNpmPackages" BeforeTargets="BuildTailwind" Condition="'$(CI)' != 'true' AND '$(CI)' != '1' AND '$(NpmAvailable)' == 'true' AND !Exists('$(MSBuildProjectDirectory)/node_modules')">
+		<Message Importance="high" Text="node_modules not found — running npm install..."/>
+		<Exec Command="$(NpmCommand) ci --ignore-scripts" WorkingDirectory="$(MSBuildProjectDirectory)"/>
+	</Target>
+
+	<Target Name="TailwindBuild" BeforeTargets="Build">
+		<Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')"/>
+		<Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="Exists('package.json')"/>
+	</Target>
+
 </Project>

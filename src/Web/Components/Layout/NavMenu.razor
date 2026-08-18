@@ -1,4 +1,10 @@
-@inject IJSRuntime JS
+
+@using Web.Security
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject NavigationManager Navigation
+@inject IConfiguration Configuration
+@inject IJSRuntime Js
 
 <header class="app-header">
 	<div class="flex items-center justify-between gap-3 px-4 py-3 md:px-6">
@@ -10,37 +16,62 @@
 		<div class="flex items-center gap-3">
 			<nav class="app-nav hidden items-center gap-2 md:flex">
 				<a href="/" class="theme-nav-link">Overview</a>
-				<a href="/counter" class="theme-nav-link">Counter</a>
+
+				<AuthorizeView>
+					<Authorized>
+						<NavLink class="nav-link" href="/profile">@GetProfileLabel(context.User)</NavLink>
+					</Authorized>
+				</AuthorizeView>
+
+				@* Login / Logout *@
+				<AuthorizeView>
+					<Authorized>
+						<a class="nav-link" href="/Account/Logout">Logout</a>
+					</Authorized>
+					<NotAuthorized>
+						@if (Auth0ConfigurationHelper.IsAuthenticationEnabled(Configuration["Auth0:Domain"], Configuration["Auth0:ClientId"], Configuration["Auth0:ClientSecret"]))
+						{
+							<a class="nav-link" href="/Account/Login">Login</a>
+						}
+					</NotAuthorized>
+				</AuthorizeView>
 			</nav>
 			<button
 				type="button"
 				class="theme-toggle"
-				aria-label="@(isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
-				title="@(isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
+				aria-label="@(_isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
+				title="@(_isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
 				@onclick="ToggleTheme">
-				@(isDarkMode ? "☀️" : "🌙")
+				@(_isDarkMode ? "☀️" : "🌙")
 			</button>
 		</div>
 	</div>
 </header>
 
 @code {
-	private bool isDarkMode;
+	private bool _isDarkMode;
+
+	private static string GetProfileLabel(System.Security.Claims.ClaimsPrincipal user)
+	{
+		var name = user.Identity?.Name;
+		return string.IsNullOrWhiteSpace(name) ? "Profile" : name;
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			var theme = await JS.InvokeAsync<string>("getTheme");
-			isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
+			var theme = await Js.InvokeAsync<string>("getTheme");
+			_isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
 			StateHasChanged();
 		}
 	}
 
 	private async Task ToggleTheme()
 	{
-		isDarkMode = !isDarkMode;
-		await JS.InvokeVoidAsync("applyTheme", isDarkMode ? "dark" : "light");
+		_isDarkMode = !_isDarkMode;
+		await Js.InvokeVoidAsync("applyTheme", _isDarkMode ? "dark" : "light");
 		StateHasChanged();
 	}
+
 }
