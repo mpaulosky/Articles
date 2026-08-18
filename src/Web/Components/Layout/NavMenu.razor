@@ -1,4 +1,3 @@
-
 @using Web.Security
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -29,19 +28,13 @@
 						<a class="nav-link" href="/Account/Logout">Logout</a>
 					</Authorized>
 					<NotAuthorized>
-						@if (Auth0ConfigurationHelper.IsAuthenticationEnabled(Configuration["Auth0:Domain"], Configuration["Auth0:ClientId"], Configuration["Auth0:ClientSecret"]))
-						{
-							<a class="nav-link" href="/Account/Login">Login</a>
-						}
+						<a class="nav-link" href="/Account/Login">Login</a>
 					</NotAuthorized>
 				</AuthorizeView>
 			</nav>
-			<button
-				type="button"
-				class="theme-toggle"
-				aria-label="@(_isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
-				title="@(_isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
-				@onclick="ToggleTheme">
+			<button type="button" class="theme-toggle"
+							aria-label="@(_isDarkMode ? "Switch to light theme" : "Switch to dark theme")"
+							title="@(_isDarkMode ? "Switch to light theme" : "Switch to dark theme")" @onclick="ToggleTheme">
 				@(_isDarkMode ? "☀️" : "🌙")
 			</button>
 		</div>
@@ -62,8 +55,12 @@
 		if (firstRender)
 		{
 			var theme = await Js.InvokeAsync<string>("getTheme");
-			_isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
-			StateHasChanged();
+			var isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
+			if (_isDarkMode != isDarkMode)
+			{
+				_isDarkMode = isDarkMode;
+				StateHasChanged();
+			}
 		}
 	}
 

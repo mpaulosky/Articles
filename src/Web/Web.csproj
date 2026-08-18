@@ -4,6 +4,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<UserSecretsId>94491f6e-auth0-values-3ff40da38702</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,6 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching"/>
 		<PackageReference Include="Aspire.StackExchange.Redis.OutputCaching"/>
 		<PackageReference Include="Aspire.MongoDB.Driver"/>
 		<PackageReference Include="Auth0.AspNetCore.Authentication"/>
@@ -30,6 +32,65 @@
 		<PackageReference Include="WaffleGenerator.Bogus"/>
 	</ItemGroup>
 
+	<!--
+		Generate BuildInfo.g.cs at build time with the git tag and short commit hash.
+		FooterComponent reads BuildInfo.Version and BuildInfo.Commit at runtime.
+	-->
+	<ItemGroup>
+		<Compile Include="$(IntermediateOutputPath)BuildInfo.g.cs" Condition="Exists('$(IntermediateOutputPath)BuildInfo.g.cs')"/>
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="FluentValidation">
+			<HintPath>..\..\..\..\.nuget\packages\fluentvalidation\12.1.1\lib\net8.0\FluentValidation.dll</HintPath>
+		</Reference>
+		<Reference Include="MongoDB.Bson">
+			<HintPath>..\..\..\..\.nuget\packages\mongodb.bson\3.9.0\lib\net6.0\MongoDB.Bson.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<NpmCommand Condition="'$(NpmCommand)' == ''">npm</NpmCommand>
+	</PropertyGroup>
+
+	<Target Name="GetGitBuildInfo" BeforeTargets="BeforeBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+		<Exec Command="git fetch --tags --prune origin" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="Low" StandardErrorImportance="Low"/>
+		<Exec Command="git tag --sort=-creatordate | head -n 1" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="Low" StandardErrorImportance="Low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="_RawGitTag"/>
+		</Exec>
+		<Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="Low" StandardErrorImportance="Low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="_RawGitCommit"/>
+		</Exec>
+
+		<PropertyGroup>
+			<_GitTag>$(_RawGitTag.Trim())</_GitTag>
+			<_GitCommit>$(_RawGitCommit.Trim())</_GitCommit>
+			<_GitTag Condition="'$(_GitTag)' == '' OR $([System.String]::Copy('$(_GitTag)').Contains('fatal:'))">no release</_GitTag>
+			<_GitCommit Condition="'$(_GitCommit)' == ''">unknown</_GitCommit>
+		</PropertyGroup>
+
+		<ItemGroup>
+			<_BuildInfoLine Include="// &lt;auto-generated /&gt;"/>
+			<_BuildInfoLine Include="// Copyright (c) 2026. All rights reserved."/>
+			<_BuildInfoLine Include="namespace UI%3B"/>
+			<_BuildInfoLine Include="/// &lt;summary&gt;Build-time git metadata baked in by GetGitBuildInfo MSBuild target.&lt;/summary&gt;"/>
+			<_BuildInfoLine Include="internal static class BuildInfo"/>
+			<_BuildInfoLine Include="{"/>
+			<_BuildInfoLine Include="    internal const string Version = &quot;$(_GitTag)&quot;%3B"/>
+			<_BuildInfoLine Include="    internal const string Commit = &quot;$(_GitCommit)&quot;%3B"/>
+			<_BuildInfoLine Include="}"/>
+		</ItemGroup>
+
+		<WriteLinesToFile File="$(IntermediateOutputPath)BuildInfo.g.cs" Lines="@(_BuildInfoLine)" Overwrite="true" WriteOnlyWhenDifferent="true"/>
+		<ItemGroup>
+			<Compile Remove="$(IntermediateOutputPath)BuildInfo.g.cs"/>
+			<Compile Include="$(IntermediateOutputPath)BuildInfo.g.cs"/>
+		</ItemGroup>
+	</Target>
+
+	<!--
+	Ensure that npm is available on the build machine.
+	If not, check if a pre-built app.css exists. If neither is true, fail the build.
+-->
 	<Target Name="DetectNpm" BeforeTargets="EnsureNpmPackages;BuildTailwind" Condition="'$(CI)' != 'true' AND '$(CI)' != '1'">
 		<Exec Command="$(NpmCommand) --version" IgnoreExitCode="true">
 			<Output TaskParameter="ExitCode" PropertyName="NpmExitCode"/>

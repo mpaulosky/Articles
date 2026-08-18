@@ -12,21 +12,28 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
+using static Domain.Constants.ApplicationConstants;
+
+using Web;
 using Web.Components;
 using Web.Components.Features.UserManagement.Caching.Extensions;
+using Web.Security;
 using Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-var disableRedis = builder.Configuration.GetValue("DisableRedis", false);
+DevelopmentStaticWebAssets.EnableForDevelopment(builder);
+var redisConnectionString = builder.Configuration.GetConnectionString(RedisCache);
+var useRedisCache = !string.IsNullOrWhiteSpace(redisConnectionString);
 
 // --- Configuration Registration ---
 IConfiguration configuration = builder.Configuration;
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
-if (!disableRedis)
+if (useRedisCache)
 {
-	builder.AddRedisOutputCache("cache");
+	builder.AddRedisOutputCache(OutputCache);
+	builder.AddRedisDistributedCache(RedisCache);
 }
 else
 {
@@ -69,7 +76,7 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (!app.Configuration.GetValue("DisableRedis", false))
+if (useRedisCache)
 {
 	app.UseOutputCache();
 }
@@ -87,7 +94,16 @@ app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = 
 		.WithRedirectUri(returnUrl)
 		.Build();
 
-	await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties).ConfigureAwait(false);
+	var isAuth0Enabled = Auth0ConfigurationHelper.IsAuthenticationEnabled(
+		app.Configuration["Auth0:Domain"],
+		app.Configuration["Auth0:ClientId"],
+		app.Configuration["Auth0:ClientSecret"]);
+
+	var scheme = isAuth0Enabled
+		? Auth0Constants.AuthenticationScheme
+		: CookieAuthenticationDefaults.AuthenticationScheme;
+
+	await httpContext.ChallengeAsync(scheme, authenticationProperties).ConfigureAwait(false);
 });
 
 app.MapGet("/Account/Logout", async httpContext =>

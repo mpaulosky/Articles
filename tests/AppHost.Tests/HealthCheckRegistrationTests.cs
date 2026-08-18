@@ -109,6 +109,24 @@ public class HealthCheckRegistrationTests
 	}
 
 	[Fact]
+	public void ConfigureOpenTelemetryUsesAspireDashboardEndpointWhenStandardOtlpEndpointIsMissing()
+	{
+		// Arrange
+		var builder = Host.CreateApplicationBuilder();
+		builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+		{
+			["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "https://localhost:21244",
+		});
+
+		// Act
+		builder.ConfigureOpenTelemetry();
+		var hasOtlpWithDashboardEndpoint = HasOtlpExporterOptionsRegistration(builder.Services);
+
+		// Assert
+		hasOtlpWithDashboardEndpoint.Should().BeTrue();
+	}
+
+	[Fact]
 	public void ConfigureOpenTelemetrySetsLoggingAndTracingOptions()
 	{
 		// Arrange

@@ -98,7 +98,10 @@ public static class Extensions
 	private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder)
 		where TBuilder : IHostApplicationBuilder
 	{
-		var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+		var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
+		                   ?? builder.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"]
+		                   ?? builder.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"];
+		var useOtlpExporter = !string.IsNullOrWhiteSpace(otlpEndpoint);
 
 		if (useOtlpExporter)
 		{
