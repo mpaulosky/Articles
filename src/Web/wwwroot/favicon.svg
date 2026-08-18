@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+    <!-- Background -->
+    <circle cx="16" cy="16" r="16" fill="#1a1a2e"/>
+    <!-- MP centred in circle -->
+    <text
+            x="16"
+            y="16"
+            text-anchor="middle"
+            dominant-baseline="central"
+            font-family="'Segoe UI', system-ui, -apple-system, sans-serif"
+            font-size="14"
+            font-weight="700">
+        <tspan fill="#7c3aed">M</tspan>
+        <tspan fill="#a78bfa">P</tspan>
+    </text>
+</svg>

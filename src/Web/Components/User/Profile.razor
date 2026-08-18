@@ -1,0 +1,182 @@
+﻿@page "/profile"
+
+@using System.Security.Claims
+@using Web.Security
+@attribute [Authorize]
+
+<h1>@_pageTitle</h1>
+
+<div class="container mx-auto">
+
+	<AuthorizeView>
+		<Authorized>
+			<div class="container-card">
+				<h2 class="text-2xl mb-4">Profile Information</h2>
+
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+					<div>
+						<h3 class="text-lg mb-2">Basic Information</h3>
+						<div class="space-y-2">
+							<p class="font-bold text-gray-900 dark:text-gray-100">
+								<span>Name:</span>
+							<h4>@_username</h4>
+							</p>
+							<p class="font-bold text-gray-900 dark:text-gray-100">
+								<span>Email:</span>
+							<h4>@_emailAddress</h4>
+							</p>
+							<p class="font-bold text-gray-900 dark:text-gray-100">
+								<span>User ID:</span>
+							<h4>@_userId</h4>
+							</p>
+						</div>
+					</div>
+
+					<div>
+						<h3 class="text-lg mb-2">Roles & Permissions</h3>
+						<div class="space-y-2">
+							@{
+								var roles = GetAllRoleClaims(context.User);
+							}
+							@if (roles.Any())
+							{
+								<p class="font-bold text-gray-900 dark:text-gray-100">
+									<span>Roles:</span>
+								</p>
+								<ul class="list-disc list-inside text-green-700 ml-4">
+									@foreach (var role in roles)
+									{
+										<li class="font-bold text-green-700">@role</li>
+									}
+								</ul>
+							}
+							else
+							{
+								<p class="text-yellow-400">No roles assigned</p>
+							}
+						</div>
+					</div>
+
+					<div class="flex flex-col items-center justify-start">
+						<span class="font-medium text-gray-300 mb-2">Profile Picture:</span>
+						@if (!string.IsNullOrEmpty(_picture))
+						{
+							<img src="@_picture" alt="Profile Picture"
+							     class="rounded-full w-24 h-24 object-cover border-2 border-gray-600"/>
+						}
+						else
+						{
+							<div
+								class="rounded-full w-24 h-24 bg-gray-700 flex items-center justify-center border-2 border-gray-600">
+								<span class="text-gray-400 text-2xl">?</span>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+
+			<div class="container-card">
+				<h2 class="text-2xl mb-4">All Claims</h2>
+				<h4 class="text-sm mb-4">Debug information showing all claims for this user:</h4>
+
+				<div class="bg-gray-400 dark:bg-gray-800 rounded p-4 overflow-auto">
+					<table class="w-full text-sm">
+						<thead>
+						<tr class="border-b border-gray-600">
+							<th class="text-left text-gray-800 dark:text-gray-100 pb-2">Claim Type</th>
+							<th class="text-left text-gray-800 dark:text-gray-100 pb-2">Value</th>
+						</tr>
+						</thead>
+						<tbody>
+						@foreach (var claim in context.User.Claims.OrderBy(c => c.Type))
+						{
+							<tr class="border-b border-gray-700">
+								<td class="px-4 font-semibold text-gray-800 dark:text-gray-100">@claim.Type</td>
+								<td class="px-4 font-semibold text-gray-800 dark:text-gray-100">@claim.Value</td>
+							</tr>
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</Authorized>
+	</AuthorizeView>
+</div>
+
+@code {
+
+	private const string _pageTitle = "User Profile";
+
+	[CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+	private string _userId = "";
+
+	private string _username = "";
+
+	private string _emailAddress = "";
+
+	private string _picture = "";
+
+	private List<string> _roles = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (AuthenticationState is not null)
+		{
+			var state = await AuthenticationState;
+
+			_username = state.User.Identity?.Name ?? string.Empty;
+
+			_userId = state.User.Claims
+				.Where(c => c.Type.Equals(ClaimTypes.NameIdentifier))
+				.Select(c => c.Value)
+				.FirstOrDefault() ?? string.Empty;
+
+			_emailAddress = state.User.Claims
+				.Where(c => c.Type.Equals(ClaimTypes.Email))
+				.Select(c => c.Value)
+				.FirstOrDefault() ?? string.Empty;
+
+			_picture = state.User.Claims
+				.Where(c => c.Type.Equals("picture"))
+				.Select(c => c.Value)
+				.FirstOrDefault() ?? string.Empty;
+
+			_roles = GetAllRoleClaims(state.User);
+		}
+
+		await base.OnInitializedAsync();
+	}
+
+	// Helper to get all role claims for a user
+	public static List<string> GetAllRoleClaims(ClaimsPrincipal user)
+	{
+		ArgumentNullException.ThrowIfNull(user);
+
+		return Web.Security.RoleClaimsHelper.GetRoles(user)
+			.Select(role => role.Trim())
+			.Where(role => !string.IsNullOrWhiteSpace(role))
+			.Distinct(StringComparer.OrdinalIgnoreCase)
+			.ToList();
+	}
+
+	// Private static method for test reflection: GetClaimValue
+	public static string GetClaimValue(ClaimsPrincipal user, params string[] claimTypes)
+	{
+		ArgumentNullException.ThrowIfNull(user);
+
+		foreach (var type in claimTypes.Where(type => !string.IsNullOrWhiteSpace(type)))
+		{
+			var claimValue = user.Claims
+				.Where(c => c.Type.Equals(type, StringComparison.OrdinalIgnoreCase))
+				.Select(c => c.Value)
+				.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+
+			if (!string.IsNullOrWhiteSpace(claimValue))
+				return claimValue.Trim();
+		}
+
+		return "N/A";
+	}
+
+}

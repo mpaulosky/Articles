@@ -1,0 +1,127 @@
+@page "/admin/users"
+@using Web.Components.Features.UserManagement.AddUserRoles
+@using Web.Components.Features.UserManagement.GetUserRoles
+@using Web.Components.Features.UserManagement.GetUserWithRoles
+@inject IMediator Sender
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+
+@if (_loading)
+{
+	<p>Loading users...</p>
+}
+else
+{
+	@if (_error is not null)
+	{
+		<div class="alert-error" role="alert">
+			<span>@_error</span>
+			<button type="button" class="alert-dismiss" aria-label="Close error" @onclick="() => _error = null">&times;</button>
+		</div>
+	}
+
+	@if (_availableRoles.Any())
+	{
+		<p>Available roles: @string.Join(
+						", ",
+						_availableRoles.Select(role => role.Name))</p>
+		}
+
+		<div class="table-wrapper">
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th>User</th>
+						<th>Email</th>
+						<th>Current Roles</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var user in _users)
+					{
+						<tr>
+							<td>@user.Name</td>
+							<td>@user.Email</td>
+							<td>@string.Join(", ", user.Roles)</td>
+							<td>
+								@foreach (var role in _availableRoles)
+								{
+									var hasRole = user.Roles.Contains(role.Name);
+									if (hasRole)
+									{
+										<button class="@ActiveRoleButtonClass" @onclick="() => RemoveRole(user.UserId, role.Id)">
+											@role.Name: Active (Remove)
+										</button>
+									}
+									else
+									{
+										<button class="@InactiveRoleButtonClass" @onclick="() => AssignRole(user.UserId, role.Id)">
+											@role.Name: Inactive (Add)
+										</button>
+									}
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+
+@code {
+	private const string ActiveRoleButtonClass =
+		"inline-block px-3 py-1 text-sm rounded border border-green-600 text-green-600 " +
+		"hover:bg-green-50 dark:hover:bg-green-900/20 transition mr-1 mb-1";
+
+	private const string InactiveRoleButtonClass =
+		"inline-block px-3 py-1 text-sm rounded border border-red-600 text-red-600 " +
+		"hover:bg-red-50 dark:hover:bg-red-900/20 transition mr-1 mb-1";
+
+	private IReadOnlyList<UserWithRolesDto> _users = [];
+	private IReadOnlyList<RoleDto> _availableRoles = [];
+	private bool _loading = true;
+	private string? _error;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var usersTask = Sender.Send(new GetUsersWithRolesQuery());
+		var rolesTask = Sender.Send(new GetAvailableRolesQuery());
+		await Task.WhenAll(usersTask, rolesTask);
+
+		var usersResult = await usersTask;
+		var rolesResult = await rolesTask;
+
+		if (usersResult.Success) _users = usersResult.Value!;
+		else _error = usersResult.Error;
+
+		if (rolesResult.Success) _availableRoles = rolesResult.Value!
+			.OrderBy(static role => role.Name, StringComparer.OrdinalIgnoreCase)
+			.ToArray();
+		else _error ??= rolesResult.Error;
+
+		_loading = false;
+	}
+
+	private async Task AssignRole(string userId, string roleId)
+	{
+		var result = await Sender.Send(new AssignRoleCommand(userId, roleId));
+		if (result.Failure) { _error = result.Error; return; }
+		await RefreshAsync();
+	}
+
+	private async Task RemoveRole(string userId, string roleId)
+	{
+		var result = await Sender.Send(new RemoveRoleCommand(userId, roleId));
+		if (result.Failure) { _error = result.Error; return; }
+		await RefreshAsync();
+	}
+
+	private async Task RefreshAsync()
+	{
+		var result = await Sender.Send(new GetUsersWithRolesQuery());
+		if (result.Success) _users = result.Value!;
+		StateHasChanged();
+	}
+}

@@ -27,7 +27,8 @@ public class MainLayoutThemeTests : BunitContext
 
 	private sealed class TestAuthorizationService : IAuthorizationService
 	{
-		public Task<AuthorizationResult> AuthorizeAsync(ClaimsPrincipal user, object? resource, IEnumerable<IAuthorizationRequirement> requirements)
+		public Task<AuthorizationResult> AuthorizeAsync(ClaimsPrincipal user, object? resource,
+			IEnumerable<IAuthorizationRequirement> requirements)
 		{
 			return Task.FromResult(AuthorizationResult.Success());
 		}
