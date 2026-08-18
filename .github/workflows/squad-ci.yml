@@ -257,16 +257,15 @@ jobs:
           # Microsoft Testing Platform is enabled via global.json for .NET 10, so
           # the coverage and xUnit report args are passed directly to the MTP runner
           # instead of the legacy VSTest collector/Logger syntax.
+          # .NET 10 uses Microsoft Testing Platform (MTP), which accepts the
+          # xUnit TRX report option but not the legacy VSTest coverage flags.
           dotnet test "${{ matrix.project_path }}" \
             --configuration Release \
             $no_build_arg \
             --verbosity "${{ matrix.verbosity }}" \
             --results-directory "$GITHUB_WORKSPACE/test-results" \
             --report-xunit-trx \
-            --report-xunit-trx-filename "${{ matrix.test_id }}.trx" \
-            --coverage \
-            --coverage-output-format cobertura \
-            --coverage-output "$GITHUB_WORKSPACE/test-results/${{ matrix.test_id }}.cobertura.xml"
+            --report-xunit-trx-filename "${{ matrix.test_id }}.trx"
           exit_code=$?
           if [ $exit_code -ne 0 ]; then
             echo "::error::Test project failed: ${{ matrix.project_path }}"
