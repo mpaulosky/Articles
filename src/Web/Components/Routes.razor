@@ -1,5 +1,4 @@
-﻿
-@using Web.Security
+﻿@using Web.Security
 
 @inject IConfiguration Configuration
 
@@ -7,20 +6,16 @@
 	<Found Context="routeData">
 		<AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
 			<NotAuthorized>
-				@if (!Auth0ConfigurationHelper.IsAuthenticationEnabled(Configuration["Auth0:Domain"], Configuration["Auth0:ClientId"], Configuration["Auth0:ClientSecret"]))
+				@if (context.User.Identity?.IsAuthenticated == true)
 				{
 					<p role="alert">You are not authorized to access this resource.</p>
-				}
-				else if (!context.User.Identity?.IsAuthenticated ?? true)
-				{
-					<a href="/Account/Login" aria-label="Login">Login</a>
 				}
 				else
 				{
-					<p role="alert">You are not authorized to access this resource.</p>
+					<a href="/Account/Login" aria-label="Login">Login</a>
 				}
 			</NotAuthorized>
 		</AuthorizeRouteView>
-		<FocusOnNavigate RouteData="routeData" Selector="#main-content"/>
+		<FocusOnNavigate RouteData="routeData" Selector="#main-content" />
 	</Found>
 </Router>

@@ -88,7 +88,7 @@ public class AppHostConfigurationTests
 	public void IsDisabledUsesEnvironmentVariableWhenConfigurationIsMissing()
 	{
 		// Arrange
-		const string settingName = "DisableRedis";
+		const string settingName = "DisableApi";
 		Environment.SetEnvironmentVariable(settingName, "true");
 		var configuration = new ConfigurationBuilder().Build();
 
