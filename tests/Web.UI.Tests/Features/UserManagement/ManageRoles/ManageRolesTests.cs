@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
-namespace Web.UI.Tests;
+namespace Web.UI.Tests.Features.UserManagement.ManageRoles;
 
 public class ManageRolesTests : BunitContext
 {

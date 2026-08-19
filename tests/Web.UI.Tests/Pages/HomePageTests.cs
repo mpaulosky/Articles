@@ -2,7 +2,7 @@ using Bunit;
 using FluentAssertions;
 using Web.Components.Pages;
 
-namespace Web.UI.Tests;
+namespace Web.UI.Tests.Pages;
 
 public class HomePageTests : BunitContext
 {
