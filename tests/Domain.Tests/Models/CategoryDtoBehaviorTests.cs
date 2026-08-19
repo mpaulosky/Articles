@@ -8,6 +8,7 @@
 // =============================================
 
 using MongoDB.Bson;
+
 using Web.Components.Features.Categories.Models;
 
 namespace Web.Components.Features.Categories.Models;
@@ -41,15 +42,11 @@ public class CategoryDtoBehaviorTests
 	public void CategoryNameCanBeSetAndRetrieved()
 	{
 		// Arrange
-		var category = new CategoryDto
-		{
-			CategoryName = "Test Category",
-			Slug = "test-category"
-		};
+		var category = new CategoryDto { CategoryName = "Test Category", Slug = "test-category" };
 
 		// Act & Assert
 		category.CategoryName.Should().Be("Test Category");
-		
+
 		// Test empty name
 		category.CategoryName = string.Empty;
 		category.CategoryName.Should().BeEmpty();
@@ -64,11 +61,7 @@ public class CategoryDtoBehaviorTests
 	public void SlugCanBeSetToAnyValue()
 	{
 		// Arrange
-		var category = new CategoryDto
-		{
-			CategoryName = "Test Category",
-			Slug = "valid-slug-123"
-		};
+		var category = new CategoryDto { CategoryName = "Test Category", Slug = "valid-slug-123" };
 
 		// Act & Assert
 		category.Slug.Should().Be("valid-slug-123");
