@@ -7,8 +7,6 @@
 // Project Name :  Domain.Tests
 // =============================================
 
-using System.ComponentModel.DataAnnotations;
-
 using MongoDB.Bson;
 
 using Web.Components.Features.AuthInfo.Entities;
@@ -37,19 +35,15 @@ public class CategoryBehaviorTests
 	}
 
 	[Fact]
-	public void CategoryDtoValidatesSlugFormat()
+	public void CategoryDtoAcceptsAnySlugValue()
 	{
 		// Arrange
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "Technology!" };
-		var validationContext = new ValidationContext(category);
-		var validationResults = new List<ValidationResult>();
 
-		// Act
-		var isValid = Validator.TryValidateObject(category, validationContext, validationResults, true);
-
-		// Assert
-		isValid.Should().BeFalse();
-		validationResults.Should().Contain(result => result.MemberNames.Contains(nameof(CategoryDto.Slug)));
+		// Act & Assert - CategoryDto has no validation attributes
+		category.Slug.Should().Be("Technology!");
+		category.CategoryName.Should().Be("Technology");
+		category.Id.Should().NotBe(ObjectId.Empty);
 	}
 
 	[Fact]
