@@ -15,19 +15,23 @@ namespace Web.Components.Features.AuthInfo.Entities;
 /// <summary>
 ///   Record representing author information captured from the authenticated user.
 /// </summary>
+/// <param name="UserId">The unique identifier from the authentication provider (Auth0 'sub' claim).</param>
+/// <param name="Name">The display name of the author.</param>
+/// <param name="Email">The email address of the author.</param>
 [Serializable]
-public sealed class AuthorDto
+public sealed record AuthorDto(
+	[property: BsonElement("userId")]
+	[property: BsonRepresentation(BsonType.String)]
+	string UserId,
+	
+	[property: BsonElement("name")]
+	[property: BsonRepresentation(BsonType.String)]
+	string Name,
+	
+	[property: BsonElement("email")]
+	[property: BsonRepresentation(BsonType.String)]
+	string Email = "")
 {
-	/// <summary>
-	///   Initializes a new empty author snapshot.
-	/// </summary>
-	public AuthorDto()
-	{
-		UserId = string.Empty;
-		Name = string.Empty;
-		Email = string.Empty;
-	}
-
 	/// <summary>
 	///   Initializes a new author snapshot with the supplied user identifier and display name.
 	/// </summary>
@@ -36,43 +40,9 @@ public sealed class AuthorDto
 	public AuthorDto(string userId, string name) : this(userId, name, string.Empty)
 	{
 	}
-
+	
 	/// <summary>
-	///   Initializes a new author snapshot with the supplied user identifier, display name, and email address.
+	///   Gets an empty AuthorDto instance.
 	/// </summary>
-	/// <param name="userId">The unique identifier for the author.</param>
-	/// <param name="name">The display name for the author.</param>
-	/// <param name="email">The email address for the author.</param>
-	public AuthorDto(string userId, string name, string email)
-	{
-		UserId = userId;
-		Name = name;
-		Email = email;
-	}
-
-	/// <summary>
-	///   Gets the unique user identifier from the authentication provider (Auth0 'sub' claim).
-	/// </summary>
-	[BsonElement("userId")]
-	[BsonRepresentation(BsonType.String)]
-	public string UserId { get; init; }
-
-	/// <summary>
-	///   Gets the display name of the author.
-	/// </summary>
-	[BsonElement("name")]
-	[BsonRepresentation(BsonType.String)]
-	public string Name { get; init; }
-
-	/// <summary>
-	///   Gets the email address of the author.
-	/// </summary>
-	[BsonElement("email")]
-	[BsonRepresentation(BsonType.String)]
-	public string Email { get; init; }
-
-	/// <summary>
-	///   Gets an empty AuthorInfo instance.
-	/// </summary>
-	public static AuthorDto Empty => new() { UserId = string.Empty, Name = string.Empty, Email = string.Empty };
+	public static AuthorDto Empty => new(string.Empty, string.Empty, string.Empty);
 }
