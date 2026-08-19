@@ -84,9 +84,21 @@ public sealed class CategoryRepository
 	{
 		ArgumentNullException.ThrowIfNull(category);
 
-		_context.Categories.Update(category);
+		// Check if the entity is already being tracked
+		var trackedEntity = _context.Categories.Local.FirstOrDefault(c => c.Id == category.Id);
+		if (trackedEntity != null)
+		{
+			// Entity is already tracked, update its properties
+			_context.Entry(trackedEntity).CurrentValues.SetValues(category);
+		}
+		else
+		{
+			// Entity is not tracked, attach and mark as modified
+			_context.Categories.Update(category);
+		}
+
 		await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-		return category;
+		return trackedEntity ?? category;
 	}
 
 	/// <summary>
