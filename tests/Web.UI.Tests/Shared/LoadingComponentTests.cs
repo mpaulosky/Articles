@@ -2,7 +2,7 @@ using Bunit;
 using FluentAssertions;
 using Web.Components.Shared;
 
-namespace Web.UI.Tests;
+namespace Web.UI.Tests.Shared;
 
 public class LoadingComponentTests : BunitContext
 {

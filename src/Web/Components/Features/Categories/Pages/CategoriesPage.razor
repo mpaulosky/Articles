@@ -1,0 +1,174 @@
+@page "/categories"
+@rendermode InteractiveServer
+@using Web.Components.Features.Categories.Commands
+@using Web.Components.Features.Categories.Models
+@using Web.Components.Features.Categories.Queries
+@inject IMediator Sender
+
+<PageTitle>Categories</PageTitle>
+
+<section class="app-page-stack">
+	<div class="app-page-card">
+		<div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+			<div>
+				<p class="app-pill">Content model</p>
+				<h1 class="app-h1">Categories</h1>
+			</div>
+		</div>
+	</div>
+
+	<div class="grid gap-6 lg:grid-cols-[0.95fr_1.55fr]">
+		<section class="app-panel-card">
+			<h2 class="app-section-title">Create category</h2>
+
+			@if (!string.IsNullOrWhiteSpace(_error))
+			{
+				<div class="alert-error" role="alert">@_error</div>
+			}
+
+			<EditForm Model="_form" OnValidSubmit="CreateCategoryAsync">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+
+				<div class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-(--app-text)">Name</label>
+						<InputText @bind-Value="_form.Name"
+											 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-(--app-text)">Description</label>
+						<InputTextArea @bind-Value="_form.Description"
+													 class="mt-1 min-h-28 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+					</div>
+
+					<button type="submit"
+									class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+									disabled="@_saving">
+						@(_saving ? "Saving..." : "Save category")
+					</button>
+				</div>
+			</EditForm>
+		</section>
+
+		<section class="app-panel-card">
+			<div class="app-section-header">
+				<h2 class="app-section-title">Category list</h2>
+				<span class="app-badge">@_categories.Count total</span>
+			</div>
+
+			@if (_loading)
+			{
+				<p class="app-copy">Loading categories...</p>
+			}
+			else if (_categories.Count == 0)
+			{
+				<p class="app-copy">No categories yet. Create the first one on the left.</p>
+			}
+			else
+			{
+				<div class="space-y-3">
+					@foreach (var category in _categories)
+					{
+						<div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
+							<div class="flex items-start justify-between gap-3">
+								<div>
+									<h3 class="text-lg font-semibold text-(--app-text)">@category.CategoryName</h3>
+									<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">@category.Slug</p>
+								</div>
+								<button type="button"
+												class="rounded border border-rose-500 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+												@onclick="() => DeleteCategoryAsync(category.Id.ToString())">
+									Delete
+								</button>
+							</div>
+
+							@if (!string.IsNullOrWhiteSpace(category.Description))
+							{
+								<p class="mt-2 text-sm text-slate-700 dark:text-slate-200">@category.Description</p>
+							}
+						</div>
+					}
+				</div>
+			}
+		</section>
+	</div>
+</section>
+
+@code {
+	private readonly CategoryFormModel _form = new();
+	private readonly List<CategoryDto> _categories = [];
+	private bool _loading;
+	private bool _saving;
+	private string? _error;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadAsync();
+	}
+
+	private async Task LoadAsync()
+	{
+		_loading = true;
+		_error = null;
+
+		var result = await Sender.Send(new GetCategoriesQuery());
+		if (result.Success)
+		{
+			_categories.Clear();
+			_categories.AddRange(result.Value ?? []);
+		}
+		else
+		{
+			_error = result.Error;
+		}
+
+		_loading = false;
+	}
+
+	private async Task CreateCategoryAsync()
+	{
+		_saving = true;
+		_error = null;
+
+		var result = await Sender.Send(new CreateCategoryCommand(_form.Name.Trim(), _form.Description.Trim()));
+		if (result.Success)
+		{
+			_form.Reset();
+			await LoadAsync();
+		}
+		else
+		{
+			_error = result.Error;
+		}
+
+		_saving = false;
+	}
+
+	private async Task DeleteCategoryAsync(string id)
+	{
+		_error = null;
+		var result = await Sender.Send(new DeleteCategoryCommand(id));
+		if (result.Success)
+		{
+			await LoadAsync();
+		}
+		else
+		{
+			_error = result.Error;
+		}
+	}
+
+	private sealed class CategoryFormModel
+	{
+		public string Name { get; set; } = string.Empty;
+		public string Description { get; set; } = string.Empty;
+
+		public void Reset()
+		{
+			Name = string.Empty;
+			Description = string.Empty;
+		}
+	}
+}

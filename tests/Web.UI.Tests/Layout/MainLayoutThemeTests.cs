@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Web.UI.Tests;
+namespace Web.UI.Tests.Layout;
 
 public class MainLayoutThemeTests : BunitContext
 {

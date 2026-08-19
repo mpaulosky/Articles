@@ -1,12 +1,16 @@
 using System.Security.Claims;
+
 using Bunit;
+
 using FluentAssertions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+
 using Web.Components.Features.UserManagement;
 
-namespace Web.UI.Tests;
+namespace Web.UI.Tests.Features.UserManagement;
 
 public class ProfileTests : BunitContext
 {
@@ -50,8 +54,7 @@ public class ProfileTests : BunitContext
 		var user = new ClaimsPrincipal(new ClaimsIdentity(
 			new[]
 			{
-				new Claim(ClaimTypes.Name, "Test User"),
-				new Claim(ClaimTypes.Email, "test@example.com"),
+				new Claim(ClaimTypes.Name, "Test User"), new Claim(ClaimTypes.Email, "test@example.com"),
 				new Claim(ClaimTypes.NameIdentifier, "auth0|123456")
 			},
 			"TestAuthType"));
@@ -76,8 +79,7 @@ public class ProfileTests : BunitContext
 		var user = new ClaimsPrincipal(new ClaimsIdentity(
 			new[]
 			{
-				new Claim(ClaimTypes.Name, "Admin User"),
-				new Claim(ClaimTypes.Email, "admin@example.com"),
+				new Claim(ClaimTypes.Name, "Admin User"), new Claim(ClaimTypes.Email, "admin@example.com"),
 				new Claim(ClaimTypes.Role, "Admin")
 			},
 			"TestAuthType"));

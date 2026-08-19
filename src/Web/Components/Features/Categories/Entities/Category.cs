@@ -7,6 +7,8 @@
 // Project Name :  Domain
 // =============================================
 
+using Domain.Helpers;
+
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -105,7 +107,7 @@ public sealed class Category
 			Name = name.Trim(),
 			Description = description.Trim(),
 			CreatedOn = DateTimeOffset.UtcNow,
-			Slug = string.Empty
+			Slug = name.GenerateSlug()
 		};
 	}
 
@@ -120,6 +122,7 @@ public sealed class Category
 		ArgumentException.ThrowIfNullOrWhiteSpace(description);
 		Name = name.Trim();
 		Description = description.Trim();
+		Slug = name.GenerateSlug();
 		ModifiedOn = DateTime.UtcNow;
 	}
 }
