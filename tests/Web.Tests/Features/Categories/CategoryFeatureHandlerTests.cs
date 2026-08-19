@@ -1,11 +1,16 @@
+using Domain.Abstractions;
+
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
+
+using MongoDB.Bson;
 
 using Web.Components.Features.Categories.Commands;
 using Web.Components.Features.Categories.Entities;
 using Web.Components.Features.Categories.Handlers;
 using Web.Components.Features.Categories.Queries;
+using Web.Components.Features.Categories.Validators;
 using Web.Data;
 
 namespace Web.Tests.Features.Categories;
@@ -89,6 +94,38 @@ public class CategoryFeatureHandlerTests
 		// Assert
 		result.Success.Should().BeTrue();
 		(await repository.GetByIdAsync(created.Id, cancellationToken)).Should().BeNull();
+	}
+
+	[Fact]
+	public async Task CreateCategoryCommandReturnsValidationFailureForInvalidInputAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context), new CreateCategoryCommandValidator());
+
+		// Act
+		var result = await handler.Handle(new CreateCategoryCommand("A", "bad"), cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+	}
+
+	[Fact]
+	public async Task GetCategoryByIdQueryReturnsNotFoundForUnknownIdAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+
+		// Act
+		var result = await handler.Handle(new GetCategoryByIdQuery(ObjectId.GenerateNewId().ToString()), cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
 	}
 
 	private static ArticlesMongoDbContext CreateContext()
