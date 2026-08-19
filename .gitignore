@@ -414,3 +414,4 @@ skills-lock.json
 # Misc. files and folders
 .directory
 build-log.txt
+build-output.txt
