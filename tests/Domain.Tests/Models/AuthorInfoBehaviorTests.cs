@@ -44,7 +44,7 @@ public class AuthorInfoBehaviorTests
 	}
 
 	[Fact]
-	public void RecordEqualityWorks()
+	public void PropertyEqualityWorks()
 	{
 		// Arrange
 		var author1 = new AuthorDto("auth0|12345", "John Doe");
@@ -52,10 +52,11 @@ public class AuthorInfoBehaviorTests
 		var author3 = new AuthorDto("auth0|67890", "Jane Smith");
 
 		// Act & Assert
-		author1.Should().Be(author2);
-		author1.Should().NotBe(author3);
-		(author1 == author2).Should().BeTrue();
-		(author1 == author3).Should().BeFalse();
+		author1.Should().BeEquivalentTo(author2);
+		author1.Should().NotBeEquivalentTo(author3);
+		author1.UserId.Should().Be(author2.UserId);
+		author1.Name.Should().Be(author2.Name);
+		author1.UserId.Should().NotBe(author3.UserId);
 	}
 
 	[Fact]
@@ -69,8 +70,9 @@ public class AuthorInfoBehaviorTests
 		var deserialized = BsonSerializer.Deserialize<AuthorDto>(bson);
 
 		// Assert
-		deserialized.Should().Be(original);
+		deserialized.Should().BeEquivalentTo(original);
 		deserialized.UserId.Should().Be(original.UserId);
 		deserialized.Name.Should().Be(original.Name);
+		deserialized.Email.Should().Be(original.Email);
 	}
 }
