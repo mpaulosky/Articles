@@ -44,6 +44,8 @@
 
 - Use xUnit v3 with FluentAssertions and NSubstitute where appropriate, following nearby test conventions.
 - Use TDD for new behavior and bug fixes when practical. Test methods should retain the repository's `// Arrange`, `// Act`, and `// Assert` markers.
+- Follow the repository's lint rules for test method naming and organization.
+- Never change the object under test code to make a test pass. Instead, fix the implementation or the test to reflect the intended behavior.
 - Run the narrowest relevant test or validation command during iteration. Typical commands are:
 
   ```bash
