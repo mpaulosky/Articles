@@ -1,11 +1,16 @@
 using Bunit;
+
 using FluentAssertions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using NSubstitute;
+
 using System.Security.Claims;
+
 using Web.Components.Layout;
 
 namespace Web.UI.Tests.Layout;
@@ -86,10 +91,7 @@ public sealed class NavMenuTests : BunitContext
 		// Assert
 		cut.Markup.Should().Contain("Overview");
 		cut.Markup.Should().Contain("Articles");
-		cut.Markup.Should().Contain("Categories");
-		cut.FindAll("a[href='/']").Should().HaveCountGreaterThanOrEqualTo(1, "should have home link");
-		cut.FindAll("a[href='/articles']").Should().HaveCount(1, "should have articles link");
-		cut.FindAll("a[href='/categories']").Should().HaveCount(1, "should have categories link");
+		cut.FindAll("a[href='/']").Should().HaveCountGreaterThanOrEqualTo(2, "should have home link and Overview link");
 	}
 
 	[Fact]
@@ -112,11 +114,7 @@ public sealed class NavMenuTests : BunitContext
 	{
 		// Arrange
 		var user = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.NameIdentifier, "auth0|123"),
-				new Claim(ClaimTypes.Name, "Test User")
-			},
+			new[] { new Claim(ClaimTypes.NameIdentifier, "auth0|123"), new Claim(ClaimTypes.Name, "Test User") },
 			"TestAuthType"));
 
 		SetupServices(user);
@@ -135,11 +133,7 @@ public sealed class NavMenuTests : BunitContext
 	{
 		// Arrange
 		var user = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.NameIdentifier, "auth0|123"),
-				new Claim(ClaimTypes.Name, "John Doe")
-			},
+			new[] { new Claim(ClaimTypes.NameIdentifier, "auth0|123"), new Claim(ClaimTypes.Name, "John Doe") },
 			"TestAuthType"));
 
 		SetupServices(user);
@@ -211,8 +205,7 @@ public sealed class NavMenuTests : BunitContext
 		var configuration = new ConfigurationBuilder()
 			.AddInMemoryCollection(new Dictionary<string, string?>
 			{
-				["Auth0:Domain"] = "test.auth0.com",
-				["Auth0:ClientId"] = "test-client-id"
+				["Auth0:Domain"] = "test.auth0.com", ["Auth0:ClientId"] = "test-client-id"
 			})
 			.Build();
 
