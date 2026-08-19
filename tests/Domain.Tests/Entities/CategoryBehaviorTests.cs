@@ -8,7 +8,12 @@
 // =============================================
 
 using System.ComponentModel.DataAnnotations;
-using Domain.Models;
+
+using MongoDB.Bson;
+
+using Web.Components.Features.AuthInfo.Entities;
+using Web.Components.Features.Categories.Entities;
+using Web.Components.Features.Categories.Models;
 
 namespace Domain.Entities;
 
@@ -26,7 +31,7 @@ public class CategoryBehaviorTests
 		empty.Id.Should().Be(ObjectId.Empty);
 		empty.CategoryName.Should().BeEmpty();
 		empty.Slug.Should().BeEmpty();
-		empty.CreatedOn.Should().NotBe(default(DateTimeOffset));
+		empty.CreatedOn.Should().NotBe(default(DateTime));
 		empty.ModifiedOn.Should().BeNull();
 		empty.IsArchived.Should().BeFalse();
 	}
@@ -35,12 +40,7 @@ public class CategoryBehaviorTests
 	public void CategoryDtoValidatesSlugFormat()
 	{
 		// Arrange
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "Technology!"
-		};
+		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "Technology!" };
 		var validationContext = new ValidationContext(category);
 		var validationResults = new List<ValidationResult>();
 
@@ -58,7 +58,7 @@ public class CategoryBehaviorTests
 		// Arrange
 
 		// Act
-		var empty = AuthorInfo.Empty;
+		var empty = AuthorDto.Empty;
 
 		// Assert
 		empty.UserId.Should().BeEmpty();
@@ -69,7 +69,7 @@ public class CategoryBehaviorTests
 	public void AuthorInfoRetainsProvidedValues()
 	{
 		// Arrange
-		var authorInfo = new AuthorInfo("auth-123", "Ada Lovelace");
+		var authorInfo = new AuthorDto("auth-123", "Ada Lovelace");
 
 		// Act
 

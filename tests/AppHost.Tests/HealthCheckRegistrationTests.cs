@@ -11,7 +11,7 @@ namespace AppHost;
 
 public class HealthCheckRegistrationTests
 {
-	[Fact(Skip = "Waiting for investigation of intermittent test failures in CI/CD pipeline.")]
+	[Fact]
 	public async Task AddDefaultHealthChecksRegistersReadinessAndLivenessChecks()
 	{
 		// Arrange
@@ -22,7 +22,10 @@ public class HealthCheckRegistrationTests
 		await using var provider = builder.Services.BuildServiceProvider();
 		var healthCheckOptions = provider.GetRequiredService<IOptions<HealthCheckServiceOptions>>().Value;
 		var healthCheckService = provider.GetRequiredService<HealthCheckService>();
-		var healthCheckResult = await healthCheckService.CheckHealthAsync(TestContext.Current.CancellationToken);
+
+		// Fix: Use dedicated CancellationTokenSource with timeout to avoid CI/CD issues with TestContext.Current.CancellationToken
+		using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+		var healthCheckResult = await healthCheckService.CheckHealthAsync(cts.Token);
 
 		// Assert
 		healthCheckOptions.Registrations.Should()
@@ -32,16 +35,20 @@ public class HealthCheckRegistrationTests
 		healthCheckResult.Status.Should().Be(HealthStatus.Healthy);
 	}
 
-	[Fact(Skip = "Waiting for investigation of intermittent test failures in CI/CD pipeline.")]
+	[Fact]
 	public async Task MapDefaultEndpointsRegistersHealthAndAlivenessRoutes()
 	{
 		// Arrange
 		var builder =
 			WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = Environments.Development });
+
+		// Fix: Add service defaults to register health check services before building the app
+		builder.AddServiceDefaults();
 		var app = builder.Build();
 
 		// Act
 		app.MapDefaultEndpoints();
+		// Fix: GetRoutePatternsAsync now uses dedicated CancellationTokenSource to avoid TestContext timing issues
 		var endpoints = await GetRoutePatternsAsync(app);
 
 		// Assert
@@ -65,7 +72,7 @@ public class HealthCheckRegistrationTests
 		endpoints.Should().NotContain("/alive");
 	}
 
-	[Fact(Skip = "Waiting for Investigation of intermittent test failures in CI/CD pipeline.")]
+	[Fact]
 	public async Task MapDefaultEndpointsRegistersRoutesWhenEnabledByConfigurationOutsideDevelopment()
 	{
 		// Arrange
@@ -74,10 +81,14 @@ public class HealthCheckRegistrationTests
 		{
 			["EnableHealthEndpoints"] = "true",
 		});
+
+		// Fix: Add service defaults to register health check services before building the app
+		builder.AddServiceDefaults();
 		var app = builder.Build();
 
 		// Act
 		app.MapDefaultEndpoints();
+		// Fix: GetRoutePatternsAsync now uses dedicated CancellationTokenSource to avoid TestContext timing issues
 		var endpoints = await GetRoutePatternsAsync(app);
 
 		// Assert
@@ -168,7 +179,10 @@ public class HealthCheckRegistrationTests
 
 	private static async Task<string?[]> GetRoutePatternsAsync(WebApplication app)
 	{
-		await app.StartAsync(TestContext.Current.CancellationToken).ConfigureAwait(false);
+		// Fix: Use dedicated CancellationTokenSource with timeout instead of TestContext.Current.CancellationToken
+		// This prevents race conditions and timing issues in CI/CD environments
+		using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+		await app.StartAsync(cts.Token).ConfigureAwait(false);
 		try
 		{
 			return
@@ -181,7 +195,7 @@ public class HealthCheckRegistrationTests
 		}
 		finally
 		{
-			await app.StopAsync(TestContext.Current.CancellationToken).ConfigureAwait(false);
+			await app.StopAsync(cts.Token).ConfigureAwait(false);
 		}
 	}
 }
