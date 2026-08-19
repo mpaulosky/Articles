@@ -15,7 +15,7 @@ namespace Domain.ValueObjects;
 public class PostAuthorBehaviorTests
 {
 	[Fact]
-	public void Empty_ReturnsExpectedDefaultValues()
+	public void EmptyReturnsExpectedDefaultValues()
 	{
 		// Arrange & Act
 		var empty = PostAuthor.Empty;
@@ -28,7 +28,7 @@ public class PostAuthorBehaviorTests
 	}
 
 	[Fact]
-	public void Empty_ReturnsStableInstance()
+	public void EmptyReturnsStableInstance()
 	{
 		// Arrange & Act
 		var empty1 = PostAuthor.Empty;
@@ -58,7 +58,7 @@ public class PostAuthorBehaviorTests
 	[InlineData("user-1", "Alice Smith", "alice@example.com")]
 	[InlineData("user-2", "Bob Jones", "bob@example.com")]
 	[InlineData("auth0|12345", "Carol White", "carol@example.org")]
-	public void Constructor_SetsScalarProperties(string id, string name, string email)
+	public void ConstructorSetsScalarProperties(string id, string name, string email)
 	{
 		// Arrange
 		var roles = new[] { "Author", "User" };
@@ -74,7 +74,7 @@ public class PostAuthorBehaviorTests
 	}
 
 	[Fact]
-	public void Deconstruct_ExtractsAllProperties()
+	public void DeconstructExtractsAllProperties()
 	{
 		// Arrange
 		var roles = new[] { "Admin" };
@@ -91,7 +91,7 @@ public class PostAuthorBehaviorTests
 	}
 
 	[Fact]
-	public void WithExpression_CreatesModifiedCopy()
+	public void WithExpressionCreatesModifiedCopy()
 	{
 		// Arrange
 		var roles = new[] { "Contributor" };
@@ -112,7 +112,7 @@ public class PostAuthorBehaviorTests
 	}
 
 	[Fact]
-	public void PropertyEquality_EquivalentObjects_Match()
+	public void PropertyEqualityEquivalentObjectsMatch()
 	{
 		// Arrange
 		var roles = new[] { "Admin", "Writer" };
@@ -130,7 +130,7 @@ public class PostAuthorBehaviorTests
 	}
 
 	[Fact]
-	public void BsonSerializationRoundTrip_PreservesAllProperties()
+	public void BsonSerializationRoundTripPreservesAllProperties()
 	{
 		// Arrange
 		var roles = new[] { "Admin", "Editor" };
