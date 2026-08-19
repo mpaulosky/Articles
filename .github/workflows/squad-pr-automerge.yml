@@ -5,6 +5,9 @@ name: Squad PR Auto-Merge
   pull_request:
     types: [opened, ready_for_review, reopened, edited, synchronize]
     branches: [main]
+  status:
+  check_suite:
+    types: [completed, requested, rerequested]
 
 permissions:
   contents: write
@@ -14,17 +17,78 @@ jobs:
   enable-auto-merge:
     name: Enable auto-merge for squad/* PRs
     runs-on: ubuntu-latest
-    if: >-
-      github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      startsWith(github.event.pull_request.head.ref, 'squad/')
     steps:
       - name: Enable auto-merge (squash)
         uses: actions/github-script@v9
         with:
           script: |
-            const pull = context.payload.pull_request;
-            const pullNumber = pull.number;
+            const { owner, repo } = context.repo;
+            const pullRequestPayload = context.payload.pull_request;
+            const statusPayload = context.payload.status;
+            const checkSuitePayload = context.payload.check_suite;
+
+            let pullNumber;
+            if (pullRequestPayload) {
+              pullNumber = pullRequestPayload.number;
+            } else if (statusPayload) {
+              const associated = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: statusPayload.sha
+              });
+
+              const matching = associated.data.find((pr) => {
+                return (
+                  pr.state === "open" &&
+                  !pr.merged_at &&
+                  !pr.draft &&
+                  pr.head?.repo?.full_name === `${owner}/${repo}` &&
+                  pr.head?.ref?.startsWith("squad/")
+                );
+              });
+
+              if (!matching) {
+                core.info(
+                  `Skipping status update for ${statusPayload.sha}: no open squad PR is associated.`
+                );
+                return;
+              }
+
+              pullNumber = matching.number;
+            } else if (checkSuitePayload) {
+              const associated = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: checkSuitePayload.head_sha
+              });
+
+              const matching = associated.data.find((pr) => {
+                return (
+                  pr.state === "open" &&
+                  !pr.merged_at &&
+                  !pr.draft &&
+                  pr.head?.repo?.full_name === `${owner}/${repo}` &&
+                  pr.head?.ref?.startsWith("squad/")
+                );
+              });
+
+              if (!matching) {
+                core.info(
+                  `Skipping check suite update for ${checkSuitePayload.head_sha}: no open squad PR is associated.`
+                );
+                return;
+              }
+
+              pullNumber = matching.number;
+            }
+
+            if (!pullNumber) {
+              core.info("No pull request number was resolved for this event.");
+              return;
+            }
+
+            const pull = pullRequestPayload ??
+              await github.rest.pulls.get({ owner, repo, pull_number: pullNumber }).then((result) => result.data);
 
             if (pull.merged_at || pull.state !== "open") {
               core.info(
@@ -34,7 +98,13 @@ jobs:
               return;
             }
 
-            const { owner, repo } = context.repo;
+            if (pull.draft || pull.head?.repo?.full_name !== `${owner}/${repo}` || !pull.head?.ref?.startsWith("squad/")) {
+              core.info(
+                `Skipping PR #${pullNumber}: not an eligible squad branch.`
+              );
+              return;
+            }
+
             const status = await github.graphql(
               `query AutoMergeStatus(
                  $owner: String!,
@@ -43,9 +113,12 @@ jobs:
                ) {
                  repository(owner: $owner, name: $repo) {
                    pullRequest(number: $number) {
+                     id
                      number
                      state
                      merged
+                     mergeable
+                     mergeStateStatus
                      autoMergeRequest {
                        enabledAt
                        mergeMethod
@@ -72,6 +145,17 @@ jobs:
               return;
             }
 
+            const isReadyForAutoMerge =
+              currentPr.mergeable === true && currentPr.mergeStateStatus === "CLEAN";
+
+            if (!isReadyForAutoMerge) {
+              core.info(
+                `Skipping PR #${pullNumber}: mergeable=${String(currentPr.mergeable)} ` +
+                `mergeStateStatus=${currentPr.mergeStateStatus ?? "unknown"}.`
+              );
+              return;
+            }
+
             try {
               await github.graphql(
                 `mutation EnableAutoMerge($pullRequestId: ID!) {
@@ -88,7 +172,7 @@ jobs:
                      }
                    }
                  }`,
-                { pullRequestId: pull.node_id }
+                { pullRequestId: currentPr.id }
               );
             } catch (error) {
               const messages = Array.isArray(error?.errors)
@@ -101,10 +185,13 @@ jobs:
               if (
                 combinedMessage.includes("already merged") ||
                 combinedMessage.includes("already enabled") ||
-                combinedMessage.includes("unstable status")
+                combinedMessage.includes("unstable status") ||
+                combinedMessage.includes("mergeable") ||
+                combinedMessage.includes("required status") ||
+                combinedMessage.includes("not mergeable")
               ) {
                 core.warning(
-                  `Skipping PR #${pullNumber}: ${error.message}`
+                  `Skipping PR #${pullNumber}: ${error.message || "Auto-merge is not ready yet."}`
                 );
                 return;
               }

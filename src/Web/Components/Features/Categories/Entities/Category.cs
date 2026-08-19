@@ -120,5 +120,6 @@ public sealed class Category
 		ArgumentException.ThrowIfNullOrWhiteSpace(description);
 		Name = name.Trim();
 		Description = description.Trim();
+		ModifiedOn = DateTime.UtcNow;
 	}
 }

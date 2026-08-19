@@ -14,9 +14,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 using static Domain.Constants.ApplicationConstants;
 
+using Microsoft.EntityFrameworkCore;
+
 using Web;
 using Web.Components;
 using Web.Components.Features.UserManagement.Caching.Extensions;
+using Web.Data;
 using Web.Security;
 using Web.Services;
 
@@ -46,6 +49,18 @@ builder.Services.AddAuthenticationAndAuthorization(configuration);
 builder.Services.AddMemoryCache();
 builder.Services.AddUserManagementCaching();
 builder.Services.AddMyMediator(typeof(Program).Assembly);
+
+var mongoConnectionString = configuration.GetConnectionString("articlesdb")
+                            ?? configuration["MONGODB_CONNECTION_STRING"]
+                            ?? "mongodb://localhost:27017";
+var mongoDatabaseName = configuration["MONGODB_DATABASE_NAME"] ?? "articlesdb";
+
+builder.Services.AddDbContextFactory<ArticlesMongoDbContext>(options =>
+{
+	options.UseMongoDB(mongoConnectionString, mongoDatabaseName);
+});
+builder.Services.AddScoped<ArticleRepository>();
+builder.Services.AddScoped<CategoryRepository>();
 
 // Output Cache
 builder.Services.AddOutputCache();
