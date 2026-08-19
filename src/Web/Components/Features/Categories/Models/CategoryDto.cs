@@ -23,7 +23,7 @@ public sealed class CategoryDto
 	/// <summary>
 	///   Initializes a new empty category snapshot for serialization and test data generation.
 	/// </summary>
-	public CategoryDto() : this(ObjectId.Empty, string.Empty, string.Empty, EmptyCreatedOn, null, false)
+	public CategoryDto() : this(ObjectId.Empty, string.Empty, string.Empty, string.Empty, EmptyCreatedOn, null, false)
 	{
 	}
 
@@ -33,6 +33,7 @@ public sealed class CategoryDto
 	/// <param name="id">The unique MongoDB identifier for the category.</param>
 	/// <param name="categoryName">The display name of the category.</param>
 	/// <param name="slug">The URL-friendly slug for the category.</param>
+	/// <param name="description">The category description.</param>
 	/// <param name="createdOn">The UTC creation time for the category snapshot.</param>
 	/// <param name="modifiedOn">The last modification time for the category snapshot, if any.</param>
 	/// <param name="isArchived">Indicates whether the category is archived.</param>
@@ -40,6 +41,7 @@ public sealed class CategoryDto
 		ObjectId id,
 		string categoryName,
 		string slug,
+		string description,
 		DateTime createdOn,
 		DateTime? modifiedOn,
 		bool isArchived)
@@ -47,6 +49,7 @@ public sealed class CategoryDto
 		Id = id;
 		CategoryName = categoryName;
 		Slug = slug;
+		Description = description;
 		CreatedOn = createdOn;
 		ModifiedOn = modifiedOn;
 		IsArchived = isArchived;
@@ -66,6 +69,13 @@ public sealed class CategoryDto
 	[BsonElement("categoryName")]
 	[BsonRepresentation(BsonType.String)]
 	public string CategoryName { get; set; }
+
+	/// <summary>
+	///   Gets or sets the category description.
+	/// </summary>
+	[BsonElement("description")]
+	[BsonRepresentation(BsonType.String)]
+	public string Description { get; set; } = string.Empty;
 
 	/// <summary>
 	///   Gets or sets the slug for the category, used in the category's URL.
@@ -102,7 +112,27 @@ public sealed class CategoryDto
 		ObjectId.Empty,
 		string.Empty,
 		string.Empty,
+		string.Empty,
 		EmptyCreatedOn,
 		null,
 		false);
+
+	/// <summary>
+	///   Creates a CategoryDto from a Category entity.
+	/// </summary>
+	/// <param name="entity">The Category entity to convert.</param>
+	/// <returns>A new CategoryDto instance.</returns>
+	public static CategoryDto FromEntity(Entities.Category entity)
+	{
+		ArgumentNullException.ThrowIfNull(entity);
+
+		return new CategoryDto(
+			entity.Id,
+			entity.Name,
+			entity.Slug,
+			entity.Description,
+			entity.CreatedOn.DateTime,
+			entity.ModifiedOn,
+			entity.IsArchived);
+	}
 }
