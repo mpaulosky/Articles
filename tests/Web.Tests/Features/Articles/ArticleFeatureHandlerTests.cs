@@ -1,3 +1,5 @@
+using Domain.Abstractions;
+
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +9,7 @@ using MongoDB.Bson;
 using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Handlers;
 using Web.Components.Features.Articles.Queries;
+using Web.Components.Features.Articles.Validators;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 using Web.Data;
@@ -79,6 +82,38 @@ public class ArticleFeatureHandlerTests
 		result.Success.Should().BeTrue();
 		result.Value.Should().HaveCount(2);
 		result.Value!.Select(article => article.Title).Should().ContainInOrder("First article", "Second article");
+	}
+
+	[Fact]
+	public async Task CreateArticleCommandReturnsValidationFailureForInvalidInputAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context), new CreateArticleCommandValidator());
+		var command = new CreateArticleCommand("A", "short", null!);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+	}
+
+	[Fact]
+	public async Task GetArticleByIdQueryReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+
+		// Act
+		var result =
+			await handler.Handle(new GetArticleByIdQuery("not-an-object-id"), TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
 	}
 
 	private static ArticlesMongoDbContext CreateContext()
