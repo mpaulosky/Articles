@@ -415,3 +415,4 @@ skills-lock.json
 .directory
 build-log.txt
 build-output.txt
+test-output.txt
