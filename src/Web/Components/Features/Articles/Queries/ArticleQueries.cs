@@ -13,6 +13,6 @@ using Web.Components.Features.Articles.Models;
 
 namespace Web.Components.Features.Articles.Queries;
 
-internal sealed record GetArticlesQuery : IRequest<Result<IReadOnlyList<ArticleDto>>>;
+public sealed record GetArticlesQuery : IRequest<Result<IReadOnlyList<ArticleDto>>>;
 
-internal sealed record GetArticleByIdQuery(string Id) : IRequest<Result<ArticleDto>>;
+public sealed record GetArticleByIdQuery(string Id) : IRequest<Result<ArticleDto>>;
