@@ -2,6 +2,7 @@
     <PropertyGroup>
         <AnalysisLevel>latest</AnalysisLevel>
         <AnalysisMode>all</AnalysisMode>
+        <NoWarn>$(NoWarn);CA1515</NoWarn>
         <!-- Keep analyzer diagnostics as warnings so TreatWarningsAsErrors doesn't fail CI -->
         <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>

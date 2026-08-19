@@ -7,9 +7,10 @@
 // Project Name :  Web
 // =============================================
 
-using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace Domain.Models;
+namespace Web.Components.Features.Categories.Models;
 
 /// <summary>
 ///   Represents a data transfer object for a category.
@@ -20,7 +21,7 @@ public sealed class CategoryDto
 	private static readonly DateTime EmptyCreatedOn = DateTime.UnixEpoch;
 
 	/// <summary>
-	///   Parameterless constructor for serialization and test data generation.
+	///   Initializes a new empty category snapshot for serialization and test data generation.
 	/// </summary>
 	public CategoryDto() : this(ObjectId.Empty, string.Empty, string.Empty, EmptyCreatedOn, null, false)
 	{
@@ -29,11 +30,11 @@ public sealed class CategoryDto
 	/// <summary>
 	///   Initializes a new instance of the <see cref="CategoryDto" /> class.
 	/// </summary>
-	/// <param name="id"></param>
-	/// <param name="categoryName"></param>
-	/// <param name="slug"></param>
-	/// <param name="createdOn"></param>
-	/// <param name="modifiedOn"></param>
+	/// <param name="id">The unique MongoDB identifier for the category.</param>
+	/// <param name="categoryName">The display name of the category.</param>
+	/// <param name="slug">The URL-friendly slug for the category.</param>
+	/// <param name="createdOn">The UTC creation time for the category snapshot.</param>
+	/// <param name="modifiedOn">The last modification time for the category snapshot, if any.</param>
 	/// <param name="isArchived">Indicates whether the category is archived.</param>
 	private CategoryDto(
 		ObjectId id,
@@ -54,47 +55,54 @@ public sealed class CategoryDto
 	/// <summary>
 	///   Gets or sets the unique identifier for the category.
 	/// </summary>
+	[BsonId]
+	[BsonElement("_id")]
+	[BsonRepresentation(BsonType.ObjectId)]
 	public ObjectId Id { get; set; }
 
 	/// <summary>
 	///   Gets the name of the category.
 	/// </summary>
-	[Display(Name = "Category Name")]
-	[Required(ErrorMessage = "Category name is required")]
-	[StringLength(80, ErrorMessage = "Category name cannot exceed 80 characters")]
+	[BsonElement("categoryName")]
+	[BsonRepresentation(BsonType.String)]
 	public string CategoryName { get; set; }
 
 	/// <summary>
 	///   Gets or sets the slug for the category, used in the category's URL.
 	/// </summary>
-	[Display(Name = "Slug")]
-	[StringLength(200, ErrorMessage = "Slug cannot exceed200 characters")]
-	[RegularExpression(@"^[a-z0-9-]+$",
-		ErrorMessage = "Slug can only contain lowercase letters, numbers, and hyphens")]
+	[BsonElement("slug")]
+	[BsonRepresentation(BsonType.String)]
 	public string Slug { get; set; }
 
 	/// <summary>
 	///   Gets the date and time when this entity was created.
 	/// </summary>
-	/// )]
-	[Display(Name = "Created On")]
-	public DateTimeOffset CreatedOn { get; set; }
+	[BsonElement("createdOn")]
+	[BsonRepresentation(BsonType.DateTime)]
+	public DateTime CreatedOn { get; set; }
 
 	/// <summary>
 	///   Gets or sets the date and time when this entity was last modified.
 	/// </summary>
-	[Display(Name = "Modified On")]
-	public DateTimeOffset? ModifiedOn { get; set; }
+	[BsonElement("modifiedOn")]
+	[BsonRepresentation(BsonType.DateTime)]
+	public DateTime? ModifiedOn { get; set; }
 
 	/// <summary>
 	///   Gets or sets a value indicating whether the category is archived.
 	/// </summary>
-	[Display(Name = "Is Archived")]
+	[BsonElement("isArchived")]
+	[BsonRepresentation(BsonType.Boolean)]
 	public bool IsArchived { get; set; }
 
-
 	/// <summary>
-	///   Gets a fresh empty category instance with a stable creation timestamp.
+	///   Gets a fresh empty category snapshot with a stable creation timestamp.
 	/// </summary>
-	public static CategoryDto Empty => new(ObjectId.Empty, string.Empty, string.Empty, EmptyCreatedOn, null, false);
+	public static CategoryDto Empty => new(
+		ObjectId.Empty,
+		string.Empty,
+		string.Empty,
+		EmptyCreatedOn,
+		null,
+		false);
 }

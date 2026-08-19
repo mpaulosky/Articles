@@ -2,7 +2,7 @@
 name: build-repair-prompt
 description: Build and repair Prompt
 model: Claude Sonnet 4.5 (copilot)
-agent: agent
+agent: Squad
 ---
 
 # Copilot Build Prompt: Universal .NET Solution Build & Error Resolution
@@ -11,52 +11,73 @@ agent: agent
 
 1. **Locate Solution File**
 
-- Check for `*.slnx` file in current directory
-- If found, continue to next step
-- If not found, run: `cd ..` and check again
-- Repeat until `*.slnx` file is found
+- Check for `*.slnx` file in the current directory.
+- If found, continue to the next step.
+- If not found, run `cd ..` and check again.
+- Repeat until a `*.slnx` file is found.
 
-1. **Restore Dependencies**
+2. **Restore Dependencies**
 
-- Run: `dotnet restore`
+- Run `dotnet restore`.
+- If restore fails, fix the project or tooling issue before continuing.
 
-1. **Build Solution**
+3. **Run Lint Gates Before Final Build**
 
-- Run: `dotnet build --no-restore`
+- Run YAML lint against the repo and fix all findings before build completion.
+- Run Markdown lint against the repo and fix all findings before build completion.
+- If lint tooling is not installed, install the repo-supported tooling and then rerun the lint commands.
+- The build-repair loop is not complete until both lint passes succeed with zero issues.
+
+4. **Build Solution**
+
+- Run `dotnet build --no-restore`.
 - Capture all build output, including errors and warnings.
+- If warnings are treated as errors by repo configuration or the project gate, fix them too.
 
-1. **Error & Warning Resolution**
+5. **Error & Warning Resolution Loop**
 
 - For each error or warning in the build output:
   - Identify the affected file and line number.
-  - Research the error/warning code and message.
+  - Research the warning/error code and message.
   - Apply the recommended fix to the codebase.
-  - Rebuild the solution to verify the fix.
-  - Repeat until the build completes with zero errors and warnings.
+  - Re-run the relevant lint and build commands to verify the fix.
+  - Repeat until the final build completes with zero errors and zero blocking warnings.
+- Do not stop after the first fix. Continue until the repo passes the validation gate.
 
-1. **Verification**
+6. **Verification**
 
-- Ensure the final build output shows “Build succeeded” and no warnings.
-- Document any changes made to resolve issues.
+- Ensure the final build output shows `Build succeeded` and no warnings or errors.
+- Document every change made to resolve issues.
 
-1. **Testing**
+7. **Testing**
 
-- Run unit tests to ensure the solution works as expected.
+- Run the smallest relevant unit tests for the change set.
 - If tests fail, identify and fix the issues in the codebase.
-- Rebuild and retest until all tests pass.  
+- Rebuild and retest until the relevant tests pass.
 
-1. **Documentation**
+8. **Documentation**
 
 - Create a `build-log.txt` file in the solution directory.
-- Log all build outputs, error resolutions, and changes made.
+- Log the lint output, build output, error resolutions, and changes made.
+
+## Success Requirement
+
+This prompt must continue until all repository validation gates pass. It must never stop after a partial fix or after a subset of files appears clean. In practical terms, the session is not complete until:
+
+- YAML lint succeeds with no findings.
+- Markdown lint succeeds with no findings.
+- `dotnet restore` succeeds.
+- `dotnet build --no-restore` succeeds.
+- Relevant tests pass.
+- The final result is a clean, successful build path without unresolved errors or required lint issues.
 
 ## Notes
 
 - These steps apply to any .NET solution (`*.slnx`).
-- Use PowerShell or your default shell for commands.
-- Always re-run the build after each fix to confirm resolution.
+- Use PowerShell or the default shell for commands.
+- Always re-run lint and build after each fix to confirm resolution.
+- If the issue is repository configuration rather than code, fix the config or workflow in the smallest safe way that preserves project intent.
 
 ---
 
-**Use this prompt to automate building and testing any .NET solution and iteratively resolve all build and test errors and warnings until the
-build is clean.**
+**Use this prompt to automate building, linting, testing, and repairing any .NET solution until the repo is fully green and the build succeeds without leaving unresolved lint or build issues.**

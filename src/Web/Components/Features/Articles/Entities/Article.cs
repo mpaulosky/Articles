@@ -7,54 +7,74 @@
 // Project Name :  Domain
 // =============================================
 
-using Domain.ValueObjects;
-using Domain.Models;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using Web.Components.Features.AuthInfo.Entities;
+using Web.Components.Features.Categories.Models;
 
-namespace Domain.Entities;
+namespace Web.Components.Features.Articles.Entities;
 
 /// <summary>
 ///     Represents an article authored for publication in the blog.
 /// </summary>
+[Serializable]
 public sealed class Article
 {
 	/// <summary>
 	///     Gets the unique MongoDB identifier for the article.
 	/// </summary>
+	[BsonId]
+	[BsonElement("_id")]
+	[BsonRepresentation(BsonType.ObjectId)]
 	public ObjectId Id { get; private set; }
 
 	/// <summary>
 	///     Gets the article title.
 	/// </summary>
+	[BsonElement("title")]
+	[BsonRepresentation(BsonType.String)]
 	public string Title { get; private set; } = string.Empty;
 
 	/// <summary>
 	///     Gets the article body content.
 	/// </summary>
+	[BsonElement("content")]
+	[BsonRepresentation(BsonType.String)]
 	public string Content { get; private set; } = string.Empty;
 
 	/// <summary>
 	///     Gets the author snapshot captured when the article was created.
 	/// </summary>
-	public PostAuthor Author { get; private set; } = PostAuthor.Empty;
+	[BsonElement("author")]
+	[BsonRepresentation(BsonType.Document)]
+	public AuthorDto Author { get; private set; } = AuthorDto.Empty;
 
 	/// <summary>
 	///     Gets the UTC date and time when the article was created.
 	/// </summary>
+	[BsonElement("createdAt")]
+	[BsonRepresentation(BsonType.DateTime)]
 	public DateTime CreatedAt { get; private set; }
 
 	/// <summary>
 	///     Gets the UTC date and time when the article was last updated.
 	/// </summary>
+	[BsonElement("updatedAt")]
+	[BsonRepresentation(BsonType.DateTime)]
 	public DateTime? UpdatedAt { get; private set; }
 
 	/// <summary>
 	///     Gets a value indicating whether the article is published.
 	/// </summary>
+	[BsonElement("isPublished")]
+	[BsonRepresentation(BsonType.Boolean)]
 	public bool IsPublished { get; private set; }
 
 	/// <summary>
 	///     Gets the assigned category identifier, when the article has a category.
 	/// </summary>
+	[BsonElement("category")]
+	[BsonRepresentation(BsonType.Document)]
 	public CategoryDto Category { get; private set; } = CategoryDto.Empty;
 
 	private Article()
@@ -68,7 +88,7 @@ public sealed class Article
 	/// <param name="content">The article body content.</param>
 	/// <param name="author">The author snapshot for the article.</param>
 	/// <returns>A new <see cref="Article" /> instance.</returns>
-	public static Article Create(string title, string content, PostAuthor author)
+	public static Article Create(string title, string content, AuthorDto author)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(title);
 		ArgumentException.ThrowIfNullOrWhiteSpace(content);

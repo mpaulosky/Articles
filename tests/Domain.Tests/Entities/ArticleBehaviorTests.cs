@@ -7,19 +7,20 @@
 // Project Name :  Domain.Tests
 // =============================================
 
-using Domain.Models;
+using Web.Components.Features.Articles.Entities;
+using Web.Components.Features.AuthInfo.Entities;
+using Web.Components.Features.Categories.Entities;
+using Web.Components.Features.Categories.Models;
 
 namespace Domain.Entities;
 
 public class ArticleBehaviorTests
 {
-	private static readonly string[] AdminRoles = ["admin"];
-
 	[Fact]
 	public void CreateSetsExpectedState()
 	{
 		// Arrange
-		var author = new PostAuthor("author-1", "Ada Lovelace", "ada@example.com", AdminRoles);
+		var author = new AuthorDto("author-1", "Ada Lovelace", "ada@example.com");
 
 		// Act
 		var article = Article.Create("My First Post", "Hello from the domain", author);
@@ -39,14 +40,14 @@ public class ArticleBehaviorTests
 	public void CreateThrowsForInvalidTitleOrContent()
 	{
 		// Arrange
-		var author = new PostAuthor("author-1", "Ada Lovelace", "ada@example.com", Array.Empty<string>());
+		var author = new AuthorDto("author-1", "Ada Lovelace", "ada@example.com");
 
 		// Act
 		Action actWithBlankTitle = () => Article.Create("   ", "content", author);
 		Action actWithBlankContent = () => Article.Create("title", "   ", author);
 		Action actWithNullAuthor = () => Article.Create("title", "content", null!);
 		Action actWithBlankAuthorName = () => Article.Create("title", "content",
-			new PostAuthor("author-1", "  ", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "  ", "ada@example.com"));
 
 		// Assert
 		actWithBlankTitle.Should().Throw<ArgumentException>();
@@ -60,7 +61,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 
 		// Act
 		article.Publish();
@@ -76,7 +77,7 @@ public class ArticleBehaviorTests
 	public void CreateInitializesCategoryAsEmpty()
 	{
 		// Arrange
-		var author = new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>());
+		var author = new AuthorDto("author-1", "Ada", "ada@example.com");
 
 		// Act
 		var article = Article.Create("Post", "Body", author);
@@ -92,7 +93,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 
 		// Act
@@ -112,7 +113,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var firstCategory = new CategoryDto
 		{
 			Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology"
@@ -136,7 +137,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 
@@ -154,7 +155,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 		var afterAssignmentTime = article.UpdatedAt;
@@ -172,7 +173,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Original", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 
 		// Act
@@ -190,7 +191,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Original", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 
@@ -209,7 +210,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Original", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 		article.AssignCategory(category);
 
@@ -227,7 +228,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Original", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var firstCategory = new CategoryDto
 		{
 			Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology"
@@ -250,7 +251,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Original", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 
 		// Act
 		Action actWithBlankTitle = () => article.Update("   ", "Body", category: null);
@@ -266,7 +267,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		article.Publish();
 		var firstPublishTime = article.UpdatedAt;
 
@@ -284,7 +285,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var creationTime = article.UpdatedAt;
 
 		// Act
@@ -300,7 +301,7 @@ public class ArticleBehaviorTests
 	{
 		// Arrange
 		var article = Article.Create("Post", "Body",
-			new PostAuthor("author-1", "Ada", "ada@example.com", Array.Empty<string>()));
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		var category = new CategoryDto { Id = ObjectId.GenerateNewId(), CategoryName = "Technology", Slug = "technology" };
 
 		// Act
