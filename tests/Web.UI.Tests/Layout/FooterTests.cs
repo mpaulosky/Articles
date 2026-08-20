@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NSubstitute;
 
+using System.Globalization;
 using System.Net;
 
 using Web.Components.Layout;
@@ -40,7 +41,7 @@ public sealed class FooterTests : BunitContext
 		var cut = Render<Footer>();
 
 		// Assert
-		var currentYear = DateTime.UtcNow.Year.ToString();
+		var currentYear = DateTime.UtcNow.Year.ToString(CultureInfo.InvariantCulture);
 		cut.Markup.Should().Contain($"© {currentYear} Articles");
 	}
 

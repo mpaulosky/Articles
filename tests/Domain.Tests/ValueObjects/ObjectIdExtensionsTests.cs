@@ -151,11 +151,11 @@ public class ObjectIdExtensionsTests
 
 	[Theory]
 	[InlineData(1, "000000000000000000000001")]
-	[InlineData(10, "00000000000000000000000A")]
+	[InlineData(10, "00000000000000000000000a")]
 	[InlineData(16, "000000000000000000000010")]
-	[InlineData(255, "0000000000000000000000FF")]
-	[InlineData(123456789, "0000000000000000075BCD15")]
-	[InlineData(9999999, "00000000000000000098967F")]
+	[InlineData(255, "0000000000000000000000ff")]
+	[InlineData(123456789, "0000000000000000075bcd15")]
+	[InlineData(9999999, "00000000000000000098967f")]
 	public void DeterministicId_VariousValidSlots_GeneratesExpectedPaddedHex(int slot, string expectedHex)
 	{
 		// Arrange
@@ -164,7 +164,7 @@ public class ObjectIdExtensionsTests
 		var id = ObjectIdExtensions.DeterministicId(slot);
 
 		// Assert
-		id.ToString().Should().Be(expectedHex.ToLowerInvariant());
+		id.ToString().Should().Be(expectedHex);
 		id.ToString().Should().HaveLength(24);
 	}
 

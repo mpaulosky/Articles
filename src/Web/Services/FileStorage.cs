@@ -5,7 +5,7 @@ namespace Web.Services
 		Task<string> AddFile(FileData fileData);
 	}
 
-	public class FileStorage : IFileStorage
+	public partial class FileStorage : IFileStorage
 	{
 		private readonly IWebHostEnvironment _environment;
 		private readonly ILogger<FileStorage> _logger;
@@ -18,6 +18,8 @@ namespace Web.Services
 
 		public async Task<string> AddFile(FileData fileData)
 		{
+			ArgumentNullException.ThrowIfNull(fileData);
+
 			try
 			{
 				// Validate WebRootPath is configured
@@ -34,7 +36,9 @@ namespace Web.Services
 				}
 
 				// Validate file extension
+#pragma warning disable CA1308 // Lowercase is the conventional casing for stored file extensions; this is not a security comparison.
 				var extension = Path.GetExtension(fileData.MetaData.Name).ToLowerInvariant();
+#pragma warning restore CA1308
 				var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 				if (string.IsNullOrEmpty(extension) || !allowedExtensions.Contains(extension))
 				{
@@ -50,30 +54,43 @@ namespace Web.Services
 				var filePath = Path.Combine(uploadsPath, uniqueFileName);
 
 				// Save the file
-				await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+				var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+				await using (fileStream.ConfigureAwait(false))
 				{
-					await fileData.Content.CopyToAsync(fileStream);
+					await fileData.Content.CopyToAsync(fileStream).ConfigureAwait(false);
 				}
 
-				_logger.LogInformation("File saved successfully: {FileName}", uniqueFileName);
+				LogFileSaved(uniqueFileName);
 				return uniqueFileName;
 			}
 			catch (InvalidOperationException ex)
 			{
-				_logger.LogWarning(ex, "Validation error saving file: {FileName}", fileData.MetaData.Name);
+				LogValidationError(ex, fileData.MetaData.Name);
 				throw;
 			}
 			catch (IOException ex)
 			{
-				_logger.LogError(ex, "IO error saving file: {FileName}", fileData.MetaData.Name);
+				LogIOError(ex, fileData.MetaData.Name);
 				throw;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Unexpected error saving file: {FileName}", fileData.MetaData.Name);
+				LogUnexpectedError(ex, fileData.MetaData.Name);
 				throw;
 			}
 		}
+
+		[LoggerMessage(Level = LogLevel.Information, Message = "File saved successfully: {FileName}")]
+		private partial void LogFileSaved(string fileName);
+
+		[LoggerMessage(Level = LogLevel.Warning, Message = "Validation error saving file: {FileName}")]
+		private partial void LogValidationError(Exception ex, string fileName);
+
+		[LoggerMessage(Level = LogLevel.Error, Message = "IO error saving file: {FileName}")]
+		private partial void LogIOError(Exception ex, string fileName);
+
+		[LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error saving file: {FileName}")]
+		private partial void LogUnexpectedError(Exception ex, string fileName);
 	}
 
 	public class FileData
