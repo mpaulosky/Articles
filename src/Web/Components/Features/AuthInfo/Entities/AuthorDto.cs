@@ -7,6 +7,8 @@
 // Project Name :  Web
 // =============================================
 
+using System.Security.Claims;
+
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -75,4 +77,44 @@ public sealed class AuthorDto
 	///   Gets an empty AuthorInfo instance.
 	/// </summary>
 	public static AuthorDto Empty => new() { UserId = string.Empty, Name = string.Empty, Email = string.Empty };
+
+	/// <summary>
+	///   Builds an author snapshot from the currently authenticated user's claims.
+	/// </summary>
+	/// <param name="user">The authenticated principal, typically from <c>AuthenticationStateProvider</c>.</param>
+	/// <returns>An <see cref="AuthorDto" /> populated from the user's claims, or <see cref="Empty" /> when unauthenticated.</returns>
+	public static AuthorDto FromClaimsPrincipal(ClaimsPrincipal? user)
+	{
+		if (user is null || user.Identity?.IsAuthenticated != true)
+		{
+			return Empty;
+		}
+
+		var userId = GetFirstClaimValue(user, ClaimTypes.NameIdentifier, "sub", "user_id") ?? string.Empty;
+
+		var name = GetFirstClaimValue(user,
+			ClaimTypes.Name, "name", "preferred_username", "nickname", ClaimTypes.GivenName)
+			?? user.Identity.Name
+			?? string.Empty;
+
+		var email = GetFirstClaimValue(user, ClaimTypes.Email, "email") ?? string.Empty;
+
+		return new AuthorDto(userId, name, email);
+	}
+
+	private static string? GetFirstClaimValue(ClaimsPrincipal user, params string[] claimTypes)
+	{
+		foreach (var claimType in claimTypes)
+		{
+			var value = user.Claims
+				.FirstOrDefault(c => c.Type.Equals(claimType, StringComparison.OrdinalIgnoreCase))?.Value;
+
+			if (!string.IsNullOrWhiteSpace(value))
+			{
+				return value;
+			}
+		}
+
+		return null;
+	}
 }

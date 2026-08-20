@@ -4,6 +4,8 @@ using Domain.Abstractions;
 
 using FluentAssertions;
 
+using MongoDB.Bson;
+
 using Web.MyMediator;
 
 using Microsoft.AspNetCore.Components.Authorization;
@@ -303,6 +305,42 @@ public class ArticlesPageTests : BunitContext
 		// Assert
 		_mediator.Received(1).Send(
 			Arg.Is<PublishArticleCommand>(command => command.Id == article.Id),
+			Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public void CreateArticleAsync_SendsCreateArticleCommand_WithAuthorFromLoggedInUser()
+	{
+		// Arrange
+		var user = CreateAdminUser();
+		SetupAuthState(user);
+		SetupEmptyArticles();
+
+		var category = new CategoryDto
+		{
+			Id = ObjectId.GenerateNewId(), CategoryName = "Test Category", Slug = "test-category",
+			Description = "Test description"
+		};
+		_mediator.Send(Arg.Any<GetCategoriesQuery>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto> { category }));
+
+		_mediator.Send(Arg.Any<CreateArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok(CreateArticle("New Article", "admin1", isPublished: false)));
+
+		var cut = Render<ArticlesPage>();
+
+		cut.Find("input.rounded-lg").Change("New Article");
+		cut.Find("textarea.rounded-lg").Change("New article content");
+		cut.Find("select.rounded-lg").Change(category.Id.ToString());
+
+		// Act
+		cut.Find("form").Submit();
+
+		// Assert
+		_mediator.Received(1).Send(
+			Arg.Is<CreateArticleCommand>(command =>
+				command.Author.UserId == "admin1"
+				&& command.Author.Name == "Admin User"),
 			Arg.Any<CancellationToken>());
 	}
 

@@ -50,12 +50,6 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-(--app-text)">Author</label>
-						<InputText @bind-Value="_form.AuthorName"
-											 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
-					</div>
-
-					<div>
 						<label class="block text-sm font-medium text-(--app-text)">Category</label>
 						<InputSelect @bind-Value="_form.CategoryId"
 												 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
@@ -201,7 +195,7 @@
 			title,
 			title.GenerateSlug(),
 			_form.Content.Trim(),
-			new Web.Components.Features.AuthInfo.Entities.AuthorDto("user-local", _form.AuthorName.Trim(), string.Empty),
+			Web.Components.Features.AuthInfo.Entities.AuthorDto.FromClaimsPrincipal(_currentUser),
 			category));
 
 		if (result.Success)
@@ -263,14 +257,12 @@
 	{
 		public string Title { get; set; } = string.Empty;
 		public string Content { get; set; } = string.Empty;
-		public string AuthorName { get; set; } = string.Empty;
 		public string CategoryId { get; set; } = string.Empty;
 
 		public void Reset()
 		{
 			Title = string.Empty;
 			Content = string.Empty;
-			AuthorName = string.Empty;
 			CategoryId = string.Empty;
 		}
 	}
