@@ -2,7 +2,9 @@
     <PropertyGroup>
         <AnalysisLevel>latest</AnalysisLevel>
         <AnalysisMode>all</AnalysisMode>
-        <NoWarn>$(NoWarn);CA1515</NoWarn>
+        <!-- CA1515: internal-izing public types isn't relevant to app projects (only libraries).
+             CA1014: this solution ships an app, not a package consumed from other CLS languages. -->
+        <NoWarn>$(NoWarn);CA1515;CA1014</NoWarn>
         <!-- Keep analyzer diagnostics as warnings so TreatWarningsAsErrors doesn't fail CI -->
         <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>

@@ -304,6 +304,8 @@ public class CachingServiceExtensionsTests
 
 public class UserManagementCacheServiceTests
 {
+	private static readonly JsonSerializerOptions WebJsonOptions = new(JsonSerializerDefaults.Web);
+
 	[Fact]
 	public async Task GetOrFetchUsersAsync_WhenL1CacheHit_ReturnsCachedValueWithoutFetch()
 	{
@@ -389,7 +391,7 @@ public class UserManagementCacheServiceTests
 		l1Hit.Should().BeEquivalentTo(fetchedUsers);
 		var redisBytes = await distributedCache.GetAsync(UserManagementCacheKeys.AllUsers, TestContext.Current.CancellationToken);
 		redisBytes.Should().NotBeNull();
-		JsonSerializer.Deserialize<List<UserWithRolesDto>>(redisBytes!, new JsonSerializerOptions(JsonSerializerDefaults.Web)).Should().BeEquivalentTo(fetchedUsers);
+		JsonSerializer.Deserialize<List<UserWithRolesDto>>(redisBytes!, WebJsonOptions).Should().BeEquivalentTo(fetchedUsers);
 	}
 
 	[Fact]

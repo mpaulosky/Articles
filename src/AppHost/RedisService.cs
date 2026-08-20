@@ -69,10 +69,13 @@ public static partial class RedisService
 		var connectionString = await builder.Resource.GetConnectionStringAsync().ConfigureAwait(false) ??
 			throw new InvalidOperationException($"Unable to get the '{context.ResourceName}' connection string.");
 
-		await using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString).ConfigureAwait(false);
-		var database = connection.GetDatabase();
-		await database.ExecuteAsync("FLUSHALL").ConfigureAwait(false);
-		return CommandResults.Success();
+		var connection = await ConnectionMultiplexer.ConnectAsync(connectionString).ConfigureAwait(false);
+		await using (connection.ConfigureAwait(false))
+		{
+			var database = connection.GetDatabase();
+			await database.ExecuteAsync("FLUSHALL").ConfigureAwait(false);
+			return CommandResults.Success();
+		}
 	}
 
 	/// <summary>
