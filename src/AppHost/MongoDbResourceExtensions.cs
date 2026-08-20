@@ -272,56 +272,82 @@ internal static partial class MongoDbResourceExtensions
 							droppedLegacyCollections.Add(legacyCollectionName);
 						}
 
-						var categoriesCollection = database.GetCollection<BsonDocument>("Categories");
-						var articlesCollection = database.GetCollection<BsonDocument>("Articles");
+						// Collection names must match ArticlesMongoDbContext.OnModelCreating's ToCollection(...)
+						// calls (lowercase) — EF Core's MongoDB provider treats them as distinct, case-sensitive
+						// collections, so a mismatch here means the app never sees the seeded documents.
+						var categoriesCollection = database.GetCollection<BsonDocument>("categories");
+						var articlesCollection = database.GetCollection<BsonDocument>("articles");
 
 						var now = DateTime.UtcNow;
 
 						// Canonical categories — stable ObjectIds from docs/Category-Seed-Data.
 						// Never change these IDs; blog posts and tests rely on them as foreign keys.
+						// Field names must match Category.cs's [BsonElement] mapping (lowercase) or the
+						// app reads back blank Name/Description/Slug for every seeded category.
 						var canonicalCategories = new BsonDocument[]
 						{
 							new()
 							{
 								["_id"] = new ObjectId("677db927900ea4af1b500cab"),
-								["Name"] = "ASP.NET Core",
-								["Description"] = "This document is related to ASP.NET Core"
+								["name"] = "ASP.NET Core",
+								["description"] = "This document is related to ASP.NET Core",
+								["slug"] = "asp-net-core",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 							new()
 							{
 								["_id"] = new ObjectId("677db927900ea4af1b500cac"),
-								["Name"] = "Blazor Server",
-								["Description"] = "This document is related to Blazor Server"
+								["name"] = "Blazor Server",
+								["description"] = "This document is related to Blazor Server",
+								["slug"] = "blazor-server",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 							new()
 							{
 								["_id"] = new ObjectId("677db9bd900ea4af1b500cad"),
-								["Name"] = "Blazor WebAssembly",
-								["Description"] = "This document is related to Blazor WebAssembly"
+								["name"] = "Blazor WebAssembly",
+								["description"] = "This document is related to Blazor WebAssembly",
+								["slug"] = "blazor-webassembly",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 							new()
 							{
 								["_id"] = new ObjectId("677db9bd900ea4af1b500cae"),
-								["Name"] = "C#",
-								["Description"] = "This document is related to C#"
+								["name"] = "C#",
+								["description"] = "This document is related to C#",
+								["slug"] = "c",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 							new()
 							{
 								["_id"] = new ObjectId("677db927900ea4af1b500caf"),
-								["Name"] = "Entity Framework Core (EF Core)",
-								["Description"] = "This document is related to Entity Framework Core (EF Core)"
+								["name"] = "Entity Framework Core (EF Core)",
+								["description"] = "This document is related to Entity Framework Core (EF Core)",
+								["slug"] = "entity-framework-core-ef-core",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 							new()
 							{
 								["_id"] = new ObjectId("677db9bd900ea4af1b500cb0"),
-								["Name"] = ".NET MAUI",
-								["Description"] = "This document is related to .NET MAUI"
+								["name"] = ".NET MAUI",
+								["description"] = "This document is related to .NET MAUI",
+								["slug"] = "net-maui",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 							new()
 							{
 								["_id"] = new ObjectId("677db9bd900ea4af1b500cb1"),
-								["Name"] = "Other",
-								["Description"] = "This document is related to other information"
+								["name"] = "Other",
+								["description"] = "This document is related to other information",
+								["slug"] = "other",
+								["createdOn"] = now,
+								["isArchived"] = false
 							},
 						};
 
@@ -334,13 +360,15 @@ internal static partial class MongoDbResourceExtensions
 								cancellationToken: context.CancellationToken).ConfigureAwait(false);
 						}
 
+						// Field names must match AuthorDto's [BsonElement] mapping — only Name is ever
+						// displayed, but UserId/Email are kept so the snapshot matches what Article.Create
+						// stores for a real logged-in author (see AuthorDto.FromClaimsPrincipal).
 						var authorId = "auth0|author-matthew-paulosky";
 						var authorDocument = new BsonDocument
 						{
-							["AuthorId"] = authorId,
-							["AuthorName"] = "Matthew Paulosky",
-							["AuthorEmail"] = "matthew@paulosky.com",
-							["AuthorRoles"] = new BsonArray { "Author", "Admin" }
+							["userId"] = authorId,
+							["name"] = "Matthew Paulosky",
+							["email"] = "matthew@paulosky.com"
 						};
 
 						var seedDocuments = new BsonDocument[]
@@ -348,62 +376,65 @@ internal static partial class MongoDbResourceExtensions
 							new()
 							{
 								["_id"] = new ObjectId("000000000000000000000002"),
-								["Title"] = "Welcome to Articles",
+								["title"] = "Welcome to Articles",
 								["Slug"] = "welcome-to-articles",
-								["Introduction"] = "This is the first post on Articles. Welcome!",
-								["Content"] = "This is the first post on Articles. Welcome!",
-								["CoverImageUrl"] = "https://example.com/image.jpg",
-								["Author"] = authorDocument.DeepClone(),
-								["CreatedOn"] = now,
-								["ModifiedOn"] = now,
-								["IsPublished"] = true,
-								["PublishedOn"] = now,
-								["Category"] =
+								["content"] = "This is the first post on Articles. Welcome!",
+								["author"] = authorDocument.DeepClone(),
+								["createdAt"] = now,
+								["updatedAt"] = now,
+								["isPublished"] = true,
+								["publishedOn"] = now,
+								["category"] =
 									new BsonDocument
 									{
-										["Id"] = new ObjectId("677db9bd900ea4af1b500cae"),
-										["Name"] = "C#",
-										["Description"] = "This document is related to C#"
+										["_id"] = new ObjectId("677db9bd900ea4af1b500cae"),
+										["categoryName"] = "C#",
+										["description"] = "This document is related to C#",
+										["slug"] = "c",
+										["createdOn"] = now,
+										["isArchived"] = false
 									}
 							},
 							new()
 							{
 								["_id"] = new ObjectId("000000000000000000000003"),
-								["Title"] = "Getting Started with .NET Aspire",
+								["title"] = "Getting Started with .NET Aspire",
 								["Slug"] = "getting-started-with-dotnet-aspire",
-								["Introduction"] = "Learn how to build cloud-native apps with .NET Aspire.",
-								["Content"] = "Learn how to build cloud-native apps with .NET Aspire.",
-								["CoverImageUrl"] = "https://example.com/image.jpg",
-								["Author"] = authorDocument.DeepClone(),
-								["CreatedOn"] = now,
-								["ModifiedOn"] = now,
-								["IsPublished"] = true,
-								["PublishedOn"] = now,
-								["Category"] =
+								["content"] = "Learn how to build cloud-native apps with .NET Aspire.",
+								["author"] = authorDocument.DeepClone(),
+								["createdAt"] = now,
+								["updatedAt"] = now,
+								["isPublished"] = true,
+								["publishedOn"] = now,
+								["category"] =
 									new BsonDocument
 									{
-										["Id"] = new ObjectId("677db9bd900ea4af1b500cb1"),
-										["Name"] = "Other",
-										["Description"] = "This document is related to other information"
+										["_id"] = new ObjectId("677db9bd900ea4af1b500cb1"),
+										["categoryName"] = "Other",
+										["description"] = "This document is related to other information",
+										["slug"] = "other",
+										["createdOn"] = now,
+										["isArchived"] = false
 									}
 							},
 							new()
 							{
 								["_id"] = new ObjectId("000000000000000000000004"),
-								["Title"] = "Draft: MongoDB Performance Tips",
+								["title"] = "Draft: MongoDB Performance Tips",
 								["Slug"] = "draft-mongodb-performance-tips",
-								["Introduction"] = "Work in progress — tips for optimising MongoDB queries.",
-								["Content"] = "Work in progress — tips for optimising MongoDB queries.",
-								["Author"] = authorDocument.DeepClone(),
-								["CreatedAt"] = now,
-								["UpdatedAt"] = now,
-								["IsPublished"] = false,
-								["Version"] = 1,
-								["Category"] = new BsonDocument
+								["content"] = "Work in progress — tips for optimising MongoDB queries.",
+								["author"] = authorDocument.DeepClone(),
+								["createdAt"] = now,
+								["updatedAt"] = now,
+								["isPublished"] = false,
+								["category"] = new BsonDocument
 								{
-									["Id"] = new ObjectId("677db927900ea4af1b500cab"),
-									["Name"] = "ASP.NET Core",
-									["Description"] = "This document is related to ASP.NET Core"
+									["_id"] = new ObjectId("677db927900ea4af1b500cab"),
+									["categoryName"] = "ASP.NET Core",
+									["description"] = "This document is related to ASP.NET Core",
+									["slug"] = "asp-net-core",
+									["createdOn"] = now,
+									["isArchived"] = false
 								}
 							}
 						};
