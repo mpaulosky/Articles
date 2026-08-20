@@ -15,28 +15,28 @@ public sealed record GitHubMetadata(string ReleaseTag, string LastCommit);
 [SuppressMessage("Design", "CA1515",
 	Justification =
 		"The metadata provider is intentionally consumed by the Blazor footer and its corresponding Web tests.")]
+[SuppressMessage("Design", "CA1031:Do not catch general exception types",
+	Justification =
+		"These are best-effort git/GitHub API lookups used to enrich footer metadata; any failure should fall back silently rather than propagate.")]
 public static class GitHubMetadataProvider
 {
 	public static async Task<GitHubMetadata?> GetMetadataAsync(HttpClient httpClient,
 		CancellationToken cancellationToken = default)
 	{
-		if (httpClient is null)
-		{
-			throw new ArgumentNullException(nameof(httpClient));
-		}
+		ArgumentNullException.ThrowIfNull(httpClient);
 
-		var remoteUrl = await GetOriginUrlAsync();
+		var remoteUrl = await GetOriginUrlAsync().ConfigureAwait(false);
 		if (!TryParseGitHubRepository(remoteUrl, out var owner, out var repo))
 		{
 			return null;
 		}
 
-		var repoDetails = await GetRepositoryDetailsAsync(httpClient, owner, repo, cancellationToken);
-		var releaseTag = await GetLatestReleaseTagAsync(httpClient, owner, repo, cancellationToken)
-		                 ?? await GetLocalReleaseTagAsync();
+		var repoDetails = await GetRepositoryDetailsAsync(httpClient, owner, repo, cancellationToken).ConfigureAwait(false);
+		var releaseTag = await GetLatestReleaseTagAsync(httpClient, owner, repo, cancellationToken).ConfigureAwait(false)
+		                 ?? await GetLocalReleaseTagAsync().ConfigureAwait(false);
 		var defaultBranch = repoDetails?.DefaultBranch ?? "main";
-		var lastCommit = await GetLastCommitAsync(httpClient, owner, repo, defaultBranch, cancellationToken)
-		                 ?? await GetLocalLastCommitAsync();
+		var lastCommit = await GetLastCommitAsync(httpClient, owner, repo, defaultBranch, cancellationToken).ConfigureAwait(false)
+		                 ?? await GetLocalLastCommitAsync().ConfigureAwait(false);
 
 		return new GitHubMetadata(
 			releaseTag ?? "no release",
@@ -62,7 +62,7 @@ public static class GitHubMetadataProvider
 		}
 		else if (normalized.StartsWith("ssh://git@github.com/", StringComparison.OrdinalIgnoreCase))
 		{
-			normalized = normalized.Replace("ssh://git@github.com/", "https://github.com/");
+			normalized = normalized.Replace("ssh://git@github.com/", "https://github.com/", StringComparison.Ordinal);
 		}
 
 		if (!normalized.Contains("github.com", StringComparison.OrdinalIgnoreCase))
@@ -154,7 +154,7 @@ public static class GitHubMetadataProvider
 		return null;
 	}
 
-	private static IEnumerable<string> GetCandidateDirectories()
+	private static HashSet<string> GetCandidateDirectories()
 	{
 		var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 		{
@@ -203,13 +203,14 @@ public static class GitHubMetadataProvider
 			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
 			request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Articles-Web", "1.0"));
 
-			using var response = await httpClient.SendAsync(request, cancellationToken);
+			using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 			if (!response.IsSuccessStatusCode)
 			{
 				return null;
 			}
 
-			return await response.Content.ReadFromJsonAsync<RepositoryDetails>(cancellationToken: cancellationToken);
+			return await response.Content.ReadFromJsonAsync<RepositoryDetails>(cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
 		}
 		catch
 		{
@@ -227,7 +228,7 @@ public static class GitHubMetadataProvider
 			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
 			request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Articles-Web", "1.0"));
 
-			using var response = await httpClient.SendAsync(request, cancellationToken);
+			using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 			if (response.StatusCode == HttpStatusCode.NotFound)
 			{
 				return null;
@@ -238,7 +239,8 @@ public static class GitHubMetadataProvider
 				return null;
 			}
 
-			var release = await response.Content.ReadFromJsonAsync<GitHubRelease>(cancellationToken: cancellationToken);
+			var release = await response.Content.ReadFromJsonAsync<GitHubRelease>(cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
 			return release?.TagName;
 		}
 		catch
@@ -257,13 +259,14 @@ public static class GitHubMetadataProvider
 			request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
 			request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Articles-Web", "1.0"));
 
-			using var response = await httpClient.SendAsync(request, cancellationToken);
+			using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 			if (!response.IsSuccessStatusCode)
 			{
 				return null;
 			}
 
-			var commit = await response.Content.ReadFromJsonAsync<GitHubCommit>(cancellationToken: cancellationToken);
+			var commit = await response.Content.ReadFromJsonAsync<GitHubCommit>(cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
 			return commit?.Sha?[..7];
 		}
 		catch
@@ -282,7 +285,7 @@ public static class GitHubMetadataProvider
 
 		try
 		{
-			var tag = await RunGitAsync(gitRoot, "describe", "--tags", "--abbrev=0");
+			var tag = await RunGitAsync(gitRoot, "describe", "--tags", "--abbrev=0").ConfigureAwait(false);
 			return string.IsNullOrWhiteSpace(tag) ? null : tag;
 		}
 		catch
@@ -301,7 +304,7 @@ public static class GitHubMetadataProvider
 
 		try
 		{
-			var sha = await RunGitAsync(gitRoot, "rev-parse", "--short", "HEAD");
+			var sha = await RunGitAsync(gitRoot, "rev-parse", "--short", "HEAD").ConfigureAwait(false);
 			return string.IsNullOrWhiteSpace(sha) ? "unknown" : sha;
 		}
 		catch

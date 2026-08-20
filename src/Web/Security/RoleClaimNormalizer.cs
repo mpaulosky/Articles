@@ -59,7 +59,7 @@ public sealed class RoleClaimNormalizer : IClaimsTransformation
 		return transformed ? Task.FromResult(principal) : Task.FromResult(principal);
 	}
 
-	private static IEnumerable<string> ExpandRoleValues(string? claimValue)
+	private static string[] ExpandRoleValues(string? claimValue)
 	{
 		if (string.IsNullOrWhiteSpace(claimValue))
 		{

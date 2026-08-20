@@ -128,7 +128,7 @@ public static class ArticleAuthorizationService
 		return false;
 	}
 
-	private static IEnumerable<string> ExpandClaimValues(string? raw)
+	private static string[] ExpandClaimValues(string? raw)
 	{
 		if (string.IsNullOrWhiteSpace(raw))
 		{

@@ -67,7 +67,7 @@ internal static class RoleClaimsHelper
 				.ToArray();
 	}
 
-	private static IReadOnlyList<string> ExpandRoleValues(string? claimValue)
+	private static string[] ExpandRoleValues(string? claimValue)
 	{
 		if (string.IsNullOrWhiteSpace(claimValue))
 		{

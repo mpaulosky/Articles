@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.Hosting;
 // Adds common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // This project should be referenced by each service project in your solution.
 // To learn more about using this project, see https://aka.ms/aspire/service-defaults
-public static class Extensions
+public static class ServiceDefaultsExtensions
 {
 	private const string HealthEndpointPath = "/health";
 	private const string AlivenessEndpointPath = "/alive";
@@ -84,8 +84,8 @@ public static class Extensions
 					.AddAspNetCoreInstrumentation(tracing =>
 						// Exclude health check requests from tracing
 						tracing.Filter = context =>
-							!context.Request.Path.StartsWithSegments(HealthEndpointPath)
-							&& !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
+							!context.Request.Path.StartsWithSegments(HealthEndpointPath, StringComparison.Ordinal)
+							&& !context.Request.Path.StartsWithSegments(AlivenessEndpointPath, StringComparison.Ordinal)
 					)
 					// Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
 					//.AddGrpcClientInstrumentation()
@@ -140,6 +140,8 @@ public static class Extensions
 	/// </summary>
 	public static WebApplication MapDefaultEndpoints(this WebApplication app)
 	{
+		ArgumentNullException.ThrowIfNull(app);
+
 		// Adding health checks endpoints to applications in non-development environments has security implications.
 		// See https://aka.ms/aspire/healthchecks for details before enabling these endpoints in non-development environments.
 		var enableHealthEndpoints = app.Configuration["EnableHealthEndpoints"] == "true";

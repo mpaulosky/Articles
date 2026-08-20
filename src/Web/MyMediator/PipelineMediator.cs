@@ -4,6 +4,8 @@ public sealed class PipelineMediator(IServiceProvider provider) : IMediator
 {
 	public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
 	{
+		ArgumentNullException.ThrowIfNull(request);
+
 		var requestType = request.GetType();
 		var handlerType = typeof(IRequestHandler<,>).MakeGenericType(requestType, typeof(TResponse));
 		var behaviorType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, typeof(TResponse));
@@ -17,7 +19,7 @@ public sealed class PipelineMediator(IServiceProvider provider) : IMediator
 		foreach (dynamic behavior in behaviors)
 		{
 			var next = pipeline;
-			pipeline = (req, ct) => behavior.Handle((dynamic)req, ct, next);
+			pipeline = (req, ct) => behavior.Handle((dynamic)req, next, ct);
 		}
 
 		return pipeline(request, cancellationToken);

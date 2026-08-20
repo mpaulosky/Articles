@@ -14,15 +14,13 @@ namespace AppHost;
 /// <summary>
 /// Provides configuration helpers and extension methods for Redis-backed application services.
 /// </summary>
-public static class RedisService
+public static partial class RedisService
 {
 	/// <summary>
-	/// Returns the default Redis image metadata used by the AppHost configuration.
+	/// The default Redis image metadata used by the AppHost configuration.
 	/// </summary>
-	public static (string ImageName, string ImageTag, string PasswordParameterName) GetRedisResourceSettings()
-	{
-		return ("redis", "latest", "redis-password");
-	}
+	public static (string ImageName, string ImageTag, string PasswordParameterName) RedisResourceSettings =>
+		("redis", "latest", "redis-password");
 
 	/// <summary>
 	/// Adds Redis services to the distributed application builder with a clear cache command and persistent lifetime.
@@ -68,12 +66,12 @@ public static class RedisService
 		IResourceBuilder<RedisResource> builder,
 		ExecuteCommandContext context)
 	{
-		var connectionString = await builder.Resource.GetConnectionStringAsync() ?? throw new InvalidOperationException(
-			$"Unable to get the '{context.ResourceName}' connection string.");
+		var connectionString = await builder.Resource.GetConnectionStringAsync().ConfigureAwait(false) ??
+			throw new InvalidOperationException($"Unable to get the '{context.ResourceName}' connection string.");
 
-		await using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+		await using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString).ConfigureAwait(false);
 		var database = connection.GetDatabase();
-		await database.ExecuteAsync("FLUSHALL");
+		await database.ExecuteAsync("FLUSHALL").ConfigureAwait(false);
 		return CommandResults.Success();
 	}
 
@@ -85,10 +83,10 @@ public static class RedisService
 	private static ResourceCommandState OnUpdateResourceState(UpdateCommandStateContext context)
 	{
 		var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
-		if (logger.IsEnabled(LogLevel.Information))
-		{
-			logger.LogInformation("Updating resource state: {ResourceSnapshot}", context.ResourceSnapshot);
-		}
+		LogUpdatingResourceState(logger, context.ResourceSnapshot);
 		return context.ResourceSnapshot.HealthStatus is HealthStatus.Healthy ? ResourceCommandState.Enabled : ResourceCommandState.Disabled;
 	}
+
+	[LoggerMessage(Level = LogLevel.Information, Message = "Updating resource state: {ResourceSnapshot}")]
+	private static partial void LogUpdatingResourceState(ILogger logger, CustomResourceSnapshot resourceSnapshot);
 }
