@@ -17,6 +17,8 @@ public static class ServiceCollectionExtensions
 	/// </remarks>
 	public static IServiceCollection AddMyMediator(this IServiceCollection services, Assembly assembly)
 	{
+		ArgumentNullException.ThrowIfNull(assembly);
+
 		services.AddScoped<IMediator, PipelineMediator>();
 
 		var types = assembly

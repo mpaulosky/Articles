@@ -16,7 +16,7 @@ public class DatabaseServiceTests
 	{
 		// Arrange
 		// Act
-		var settings = DatabaseService.GetMongoDbResourceSettings();
+		var settings = DatabaseService.MongoDbResourceSettings;
 
 		// Assert
 		settings.ImageTag.Should().Be("8.2.12");

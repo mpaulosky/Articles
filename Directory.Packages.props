@@ -65,7 +65,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.7" />
     <!-- Testing Packages -->
     <PackageVersion Include="bunit" Version="2.9.0" />
-    <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
     <PackageVersion Include="C3D.Extensions.Playwright.AspNetCore.Xunit" Version="0.1.45" />
     <PackageVersion Include="FluentAssertions" Version="8.10.0" />
     <PackageVersion Include="Markdig" Version="1.3.2" />

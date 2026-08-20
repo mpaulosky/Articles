@@ -15,9 +15,11 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
 {
 	public async Task<TResponse> Handle(
 		TRequest request,
-		CancellationToken cancellationToken,
-		Func<TRequest, CancellationToken, Task<TResponse>> next)
+		Func<TRequest, CancellationToken, Task<TResponse>> continuation,
+		CancellationToken cancellationToken)
 	{
+		ArgumentNullException.ThrowIfNull(continuation);
+
 		var failures = new List<ValidationFailure>();
 		foreach (var validator in validators)
 		{
@@ -30,6 +32,6 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
 			throw new ValidationException(failures);
 		}
 
-		return await next(request, cancellationToken).ConfigureAwait(false);
+		return await continuation(request, cancellationToken).ConfigureAwait(false);
 	}
 }

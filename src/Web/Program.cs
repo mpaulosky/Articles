@@ -29,7 +29,7 @@ var redisConnectionString = builder.Configuration.GetConnectionString(RedisCache
 var useRedisCache = !string.IsNullOrWhiteSpace(redisConnectionString);
 
 // --- Configuration Registration ---
-IConfiguration configuration = builder.Configuration;
+ConfigurationManager configuration = builder.Configuration;
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();

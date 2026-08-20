@@ -18,7 +18,7 @@ public class RedisServiceTests
 	{
 		// Arrange
 		// Act
-		var settings = RedisService.GetRedisResourceSettings();
+		var settings = RedisService.RedisResourceSettings;
 
 		// Assert
 		settings.ImageName.Should().Be("redis");

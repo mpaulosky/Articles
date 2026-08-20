@@ -17,14 +17,16 @@ public static class DatabaseService
 	/// <summary>
 	///   Gets the MongoDB container settings used by the AppHost for local development.
 	/// </summary>
-	/// <returns>The image tag and an optional data volume name for the MongoDB container.</returns>
-	public static (string ImageTag, string? DataVolumeName) GetMongoDbResourceSettings()
+	public static (string ImageTag, string? DataVolumeName) MongoDbResourceSettings
 	{
-		// Keep the MongoDB image pinned to a known-good tag so local AppHost startup stays deterministic.
-		// Also keep local-dev data ephemeral so restarted AppHost instances do not inherit stale root credentials
-		// or database state from an earlier run. Reusing a fixed named volume can leave behind auth state that
-		// makes the health probe fail even though the Mongo container itself is up.
-		return ("8.2.12", null);
+		get
+		{
+			// Keep the MongoDB image pinned to a known-good tag so local AppHost startup stays deterministic.
+			// Also keep local-dev data ephemeral so restarted AppHost instances do not inherit stale root credentials
+			// or database state from an earlier run. Reusing a fixed named volume can leave behind auth state that
+			// makes the health probe fail even though the Mongo container itself is up.
+			return ("8.2.12", null);
+		}
 	}
 
 	/// <summary>
@@ -36,7 +38,7 @@ public static class DatabaseService
 	public static IResourceBuilder<MongoDBDatabaseResource> AddMongoDbServices(
 		this IDistributedApplicationBuilder builder)
 	{
-		var (mongoImageTag, mongoDataVolumeName) = GetMongoDbResourceSettings();
+		var (mongoImageTag, mongoDataVolumeName) = MongoDbResourceSettings;
 
 		var server = builder.AddMongoDB(AppHostConstants.Server)
 			.WithImage("mongo", mongoImageTag);
