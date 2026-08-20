@@ -19,12 +19,14 @@ namespace Web.Components.Features.Articles.Models;
 public sealed record ArticleDto(
 	string Id,
 	string Title,
+  string Slug,
 	string Content,
 	AuthorDto Author,
 	CategoryDto Category,
 	DateTime CreatedAt,
 	DateTime? UpdatedAt,
-	bool IsPublished)
+	bool IsPublished,
+	DateTime? PublishedOn)
 {
 	/// <summary>
 	///     Maps an entity to a DTO using explicit application logic instead of a mapper library.
@@ -38,11 +40,13 @@ public sealed record ArticleDto(
 		return new ArticleDto(
 			article.Id.ToString(),
 			article.Title,
+			article.Slug,
 			article.Content,
 			article.Author,
 			article.Category,
 			article.CreatedAt,
 			article.UpdatedAt,
-			article.IsPublished);
+			article.IsPublished,
+			article.PublishedOn);
 	}
 }

@@ -11,4 +11,4 @@ using Domain.Abstractions;
 
 namespace Web.Components.Features.UserManagement;
 
-internal sealed record RemoveRoleCommand(string UserId, string RoleId) : IRequest<Result>;
+internal sealed record RemoveRoleCommand(string UserId, string RoleId) : ICommand<Result>;

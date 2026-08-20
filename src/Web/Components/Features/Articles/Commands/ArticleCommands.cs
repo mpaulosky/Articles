@@ -17,15 +17,21 @@ namespace Web.Components.Features.Articles.Commands;
 
 internal sealed record CreateArticleCommand(
 	string Title,
+	string Slug,
 	string Content,
 	AuthorDto Author,
-	CategoryDto? Category = null) : IRequest<Result<ArticleDto>>;
+	CategoryDto? Category = null) : ICommand<Result<ArticleDto>>;
 
 internal sealed record UpdateArticleCommand(
 	string Id,
 	string Title,
+	string Slug,
 	string Content,
 	CategoryDto? Category = null,
-	bool ClearCategory = false) : IRequest<Result<ArticleDto>>;
+	bool ClearCategory = false) : ICommand<Result<ArticleDto>>;
 
-internal sealed record DeleteArticleCommand(string Id) : IRequest<Result>;
+internal sealed record DeleteArticleCommand(string Id) : ICommand<Result>;
+
+internal sealed record PublishArticleCommand(string Id) : ICommand<Result<ArticleDto>>;
+
+internal sealed record UnpublishArticleCommand(string Id) : ICommand<Result<ArticleDto>>;

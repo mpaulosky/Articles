@@ -13,6 +13,6 @@ using Web.Components.Features.Categories.Models;
 
 namespace Web.Components.Features.Categories.Queries;
 
-public sealed record GetCategoriesQuery : IRequest<Result<IReadOnlyList<CategoryDto>>>;
+public sealed record GetCategoriesQuery : IQuery<Result<IReadOnlyList<CategoryDto>>>;
 
-public sealed record GetCategoryByIdQuery(string Id) : IRequest<Result<CategoryDto>>;
+public sealed record GetCategoryByIdQuery(string Id) : IQuery<Result<CategoryDto>>;

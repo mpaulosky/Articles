@@ -11,6 +11,6 @@ using Domain.Abstractions;
 
 namespace Web.Components.Features.UserManagement.GetUserRoles;
 
-internal sealed record GetAvailableRolesQuery : IRequest<Result<IReadOnlyList<RoleDto>>>;
+internal sealed record GetAvailableRolesQuery : IQuery<Result<IReadOnlyList<RoleDto>>>;
 
 internal sealed record RoleDto(string Id, string Name);

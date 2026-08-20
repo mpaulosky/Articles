@@ -13,9 +13,9 @@ using Web.Components.Features.Categories.Models;
 
 namespace Web.Components.Features.Categories.Commands;
 
-internal sealed record CreateCategoryCommand(string Name, string Description) : IRequest<Result<CategoryDto>>;
+internal sealed record CreateCategoryCommand(string Name, string Description) : ICommand<Result<CategoryDto>>;
 
 internal sealed record UpdateCategoryCommand(string Id, string Name, string Description)
-	: IRequest<Result<CategoryDto>>;
+	: ICommand<Result<CategoryDto>>;
 
-internal sealed record DeleteCategoryCommand(string Id) : IRequest<Result>;
+internal sealed record DeleteCategoryCommand(string Id) : ICommand<Result>;

@@ -116,4 +116,65 @@ public class ResultBehaviorTests
 		fail.ErrorCode.Should().Be(ResultErrorCode.Unauthorized);
 		convertedNull.Should().BeNull();
 	}
+
+	[Fact]
+	public void StaticGenericFailMethods_PreserveProperties()
+	{
+		// Arrange & Act
+		var res1 = Result.Fail<int>("error 1");
+		var res2 = Result.Fail<int>("error 2", ResultErrorCode.Validation);
+		var res3 = Result.Fail<int>("error 3", ResultErrorCode.Conflict, "detail3");
+
+		var typed1 = Result<string>.Fail("typed 1");
+		var typed2 = Result<string>.Fail("typed 2", ResultErrorCode.Unauthorized);
+		var typed3 = Result<string>.Fail("typed 3", ResultErrorCode.Concurrency, 100);
+
+		// Assert
+		res1.Success.Should().BeFalse();
+		res1.Error.Should().Be("error 1");
+		res1.ErrorCode.Should().Be(ResultErrorCode.None);
+
+		res2.Success.Should().BeFalse();
+		res2.Error.Should().Be("error 2");
+		res2.ErrorCode.Should().Be(ResultErrorCode.Validation);
+
+		res3.Success.Should().BeFalse();
+		res3.Error.Should().Be("error 3");
+		res3.ErrorCode.Should().Be(ResultErrorCode.Conflict);
+		res3.Details.Should().Be("detail3");
+
+		typed1.Success.Should().BeFalse();
+		typed1.Error.Should().Be("typed 1");
+
+		typed2.Success.Should().BeFalse();
+		typed2.ErrorCode.Should().Be(ResultErrorCode.Unauthorized);
+
+		typed3.Success.Should().BeFalse();
+		typed3.ErrorCode.Should().Be(ResultErrorCode.Concurrency);
+		typed3.Details.Should().Be(100);
+	}
+
+	[Fact]
+	public void FromValue_WithNonNullValue_ReturnsSuccess()
+	{
+		// Act
+		var res = Result<string>.FromValue("hello");
+
+		// Assert
+		res.Success.Should().BeTrue();
+		res.Value.Should().Be("hello");
+	}
+
+	[Fact]
+	public void ImplicitConversionFromNullResult_ReturnsDefaultForValueType()
+	{
+		// Arrange
+		Result<int>? nullIntResult = null;
+
+		// Act
+		int value = nullIntResult;
+
+		// Assert
+		value.Should().Be(0);
+	}
 }

@@ -4,7 +4,7 @@ using Domain.Abstractions;
 
 using FluentAssertions;
 
-using MyMediator.Interfaces;
+using Web.MyMediator;
 
 using Microsoft.Extensions.DependencyInjection;
 

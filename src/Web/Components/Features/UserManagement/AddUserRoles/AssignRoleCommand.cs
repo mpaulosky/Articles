@@ -11,4 +11,4 @@ using Domain.Abstractions;
 
 namespace Web.Components.Features.UserManagement.AddUserRoles;
 
-internal sealed record AssignRoleCommand(string UserId, string RoleId) : IRequest<Result>;
+internal sealed record AssignRoleCommand(string UserId, string RoleId) : ICommand<Result>;

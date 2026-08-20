@@ -26,7 +26,6 @@
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
 		<PackageReference Include="MongoDB.Driver" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" />
-		<PackageReference Include="MyMediator" />
 		<PackageReference Include="PSC.Blazor.Components.MarkdownEditor" />
 		<PackageReference Include="Snappier" />
 		<PackageReference Include="WaffleGenerator.Bogus" />
@@ -69,6 +68,14 @@
 			<_BuildInfoLine Include="    internal const string Version = &quot;$(_GitTag)&quot;%3B" />
 			<_BuildInfoLine Include="    internal const string Commit = &quot;$(_GitCommit)&quot;%3B" />
 			<_BuildInfoLine Include="}" />
+		</ItemGroup>
+
+		<ItemGroup>
+			<InternalsVisibleTo Include="AppHost.Tests" />
+			<InternalsVisibleTo Include="Architecture.Tests" />
+			<InternalsVisibleTo Include="Domain.Tests" />
+			<InternalsVisibleTo Include="Web.Tests" />
+			<InternalsVisibleTo Include="Web.UI.Tests" />
 		</ItemGroup>
 
 		<WriteLinesToFile File="$(IntermediateOutputPath)BuildInfo.g.cs" Lines="@(_BuildInfoLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />

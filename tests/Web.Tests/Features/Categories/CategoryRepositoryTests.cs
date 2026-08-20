@@ -53,6 +53,44 @@ public class CategoryRepositoryTests
 	}
 
 	[Fact]
+	public void Constructor_ThrowsArgumentNullException_WhenContextIsNull()
+	{
+		// Act
+		var act = () => new CategoryRepository(null!);
+
+		// Assert
+		act.Should().Throw<ArgumentNullException>();
+	}
+
+	[Fact]
+	public async Task AddAsync_ThrowsArgumentNullException_WhenCategoryIsNullAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var repository = new CategoryRepository(context);
+
+		// Act
+		var act = () => repository.AddAsync(null!, TestContext.Current.CancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ArgumentNullException>();
+	}
+
+	[Fact]
+	public async Task UpdateAsync_ThrowsArgumentNullException_WhenCategoryIsNullAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var repository = new CategoryRepository(context);
+
+		// Act
+		var act = () => repository.UpdateAsync(null!, TestContext.Current.CancellationToken);
+
+		// Assert
+		await act.Should().ThrowAsync<ArgumentNullException>();
+	}
+
+	[Fact]
 	public async Task DeleteAsync_ReturnsFalseWhenCategoryDoesNotExistAsync()
 	{
 		// Arrange
