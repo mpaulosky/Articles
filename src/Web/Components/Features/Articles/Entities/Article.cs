@@ -9,6 +9,7 @@
 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using static Domain.Helpers.DomainHelpers;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 
@@ -36,6 +37,13 @@ public sealed class Article
 	public string Title { get; private set; } = string.Empty;
 
 	/// <summary>
+	///   Gets or sets the slug for the article, used in the article's URL.
+	/// </summary>
+	[BsonElement("Slug")]
+	[BsonRepresentation(BsonType.String)]
+	public string Slug { get; private set; } = string.Empty;
+
+	/// <summary>
 	///     Gets the article body content.
 	/// </summary>
 	[BsonElement("content")]
@@ -46,7 +54,6 @@ public sealed class Article
 	///     Gets the author snapshot captured when the article was created.
 	/// </summary>
 	[BsonElement("author")]
-	[BsonRepresentation(BsonType.Document)]
 	public AuthorDto Author { get; private set; } = AuthorDto.Empty;
 
 	/// <summary>
@@ -71,10 +78,16 @@ public sealed class Article
 	public bool IsPublished { get; private set; }
 
 	/// <summary>
+	///     Gets the UTC date and time when the article was published, when <see cref="IsPublished" /> is true.
+	/// </summary>
+	[BsonElement("publishedOn")]
+	[BsonRepresentation(BsonType.DateTime)]
+	public DateTime? PublishedOn { get; private set; }
+
+	/// <summary>
 	///     Gets the assigned category identifier, when the article has a category.
 	/// </summary>
 	[BsonElement("category")]
-	[BsonRepresentation(BsonType.Document)]
 	public CategoryDto Category { get; private set; } = CategoryDto.Empty;
 
 	private Article()
@@ -87,8 +100,9 @@ public sealed class Article
 	/// <param name="title">The article title.</param>
 	/// <param name="content">The article body content.</param>
 	/// <param name="author">The author snapshot for the article.</param>
+	/// <param name="slug">An explicit slug to use; when omitted, one is generated from <paramref name="title" />.</param>
 	/// <returns>A new <see cref="Article" /> instance.</returns>
-	public static Article Create(string title, string content, AuthorDto author)
+	public static Article Create(string title, string content, AuthorDto author, string? slug = null)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(title);
 		ArgumentException.ThrowIfNullOrWhiteSpace(content);
@@ -99,6 +113,7 @@ public sealed class Article
 		{
 			Id = ObjectId.GenerateNewId(),
 			Title = title.Trim(),
+			Slug = string.IsNullOrWhiteSpace(slug) ? title.GenerateSlug() : slug.Trim(),
 			Content = content.Trim(),
 			Author = author,
 			CreatedAt = DateTime.UtcNow
@@ -116,6 +131,7 @@ public sealed class Article
 		}
 
 		IsPublished = true;
+		PublishedOn = DateTime.UtcNow;
 		Touch();
 	}
 
@@ -130,6 +146,7 @@ public sealed class Article
 		}
 
 		IsPublished = false;
+		PublishedOn = null;
 		Touch();
 	}
 
@@ -140,7 +157,9 @@ public sealed class Article
 	/// <param name="content">The updated article body content.</param>
 	/// <param name="category">The category metadata to assign.</param>
 	/// <param name="clearCategory">When true, clears any assigned category.</param>
-	public void Update(string title, string content, CategoryDto? category = null, bool clearCategory = false)
+	/// <param name="slug">An explicit slug to use; when omitted, one is generated from <paramref name="title" />.</param>
+	public void Update(string title, string content, CategoryDto? category = null, bool clearCategory = false,
+		string? slug = null)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(title);
 		ArgumentException.ThrowIfNullOrWhiteSpace(content);
@@ -150,6 +169,7 @@ public sealed class Article
 		}
 
 		Title = title.Trim();
+		Slug = string.IsNullOrWhiteSpace(slug) ? title.GenerateSlug() : slug.Trim();
 		Content = content.Trim();
 
 		if (clearCategory)

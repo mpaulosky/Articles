@@ -7,6 +7,7 @@
 // Project Name :  Web
 // =============================================
 
+using MongoDB.Bson;
 using FluentValidation;
 
 using Web.Components.Features.Articles.Commands;
@@ -23,17 +24,35 @@ internal sealed class CreateArticleCommandValidator : AbstractValidator<CreateAr
 	/// </summary>
 	public CreateArticleCommandValidator()
 	{
+
 		RuleFor(command => command.Title)
 			.NotEmpty()
-			.MinimumLength(3)
-			.MaximumLength(200);
+			.WithMessage("Title is required")
+			.MaximumLength(100)
+			.WithMessage("Title cannot exceed 100 characters");
 
 		RuleFor(command => command.Content)
 			.NotEmpty()
-			.MinimumLength(10);
+			.WithMessage("Content is required")
+			.MaximumLength(10000)
+			.WithMessage("Content cannot exceed 10000 characters");
+
+		RuleFor(command => command.Slug)
+			.NotEmpty()
+			.WithMessage("Slug is required")
+			.MaximumLength(200)
+			.WithMessage("Slug cannot exceed 200 characters")
+			.Matches(@"^[a-z0-9]+(-[a-z0-9]+)*$")
+			.WithMessage("Slug can only contain lowercase letters, numbers, and hyphens");
 
 		RuleFor(command => command.Author)
-			.NotNull();
+			.NotNull()
+			.WithMessage("Author is required");
+
+		RuleFor(command => command.Category)
+			.NotNull()
+			.WithMessage("Category is required");
+
 	}
 }
 

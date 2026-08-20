@@ -128,6 +128,132 @@ public class CategoryFeatureHandlerTests
 		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
 	}
 
+	[Fact]
+	public async Task GetCategoryByIdQueryReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+
+		// Act
+		var result = await handler.Handle(new GetCategoryByIdQuery("invalid-category-id"), cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+		result.Error.Should().Be("The category id is not valid.");
+	}
+
+	[Fact]
+	public async Task GetCategoryByIdQueryReturnsCategoryWhenFoundAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var repository = new CategoryRepository(context);
+		var handler = new CategoryFeatureHandler(repository);
+		var created = await repository.AddAsync(Category.Create("Tech", "Tech news"), cancellationToken);
+
+		// Act
+		var result = await handler.Handle(new GetCategoryByIdQuery(created.Id.ToString()), cancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value.Should().NotBeNull();
+		result.Value!.Id.Should().Be(created.Id);
+		result.Value.CategoryName.Should().Be("Tech");
+	}
+
+	[Fact]
+	public async Task UpdateCategoryCommandReturnsValidationFailureForInvalidInputAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context), updateValidator: new UpdateCategoryCommandValidator());
+		var command = new UpdateCategoryCommand(ObjectId.GenerateNewId().ToString(), "", "bad description");
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+	}
+
+	[Fact]
+	public async Task UpdateCategoryCommandReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+		var command = new UpdateCategoryCommand("invalid-id", "Valid Name", "Valid description");
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+		result.Error.Should().Be("The category id is not valid.");
+	}
+
+	[Fact]
+	public async Task UpdateCategoryCommandReturnsNotFoundWhenCategoryDoesNotExistAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+		var command = new UpdateCategoryCommand(ObjectId.GenerateNewId().ToString(), "Valid Name", "Valid description");
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
+		result.Error.Should().Be("Category not found.");
+	}
+
+	[Fact]
+	public async Task DeleteCategoryCommandReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+		var command = new DeleteCategoryCommand("invalid-id");
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+		result.Error.Should().Be("The category id is not valid.");
+	}
+
+	[Fact]
+	public async Task DeleteCategoryCommandReturnsNotFoundWhenCategoryDoesNotExistAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+		var command = new DeleteCategoryCommand(ObjectId.GenerateNewId().ToString());
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
+		result.Error.Should().Be("Category not found.");
+	}
+
 	private static ArticlesMongoDbContext CreateContext()
 	{
 		var options = new DbContextOptionsBuilder<ArticlesMongoDbContext>()

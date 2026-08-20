@@ -84,6 +84,12 @@ public sealed class ArticleRepository
 	{
 		ArgumentNullException.ThrowIfNull(article);
 
+		var trackedEntity = _context.Articles.Local.FirstOrDefault(a => a.Id == article.Id);
+		if (trackedEntity != null && !ReferenceEquals(trackedEntity, article))
+		{
+			_context.Entry(trackedEntity).State = EntityState.Detached;
+		}
+
 		_context.Articles.Update(article);
 		await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 		return article;

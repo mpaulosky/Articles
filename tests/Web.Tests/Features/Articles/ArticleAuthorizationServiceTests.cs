@@ -73,6 +73,193 @@ public class ArticleAuthorizationServiceTests
 		canViewOther.Should().BeFalse();
 	}
 
+	[Fact]
+	public void CanViewArticle_ReturnsFalse_WhenUserIsNull()
+	{
+		// Arrange
+		var article = CreateArticle("article-7", "Title", "author-1", published: true);
+
+		// Act
+		var canView = ArticleAuthorizationService.CanViewArticle(null, article);
+
+		// Assert
+		canView.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanViewArticle_ReturnsFalse_WhenUserIsNotAuthenticated()
+	{
+		// Arrange
+		var unauthUser = new ClaimsPrincipal(new ClaimsIdentity());
+		var article = CreateArticle("article-8", "Title", "author-1", published: true);
+
+		// Act
+		var canView = ArticleAuthorizationService.CanViewArticle(unauthUser, article);
+
+		// Assert
+		canView.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanViewArticle_ThrowsArgumentNullException_WhenArticleIsNull()
+	{
+		// Arrange
+		var user = CreateUser("user-1", "User");
+
+		// Act
+		var act = () => ArticleAuthorizationService.CanViewArticle(user, null!);
+
+		// Assert
+		act.Should().Throw<ArgumentNullException>();
+	}
+
+	[Fact]
+	public void CanViewArticle_AdminCanViewUnpublishedArticle()
+	{
+		// Arrange
+		var admin = CreateUser("admin-1", "Admin");
+		var unpublished = CreateArticle("article-9", "Draft", "author-99", published: false);
+
+		// Act
+		var canView = ArticleAuthorizationService.CanViewArticle(admin, unpublished);
+
+		// Assert
+		canView.Should().BeTrue();
+	}
+
+	[Fact]
+	public void CanViewArticle_ReturnsFalse_ForUnpublishedArticleWhenUserIsRegularUser()
+	{
+		// Arrange
+		var user = CreateUser("user-1", "Reader");
+		var unpublished = CreateArticle("article-10", "Draft", "author-99", published: false);
+
+		// Act
+		var canView = ArticleAuthorizationService.CanViewArticle(user, unpublished);
+
+		// Assert
+		canView.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanEditArticle_ReturnsFalse_WhenUserIsNull()
+	{
+		// Arrange
+		var article = CreateArticle("article-11", "Title", "author-1", published: true);
+
+		// Act
+		var canEdit = ArticleAuthorizationService.CanEditArticle(null, article);
+
+		// Assert
+		canEdit.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanEditArticle_ReturnsFalse_WhenUserIsNotAuthenticated()
+	{
+		// Arrange
+		var unauthUser = new ClaimsPrincipal(new ClaimsIdentity());
+		var article = CreateArticle("article-12", "Title", "author-1", published: true);
+
+		// Act
+		var canEdit = ArticleAuthorizationService.CanEditArticle(unauthUser, article);
+
+		// Assert
+		canEdit.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanEditArticle_ThrowsArgumentNullException_WhenArticleIsNull()
+	{
+		// Arrange
+		var user = CreateUser("user-1", "Admin");
+
+		// Act
+		var act = () => ArticleAuthorizationService.CanEditArticle(user, null!);
+
+		// Assert
+		act.Should().Throw<ArgumentNullException>();
+	}
+
+	[Fact]
+	public void CanEditArticle_ReturnsFalse_WhenUserHasOtherRole()
+	{
+		// Arrange
+		var user = CreateUser("user-1", "Reader");
+		var article = CreateArticle("article-13", "Title", "author-1", published: true);
+
+		// Act
+		var canEdit = ArticleAuthorizationService.CanEditArticle(user, article);
+
+		// Assert
+		canEdit.Should().BeFalse();
+	}
+
+	[Fact]
+	public void GetCurrentUserId_ReturnsNull_WhenUserIsNull()
+	{
+		// Act
+		var userId = ArticleAuthorizationService.GetCurrentUserId(null);
+
+		// Assert
+		userId.Should().BeNull();
+	}
+
+	[Theory]
+	[InlineData("sub", "sub-123")]
+	[InlineData("user_id", "user-id-456")]
+	[InlineData("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "soap-id-789")]
+	public void GetCurrentUserId_ResolvesAlternativeClaims(string claimType, string expectedUserId)
+	{
+		// Arrange
+		var identity = new ClaimsIdentity([new Claim(claimType, expectedUserId)], "TestAuth");
+		var principal = new ClaimsPrincipal(identity);
+
+		// Act
+		var userId = ArticleAuthorizationService.GetCurrentUserId(principal);
+
+		// Assert
+		userId.Should().Be(expectedUserId);
+	}
+
+	[Theory]
+	[InlineData(null, "Admin", false)]
+	[InlineData("user", "", false)]
+	[InlineData("user", "  ", false)]
+	public void IsInRole_ReturnsFalse_WhenUserIsNull_OrRoleIsBlank(string? userType, string role, bool expected)
+	{
+		// Arrange
+		var principal = userType != null ? CreateUser("u1", "Admin") : null;
+
+		// Act
+		var result = ArticleAuthorizationService.IsInRole(principal, role);
+
+		// Assert
+		result.Should().Be(expected);
+	}
+
+	[Theory]
+	[InlineData("roles", "[\"Admin\", \"Editor\"]", "Admin", true)]
+	[InlineData("roles", "[\"Admin\", \"Editor\"]", "Editor", true)]
+	[InlineData("roles", "[\"Admin\", \"Editor\"]", "Author", false)]
+	[InlineData("role", "Admin, Editor, Author", "Author", true)]
+	[InlineData("https://articles/roles", "Admin", "Admin", true)]
+	[InlineData("https://myblog/roles", "Admin", "admin", true)]
+	[InlineData("roles", "[invalid json", "Admin", false)]
+	[InlineData("other_claim", "Admin", "Admin", false)]
+	public void IsInRole_EvaluatesDifferentClaimTypesAndFormats(string claimType, string claimValue, string checkRole, bool expected)
+	{
+		// Arrange
+		var identity = new ClaimsIdentity([new Claim(claimType, claimValue)], "TestAuth");
+		var principal = new ClaimsPrincipal(identity);
+
+		// Act
+		var result = ArticleAuthorizationService.IsInRole(principal, checkRole);
+
+		// Assert
+		result.Should().Be(expected);
+	}
+
 	private static ClaimsPrincipal CreateUser(string userId, string role)
 	{
 		var identity = new ClaimsIdentity(
@@ -91,6 +278,7 @@ public class ArticleAuthorizationServiceTests
 		return new ArticleDto(
 			id,
 			title,
+			"test-slug",
 			"body",
 			new AuthorDto(authorUserId, "Author Name", "author@example.com"),
 			new CategoryDto
@@ -103,6 +291,7 @@ public class ArticleAuthorizationServiceTests
 			},
 			DateTime.UtcNow,
 			null,
-			published);
+			published,
+			published ? DateTime.UtcNow : null);
 	}
 }

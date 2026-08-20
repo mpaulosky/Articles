@@ -17,4 +17,9 @@
 		<ProjectReference Include="..\Web\Web.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="AppHost.Tests" />
+		<InternalsVisibleTo Include="Architecture.Tests" />
+	</ItemGroup>
+
 </Project>

@@ -28,12 +28,55 @@ public class ArticleBehaviorTests
 		// Assert
 		article.Id.Should().NotBe(ObjectId.Empty);
 		article.Title.Should().Be("My First Post");
+		article.Slug.Should().Be("my-first-post");
 		article.Content.Should().Be("Hello from the domain");
 		article.Author.Should().Be(author);
 		article.CreatedAt.Should().BeAfter(DateTime.MinValue);
 		article.UpdatedAt.Should().BeNull();
 		article.IsPublished.Should().BeFalse();
+		article.PublishedOn.Should().BeNull();
 		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
+	}
+
+	[Fact]
+	public void CreateUsesExplicitSlugWhenProvided()
+	{
+		// Arrange
+		var author = new AuthorDto("author-1", "Ada Lovelace", "ada@example.com");
+
+		// Act
+		var article = Article.Create("My First Post", "Hello from the domain", author, "custom-slug");
+
+		// Assert
+		article.Slug.Should().Be("custom-slug");
+	}
+
+	[Fact]
+	public void UpdateUsesExplicitSlugWhenProvided()
+	{
+		// Arrange
+		var article = Article.Create("Original", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+
+		// Act
+		article.Update("Updated Title", "Body updated", slug: "custom-updated-slug");
+
+		// Assert
+		article.Slug.Should().Be("custom-updated-slug");
+	}
+
+	[Fact]
+	public void UpdateDerivesSlugFromTitleWhenNotProvided()
+	{
+		// Arrange
+		var article = Article.Create("Original", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+
+		// Act
+		article.Update("Updated Title", "Body updated");
+
+		// Assert
+		article.Slug.Should().Be("updated-title");
 	}
 
 	[Fact]
@@ -66,11 +109,14 @@ public class ArticleBehaviorTests
 		// Act
 		article.Publish();
 		var publishedState = article.IsPublished;
+		var publishedOnWhilePublished = article.PublishedOn;
 		article.Unpublish();
 
 		// Assert
 		publishedState.Should().BeTrue();
+		publishedOnWhilePublished.Should().NotBeNull();
 		article.IsPublished.Should().BeFalse();
+		article.PublishedOn.Should().BeNull();
 	}
 
 	[Fact]
@@ -270,6 +316,7 @@ public class ArticleBehaviorTests
 			new AuthorDto("author-1", "Ada", "ada@example.com"));
 		article.Publish();
 		var firstPublishTime = article.UpdatedAt;
+		var firstPublishedOn = article.PublishedOn;
 
 		// Act
 		System.Threading.Thread.Sleep(10);
@@ -278,6 +325,7 @@ public class ArticleBehaviorTests
 		// Assert
 		article.IsPublished.Should().BeTrue();
 		article.UpdatedAt.Should().Be(firstPublishTime);
+		article.PublishedOn.Should().Be(firstPublishedOn);
 	}
 
 	[Fact]

@@ -1,2 +1,2 @@
-global using MyMediator.Extensions;
-global using MyMediator.Interfaces;
+global using Web.MyMediator;
+global using Web.MyMediator.Behaviors;

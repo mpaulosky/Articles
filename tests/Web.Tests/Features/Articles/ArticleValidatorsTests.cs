@@ -16,7 +16,7 @@ public class ArticleValidatorsTests
 	public void CreateArticleCommandValidator_RejectsMissingRequiredFields()
 	{
 		// Arrange
-		var command = new CreateArticleCommand("A", "short", null!, null);
+		var command = new CreateArticleCommand("", "test-slug", "", null!, null);
 
 		// Act
 		var result = _createValidator.Validate(command);
@@ -34,6 +34,7 @@ public class ArticleValidatorsTests
 		// Arrange
 		var command = new CreateArticleCommand(
 			"Valid title",
+			"valid-title",
 			"This content is long enough to pass validation.",
 			new AuthorDto("user-1", "Ada Lovelace", "ada@example.com"),
 			new CategoryDto
@@ -57,7 +58,7 @@ public class ArticleValidatorsTests
 	public void UpdateArticleCommandValidator_RejectsEmptyIdAndShortFields()
 	{
 		// Arrange
-		var command = new UpdateArticleCommand(string.Empty, "A", "short");
+		var command = new UpdateArticleCommand(string.Empty, "A", "a", "short");
 
 		// Act
 		var result = _updateValidator.Validate(command);

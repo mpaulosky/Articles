@@ -32,7 +32,9 @@ internal sealed class ArticleFeatureHandler(
 		IRequestHandler<GetArticlesQuery, Result<IReadOnlyList<ArticleDto>>>,
 		IRequestHandler<GetArticleByIdQuery, Result<ArticleDto>>,
 		IRequestHandler<UpdateArticleCommand, Result<ArticleDto>>,
-		IRequestHandler<DeleteArticleCommand, Result>
+		IRequestHandler<DeleteArticleCommand, Result>,
+		IRequestHandler<PublishArticleCommand, Result<ArticleDto>>,
+		IRequestHandler<UnpublishArticleCommand, Result<ArticleDto>>
 {
 	/// <inheritdoc />
 	public async Task<Result<ArticleDto>> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
@@ -48,7 +50,7 @@ internal sealed class ArticleFeatureHandler(
 
 		try
 		{
-			var article = Article.Create(request.Title, request.Content, request.Author);
+			var article = Article.Create(request.Title, request.Content, request.Author, request.Slug);
 			if (request.Category is not null)
 			{
 				article.AssignCategory(request.Category);
@@ -114,7 +116,7 @@ internal sealed class ArticleFeatureHandler(
 
 		try
 		{
-			article.Update(request.Title, request.Content, request.Category, request.ClearCategory);
+			article.Update(request.Title, request.Content, request.Category, request.ClearCategory, request.Slug);
 			var updated = await repository.UpdateAsync(article, cancellationToken).ConfigureAwait(false);
 			return Result.Ok(ArticleDto.FromEntity(updated));
 		}
@@ -139,5 +141,43 @@ internal sealed class ArticleFeatureHandler(
 		}
 
 		return Result.Ok();
+	}
+
+	/// <inheritdoc />
+	public async Task<Result<ArticleDto>> Handle(PublishArticleCommand request, CancellationToken cancellationToken)
+	{
+		if (!ObjectId.TryParse(request.Id, out var id))
+		{
+			return Result.Fail<ArticleDto>("The article id is not valid.", ResultErrorCode.Validation);
+		}
+
+		var article = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+		if (article is null)
+		{
+			return Result.Fail<ArticleDto>("Article not found.", ResultErrorCode.NotFound);
+		}
+
+		article.Publish();
+		var updated = await repository.UpdateAsync(article, cancellationToken).ConfigureAwait(false);
+		return Result.Ok(ArticleDto.FromEntity(updated));
+	}
+
+	/// <inheritdoc />
+	public async Task<Result<ArticleDto>> Handle(UnpublishArticleCommand request, CancellationToken cancellationToken)
+	{
+		if (!ObjectId.TryParse(request.Id, out var id))
+		{
+			return Result.Fail<ArticleDto>("The article id is not valid.", ResultErrorCode.Validation);
+		}
+
+		var article = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+		if (article is null)
+		{
+			return Result.Fail<ArticleDto>("Article not found.", ResultErrorCode.NotFound);
+		}
+
+		article.Unpublish();
+		var updated = await repository.UpdateAsync(article, cancellationToken).ConfigureAwait(false);
+		return Result.Ok(ArticleDto.FromEntity(updated));
 	}
 }

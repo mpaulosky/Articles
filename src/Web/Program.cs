@@ -50,6 +50,9 @@ builder.Services.AddMemoryCache();
 builder.Services.AddUserManagementCaching();
 builder.Services.AddMyMediator(typeof(Program).Assembly);
 
+// Cross-cutting request/response logging via the mediator pipeline.
+builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+
 var mongoConnectionString = configuration.GetConnectionString("articlesdb")
                             ?? configuration["MONGODB_CONNECTION_STRING"]
                             ?? "mongodb://localhost:27017";
