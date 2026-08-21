@@ -6,6 +6,7 @@ This directory contains release review posts that document the evolution of the 
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
 | 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](2026-08-20-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
 | 2026-08-20 | [Articles v0.1.7: Code Coverage Tooling and Analysis Cleanup](2026-08-20-v0.1.7-code-coverage-analysis-warnings.md) | code-coverage, dotcover, static-analysis, code-quality, warnings |
 | 2026-08-20 | [Articles v0.1.6: Populate Article Author from Logged-In User](2026-08-20-v0.1.6-author-from-logged-in-user.md) | auth0, authorization, user-context, security |
@@ -25,6 +26,7 @@ This directory contains release review posts that document the evolution of the 
 ## By Category
 
 ### Release & Automation
+- [v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](2026-08-21-v0.1.9-release-docs-branch-protection.md)
 - [v0.1.8: Test Coverage Expansion and Build Cleanup](2026-08-20-v0.1.8-test-coverage-expansion.md)
 - [v0.1.7: Code Coverage Tooling and Analysis Cleanup](2026-08-20-v0.1.7-code-coverage-analysis-warnings.md)
 - [v0.1.2: Blog Post Documentation](2026-08-19-v0.1.2-blog-post-documentation.md)
@@ -64,6 +66,8 @@ This directory contains release review posts that document the evolution of the 
 ### v0.1.x Series - Data & Domain
 The 0.1 series focused on establishing the domain architecture, data persistence layer, and
 core content-management features:
+- **v0.1.9**: Backfilled the v0.1.2-v0.1.8 blog indexes and moved the release workflow's docs
+  commit to a PR-based flow that respects branch protection
 - **v0.1.8**: Expanded test coverage and eliminated remaining build warnings
 - **v0.1.7**: Code coverage tooling and code analysis cleanup
 - **v0.1.6**: Article author populated from the logged-in user
