@@ -26,10 +26,12 @@ permissions:
     paths-ignore:
       - "docs/**"
 
+  # No paths-ignore here: the "Build Solution" job below is a required
+  # status check on main's ruleset. A docs-only PR that this workflow
+  # never runs against would leave that check permanently missing,
+  # blocking the PR from merging forever (see PR #26).
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "docs/**"
 
   workflow_dispatch:
     inputs:
