@@ -51,10 +51,31 @@
       }
 
       .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         font-size: 1.1rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+      }
+
+      .version-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        background: rgba(99, 179, 237, 0.12);
+        border: 1px solid rgba(99, 179, 237, 0.35);
+        border-radius: 999px;
+        color: var(--brand);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: none;
+      }
+
+      .version-badge:hover {
+        background: rgba(99, 179, 237, 0.2);
+        text-decoration: none;
       }
 
       .nav {
@@ -168,20 +189,9 @@
         margin-bottom: 4px;
       }
 
-      .release-notes article {
-        border-top: 1px solid var(--border);
-        padding-top: 18px;
-        margin-top: 18px;
-      }
-
-      .release-notes article:first-of-type {
-        border-top: none;
-        padding-top: 0;
-        margin-top: 0;
-      }
-
-      .release-notes h3 {
-        margin-bottom: 8px;
+      .release-list-footer {
+        margin: 12px 0 0;
+        font-size: 0.88rem;
       }
 
       .quick-links {
@@ -213,10 +223,13 @@
   <body>
     <div class="container">
       <header class="topbar">
-        <div class="brand">Articles</div>
+        <div class="brand">
+          Articles
+          <a href="https://github.com/mpaulosky/Articles/releases" id="version-badge" class="version-badge" aria-live="polite">Loading&hellip;</a>
+        </div>
         <nav class="nav" aria-label="Project navigation">
           <a href="#overview">Overview</a>
-          <a href="#release-notes">Release notes</a>
+          <a href="#releases">Releases</a>
           <a href="#blogs">Blogs</a>
           <a href="../README.md">README</a>
           <a href="blogs/README.md">Blog index</a>
@@ -274,37 +287,6 @@
           </aside>
         </section>
 
-        <section class="panel release-notes" id="release-notes" style="margin-top: 28px;">
-          <h2>Release notes</h2>
-
-          <article>
-            <h3>2026-07-18 — Tailwind v4, build repair, and workflow hardening</h3>
-            <p>
-              The project moved through a focused stabilization pass: dependency cleanup, xUnit v3
-              normalization, build repairs, and a refreshed Tailwind CSS v4 presentation layer. The
-              result was a cleaner repository with a more dependable UI and a stronger CI path.
-            </p>
-          </article>
-
-          <article>
-            <h3>2026-07-17 — Frontend polish and system-level clean-up</h3>
-            <p>
-              The UI team improved the layout and navigation, refreshed the responsive styling, and
-              integrated a more modern utility-first design system while keeping the application
-              grounded in the existing .NET project structure.
-            </p>
-          </article>
-
-          <article>
-            <h3>2026-07-09 — Initial template foundation</h3>
-            <p>
-              The project was first scaffolded as a full-blown template with AppHost, Domain, UI,
-              Auth0 setup docs, and five distinct test projects. That milestone established the
-              project as a reusable, production-oriented .NET 10 starting point.
-            </p>
-          </article>
-        </section>
-
         <section class="panel" id="blogs" style="margin-top: 28px;">
           <h2>Latest blog posts</h2>
           <!-- BLOG_HTML_START -->
@@ -332,7 +314,109 @@
           </ul>
           <!-- BLOG_HTML_END -->
         </section>
+
+        <section class="panel" id="releases" style="margin-top: 28px;">
+          <h2>Releases</h2>
+          <div id="releases-list">
+            <p class="mini-meta">Loading releases&hellip;</p>
+          </div>
+        </section>
       </main>
     </div>
+
+    <script>
+      (function () {
+        const REPO = "mpaulosky/Articles";
+        const MAX_RELEASES = 10;
+        const API_URL = "https://api.github.com/repos/" + REPO + "/releases?per_page=" + MAX_RELEASES;
+        const RELEASES_URL = "https://github.com/" + REPO + "/releases";
+
+        const badge = document.getElementById("version-badge");
+        const list = document.getElementById("releases-list");
+
+        function escapeHtml(value) {
+          const div = document.createElement("div");
+          div.textContent = value;
+          return div.innerHTML;
+        }
+
+        function formatDate(iso) {
+          return new Date(iso).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        }
+
+        function renderBadge(release) {
+          if (!release) {
+            badge.textContent = "Releases";
+            badge.href = RELEASES_URL;
+            return;
+          }
+          badge.textContent = release.tag_name;
+          badge.href = release.html_url;
+        }
+
+        function renderList(releases) {
+          if (!releases.length) {
+            list.innerHTML =
+              '<p class="mini-meta">No releases yet. <a href="' +
+              RELEASES_URL +
+              '" target="_blank" rel="noopener">View on GitHub</a>.</p>';
+            return;
+          }
+
+          const items = releases
+            .map(function (release) {
+              return (
+                "<li>" +
+                '<span class="mini-meta">' +
+                escapeHtml(formatDate(release.published_at)) +
+                "</span>" +
+                '<a href="' +
+                escapeHtml(release.html_url) +
+                '" target="_blank" rel="noopener">' +
+                escapeHtml(release.tag_name) +
+                "</a>" +
+                "</li>"
+              );
+            })
+            .join("");
+
+          list.innerHTML =
+            '<ul class="blog-list">' +
+            items +
+            "</ul>" +
+            '<p class="release-list-footer"><a href="' +
+            RELEASES_URL +
+            '" target="_blank" rel="noopener">View all releases on GitHub &rarr;</a></p>';
+        }
+
+        function renderError() {
+          renderBadge(null);
+          list.innerHTML =
+            '<p class="mini-meta">Couldn&rsquo;t load releases. <a href="' +
+            RELEASES_URL +
+            '" target="_blank" rel="noopener">View releases on GitHub</a>.</p>';
+        }
+
+        fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } })
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("GitHub API responded " + response.status);
+            }
+            return response.json();
+          })
+          .then(function (releases) {
+            const published = releases.filter(function (release) {
+              return !release.draft;
+            });
+            renderBadge(published[0]);
+            renderList(published.slice(0, MAX_RELEASES));
+          })
+          .catch(renderError);
+      })();
+    </script>
   </body>
 </html>
