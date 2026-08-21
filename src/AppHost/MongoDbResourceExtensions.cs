@@ -384,6 +384,7 @@ internal static partial class MongoDbResourceExtensions
 								["updatedAt"] = now,
 								["isPublished"] = true,
 								["publishedOn"] = now,
+								["isArchived"] = false,
 								["category"] =
 									new BsonDocument
 									{
@@ -406,6 +407,7 @@ internal static partial class MongoDbResourceExtensions
 								["updatedAt"] = now,
 								["isPublished"] = true,
 								["publishedOn"] = now,
+								["isArchived"] = false,
 								["category"] =
 									new BsonDocument
 									{
@@ -427,12 +429,35 @@ internal static partial class MongoDbResourceExtensions
 								["createdAt"] = now,
 								["updatedAt"] = now,
 								["isPublished"] = false,
+								["isArchived"] = false,
 								["category"] = new BsonDocument
 								{
 									["_id"] = new ObjectId("677db927900ea4af1b500cab"),
 									["categoryName"] = "ASP.NET Core",
 									["description"] = "This document is related to ASP.NET Core",
 									["slug"] = "asp-net-core",
+									["createdOn"] = now,
+									["isArchived"] = false
+								}
+							},
+							new()
+							{
+								["_id"] = new ObjectId("000000000000000000000005"),
+								["title"] = "Archived: Legacy Blazor Server Notes",
+								["Slug"] = "archived-legacy-blazor-server-notes",
+								["content"] = "Superseded notes on Blazor Server, kept for reference but retired from the default list.",
+								["author"] = authorDocument.DeepClone(),
+								["createdAt"] = now,
+								["updatedAt"] = now,
+								["isPublished"] = true,
+								["publishedOn"] = now,
+								["isArchived"] = true,
+								["category"] = new BsonDocument
+								{
+									["_id"] = new ObjectId("677db927900ea4af1b500cac"),
+									["categoryName"] = "Blazor Server",
+									["description"] = "This document is related to Blazor Server",
+									["slug"] = "blazor-server",
 									["createdOn"] = now,
 									["isArchived"] = false
 								}
@@ -455,7 +480,7 @@ internal static partial class MongoDbResourceExtensions
 						{
 							Success = true,
 							Message =
-								$"categories: 7 upserted (ASP.NET Core, Blazor Server, Blazor WebAssembly, C#, EF Core, .NET MAUI, Other); blogposts: {seedDocuments.Length} upserted (2 published, 1 draft)"
+								$"categories: 7 upserted (ASP.NET Core, Blazor Server, Blazor WebAssembly, C#, EF Core, .NET MAUI, Other); blogposts: {seedDocuments.Length} upserted (3 published, 1 draft, 1 archived)"
 								+ (droppedLegacyCollections.Count == 0
 									? string.Empty
 									: $"; dropped legacy collections: {string.Join(", ", droppedLegacyCollections)}")

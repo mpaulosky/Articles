@@ -518,6 +518,30 @@ public class ArticleFeatureHandlerTests
 	}
 
 	[Fact]
+	public async Task ArchiveArticleCommandIsIdempotentWhenArticleIsAlreadyArchivedAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var createCommand = new CreateArticleCommand(
+			"Already Archived Article",
+			"already-archived-article",
+			"Content",
+			new AuthorDto("user-1", "Author", "author@example.com"));
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+		await handler.Handle(new ArchiveArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
+
+		var command = new ArchiveArticleCommand(created.Value.Id);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value!.IsArchived.Should().BeTrue();
+	}
+
+	[Fact]
 	public async Task ArchiveArticleCommandReturnsNotFoundWhenArticleDoesNotExistAsync()
 	{
 		// Arrange
@@ -564,6 +588,29 @@ public class ArticleFeatureHandlerTests
 		await handler.Handle(new ArchiveArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
 
 		var command = new UnarchiveArticleCommand(created.Value.Id);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value!.IsArchived.Should().BeFalse();
+	}
+
+	[Fact]
+	public async Task UnarchiveArticleCommandIsIdempotentWhenArticleIsAlreadyUnarchivedAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var createCommand = new CreateArticleCommand(
+			"Already Unarchived Article",
+			"already-unarchived-article",
+			"Content",
+			new AuthorDto("user-1", "Author", "author@example.com"));
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+
+		var command = new UnarchiveArticleCommand(created.Value!.Id);
 
 		// Act
 		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
