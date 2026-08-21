@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: show release version and live releases list on docs site](docs/blogs/2026-08-21-pr-28-feat-show-release-version-and-live-releases-list-on-docs-site.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](docs/blogs/2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
 | 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](docs/blogs/2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
 | 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](docs/blogs/2026-08-20-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
 | 2026-08-20 | [Articles v0.1.7: Code Coverage Tooling and Analysis Cleanup](docs/blogs/2026-08-20-v0.1.7-code-coverage-analysis-warnings.md) | code-coverage, dotcover, static-analysis, code-quality, warnings |
-| 2026-08-20 | [Articles v0.1.6: Populate Article Author from Logged-In User](docs/blogs/2026-08-20-v0.1.6-author-from-logged-in-user.md) | auth0, authorization, user-context, security |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: show release version and live releases list on docs site](docs/blogs/2026-08-21-pr-28-feat-show-release-version-and-live-releases-list-on-docs-site.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](docs/blogs/2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
 | 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](docs/blogs/2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
 | 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](docs/blogs/2026-08-20-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
 | 2026-08-20 | [Articles v0.1.7: Code Coverage Tooling and Analysis Cleanup](docs/blogs/2026-08-20-v0.1.7-code-coverage-analysis-warnings.md) | code-coverage, dotcover, static-analysis, code-quality, warnings |
-| 2026-08-20 | [Articles v0.1.6: Populate Article Author from Logged-In User](docs/blogs/2026-08-20-v0.1.6-author-from-logged-in-user.md) | auth0, authorization, user-context, security |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
