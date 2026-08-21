@@ -3,13 +3,13 @@ name: Lint Markdown
 # Runs markdownlint-cli2 using the repo's .markdownlint.json config
 
 "on":
-
   push:
     branches:
       - "main"
   pull_request:
     branches:
       - "main"
+  workflow_dispatch:
 
 permissions:
   contents: read

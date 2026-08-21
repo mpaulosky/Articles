@@ -16,6 +16,7 @@ name: Squad Release
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: squad-release-${{ github.event.pull_request.number || inputs.pr_number }}
@@ -474,6 +475,22 @@ jobs:
             --head "$BRANCH" \
             --title "docs: add release blog for PR #${PR_NUMBER} [skip-release]" \
             --body "Automated release-notes update generated for #${PR_NUMBER}. Opened by the release workflow; the [skip-release] title marker keeps its own merge from starting another release."
+
+          dispatch_failed=0
+          for workflow in \
+            "squad-lint-markdown.yml" \
+            "squad-lint-yaml.yml" \
+            "codeql-analysis.yml"; do
+            echo "Dispatching validation workflow: $workflow -> $BRANCH"
+            if ! gh workflow run "$workflow" --ref "$BRANCH"; then
+              echo "::warning::Failed to dispatch $workflow for release PR $BRANCH. The PR may still need manual workflow approval."
+              dispatch_failed=1
+            fi
+          done
+
+          if [ "$dispatch_failed" -eq 1 ]; then
+            echo "::warning::One or more validation workflows did not start automatically for $BRANCH. Review the PR and trigger them manually if needed."
+          fi
 
           gh pr merge "$BRANCH" --auto --squash
 
