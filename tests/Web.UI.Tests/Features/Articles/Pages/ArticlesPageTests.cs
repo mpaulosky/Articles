@@ -15,7 +15,6 @@ using NSubstitute;
 
 using System.Security.Claims;
 
-using Web.Components.Features.Articles.Authorization;
 using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Models;
 using Web.Components.Features.Articles.Pages;
@@ -30,14 +29,20 @@ public class ArticlesPageTests : BunitContext
 {
 	private readonly IMediator _mediator;
 	private readonly AuthenticationStateProvider _authStateProvider;
+	private readonly CategoryDto _category;
 
 	public ArticlesPageTests()
 	{
 		_mediator = Substitute.For<IMediator>();
 		_authStateProvider = Substitute.For<AuthenticationStateProvider>();
+		_category = new CategoryDto
+		{
+			Id = ObjectId.GenerateNewId(), CategoryName = "Test Category", Slug = "test-category",
+			Description = "Test description"
+		};
 
 		_mediator.Send(Arg.Any<GetCategoriesQuery>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto>()));
+			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto> { _category }));
 
 		Services.AddSingleton(_mediator);
 		Services.AddSingleton(_authStateProvider);
@@ -55,17 +60,33 @@ public class ArticlesPageTests : BunitContext
 
 		// Assert
 		cut.Markup.Should().NotBeNullOrEmpty();
-		cut.Markup.Should().Contain("No published articles yet");
+		cut.Markup.Should().Contain("No articles to show yet.");
 	}
 
 	[Fact]
-	public void RendersArticlesList_WithValidHtmlStructure()
+	public void RendersHeaderBar_WithHeadingCheckboxAndCreateButton()
+	{
+		// Arrange
+		SetupAuthState(CreateAnonymousUser());
+		SetupEmptyArticles();
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		cut.Markup.Should().Contain("All Articles");
+		cut.Markup.Should().Contain("Show My Articles Only");
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Create New Article");
+	}
+
+	[Fact]
+	public void RendersArticlesTable_WithValidHtmlStructure()
 	{
 		// Arrange
 		var articles = CreateTestArticles();
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupArticles(articles);
 
 		// Act
 		var cut = Render<ArticlesPage>();
@@ -73,14 +94,13 @@ public class ArticlesPageTests : BunitContext
 		// Assert - This would catch tag mismatch errors
 		cut.Markup.Should().NotBeNullOrEmpty();
 
-		// Verify all opening tags have matching closing tags
 		var openDivs = CountOccurrences(cut.Markup, "<div");
 		var closeDivs = CountOccurrences(cut.Markup, "</div>");
 		openDivs.Should().Be(closeDivs, "all <div> tags must have matching closing tags");
 
-		var openSections = CountOccurrences(cut.Markup, "<section");
-		var closeSections = CountOccurrences(cut.Markup, "</section>");
-		openSections.Should().Be(closeSections, "all <section> tags must have matching closing tags");
+		var openRows = CountOccurrences(cut.Markup, "<tr");
+		var closeRows = CountOccurrences(cut.Markup, "</tr>");
+		openRows.Should().Be(closeRows, "all <tr> tags must have matching closing tags");
 	}
 
 	[Fact]
@@ -90,7 +110,7 @@ public class ArticlesPageTests : BunitContext
 		var articles = CreateTestArticles();
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupArticles(articles);
 
 		// Act
 		var cut = Render<ArticlesPage>();
@@ -98,43 +118,108 @@ public class ArticlesPageTests : BunitContext
 		// Assert
 		cut.Markup.Should().Contain("Test Article 1");
 		cut.Markup.Should().Contain("Test Article 2");
-		cut.Markup.Should().Contain("By Test Author");
+		cut.Markup.Should().Contain("Test Author");
 	}
 
 	[Fact]
-	public void ShowsDeleteButton_WhenUserCanEdit()
+	public void ShowsViewButton_ForEveryVisibleArticle_RegardlessOfEditRights()
+	{
+		// Arrange
+		var articles = new List<ArticleDto> { CreateArticle("Published Article", "author1", isPublished: true) };
+		var user = CreateAuthenticatedUser("regularUser");
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		var viewLink = cut.FindAll("a").FirstOrDefault(a => a.TextContent.Trim() == "View");
+		viewLink.Should().NotBeNull();
+		viewLink!.GetAttribute("href").Should().Be($"/articles/{articles[0].Id}");
+	}
+
+	[Fact]
+	public void ShowsEditPublishDeleteButtons_WhenUserCanEdit()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("Test Article 1", "admin1", isPublished: true) };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupArticles(articles);
 
 		// Act
 		var cut = Render<ArticlesPage>();
+		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
+		var linkLabels = cut.FindAll("a").Select(a => a.TextContent.Trim()).ToList();
 
 		// Assert
-		// Admin can edit any article, so delete button should be visible
-		cut.Markup.Should().Contain("Delete");
-		cut.Markup.Should().Contain("button");
+		// Admin can edit any article
+		linkLabels.Should().Contain("Edit");
+		buttonLabels.Should().Contain("Unpublish");
+		buttonLabels.Should().Contain("Delete");
 	}
 
 	[Fact]
-	public void HidesDeleteButton_WhenUserCannotEdit()
+	public void HidesEditPublishDeleteButtons_WhenUserCannotEdit()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("Test Article 1", "author1", isPublished: true) };
-		var user = CreateAnonymousUser();
+		var user = CreateAuthenticatedUser("regularUser");
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupArticles(articles);
 
 		// Act
 		var cut = Render<ArticlesPage>();
+		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
+		var linkLabels = cut.FindAll("a").Select(a => a.TextContent.Trim()).ToList();
 
 		// Assert
-		// Anonymous users cannot edit, so no delete buttons
-		var deleteButtons = CountOccurrences(cut.Markup, ">Delete</button>");
-		deleteButtons.Should().Be(0, "anonymous users should not see delete buttons");
+		// The article is visible (published) but this user cannot edit it
+		cut.Markup.Should().Contain("Test Article 1");
+		linkLabels.Should().NotContain("Edit");
+		buttonLabels.Should().NotContain("Publish");
+		buttonLabels.Should().NotContain("Unpublish");
+		buttonLabels.Should().NotContain("Delete");
+	}
+
+	[Fact]
+	public void HidesEditPublishDeleteButtons_ForOtherAuthorsArticle_WhenUserIsAuthor()
+	{
+		// Arrange
+		var articles = new List<ArticleDto> { CreateArticle("Someone Else's Article", "author2", isPublished: true) };
+		var user = CreateAuthorUser("author1");
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		// Act
+		var cut = Render<ArticlesPage>();
+		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
+		var linkLabels = cut.FindAll("a").Select(a => a.TextContent.Trim()).ToList();
+
+		// Assert
+		linkLabels.Should().NotContain("Edit");
+		buttonLabels.Should().NotContain("Delete");
+	}
+
+	[Fact]
+	public void ShowsEditPublishDeleteButtons_ForOwnArticle_WhenUserIsAuthor()
+	{
+		// Arrange
+		var articles = new List<ArticleDto> { CreateArticle("My Article", "author1", isPublished: false) };
+		var user = CreateAuthorUser("author1");
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		// Act
+		var cut = Render<ArticlesPage>();
+		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
+		var linkLabels = cut.FindAll("a").Select(a => a.TextContent.Trim()).ToList();
+
+		// Assert
+		linkLabels.Should().Contain("Edit");
+		buttonLabels.Should().Contain("Publish");
+		buttonLabels.Should().Contain("Delete");
 	}
 
 	[Fact]
@@ -151,7 +236,6 @@ public class ArticlesPageTests : BunitContext
 		var user = CreateAuthenticatedUser("regularUser");
 		SetupAuthState(user);
 
-		// Mock GetArticlesQuery to return all articles
 		_mediator.Send(Arg.Any<GetArticlesQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok<IReadOnlyList<ArticleDto>>(allArticles));
 
@@ -165,12 +249,36 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	[Fact]
+	public void TogglingShowMyArticlesOnly_NarrowsTableToOwnArticles()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("My Article", "admin1", isPublished: true),
+			CreateArticle("Other Article", "author2", isPublished: true)
+		};
+		var user = CreateAdminUser();
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+		cut.Markup.Should().Contain("My Article");
+		cut.Markup.Should().Contain("Other Article");
+
+		// Act
+		cut.Find("input[type=checkbox]").Change(true);
+
+		// Assert
+		cut.Markup.Should().Contain("My Article");
+		cut.Markup.Should().NotContain("Other Article");
+	}
+
+	[Fact]
 	public void DisplaysLoadingMessage_Initially()
 	{
 		// Arrange
 		SetupAuthState(CreateAnonymousUser());
 
-		// Delay the mediator response to simulate loading
 		var tcs = new TaskCompletionSource<Result<IReadOnlyList<ArticleDto>>>();
 		_mediator.Send(Arg.Any<GetArticlesQuery>(), Arg.Any<CancellationToken>())
 			.Returns(tcs.Task);
@@ -181,107 +289,82 @@ public class ArticlesPageTests : BunitContext
 		// Assert
 		cut.Markup.Should().Contain("Loading articles...");
 
-		// Complete the async operation
 		tcs.SetResult(Result.Ok<IReadOnlyList<ArticleDto>>(new List<ArticleDto>()));
 	}
 
 	[Fact]
-	public void DisplaysArticleContent_InCards()
+	public void CreatePanel_IsHiddenByDefault_AndOpensOnButtonClick()
 	{
 		// Arrange
-		var articles = new List<ArticleDto>
-		{
-			CreateArticle("Article Title", "author1", isPublished: true, content: "Article content here")
-		};
-
-		var user = CreateAdminUser();
-		SetupAuthState(user);
-		SetupArticles(articles, user);
-
-		// Act
-		var cut = Render<ArticlesPage>();
-
-		// Assert
-		cut.Markup.Should().Contain("Article Title");
-		cut.Markup.Should().Contain("Article content here");
-		cut.Markup.Should().Contain("rounded-xl"); // Tailwind card styling
-	}
-
-	[Fact]
-	public void ArticleCard_HasCompleteStructure()
-	{
-		// Arrange
-		var articles = CreateTestArticles();
-		var user = CreateAdminUser();
-		SetupAuthState(user);
-		SetupArticles(articles, user);
-
-		// Act
-		var cut = Render<ArticlesPage>();
-
-		// Assert
-		// Verify card structure elements exist
-		cut.Markup.Should().Contain("rounded-xl border"); // Card container
-		cut.Markup.Should().Contain("flex items-start justify-between"); // Flex container for title and button
-		cut.Markup.Should().Contain("text-lg font-semibold"); // Title styling
-		cut.Markup.Should().Contain("text-sm text-slate-600"); // Author styling
-	}
-
-	[Fact]
-	public void RendersCategoryOptions_FromGetCategoriesQuery()
-	{
-		// Arrange
-		SetupAuthState(CreateAnonymousUser());
+		SetupAuthState(CreateAdminUser());
 		SetupEmptyArticles();
-		_mediator.Send(Arg.Any<GetCategoriesQuery>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto>
-			{
-				new() { CategoryName = "Technology", Slug = "technology" },
-				new() { CategoryName = "Science", Slug = "science" }
-			}));
-
-		// Act
 		var cut = Render<ArticlesPage>();
 
+		cut.Markup.Should().NotContain("Create article");
+
+		// Act
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Create New Article").Click();
+
 		// Assert
-		cut.Markup.Should().Contain("Technology");
-		cut.Markup.Should().Contain("Science");
+		cut.Markup.Should().Contain("Create article");
+		cut.Find("form").Should().NotBeNull();
 	}
 
 	[Fact]
-	public void ShowsPublishButton_ForUnpublishedArticle_WhenUserCanEdit()
+	public void CreateArticleAsync_SendsCreateArticleCommand_WithAuthorFromLoggedInUser_AndCollapsesPanel()
 	{
 		// Arrange
-		var articles = new List<ArticleDto> { CreateArticle("Draft Article", "admin1", isPublished: false) };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupEmptyArticles();
+
+		_mediator.Send(Arg.Any<CreateArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok(CreateArticle("New Article", "admin1", isPublished: false)));
+
+		var cut = Render<ArticlesPage>();
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Create New Article").Click();
+
+		cut.Find("input.rounded-lg").Change("New Article");
+		cut.Find("textarea.rounded-lg").Change("New article content");
+		cut.Find("select.rounded-lg").Change(_category.Id.ToString());
 
 		// Act
-		var cut = Render<ArticlesPage>();
-		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
+		cut.Find("form").Submit();
 
 		// Assert
-		buttonLabels.Should().Contain("Publish");
-		buttonLabels.Should().NotContain("Unpublish");
+		_mediator.Received(1).Send(
+			Arg.Is<CreateArticleCommand>(command =>
+				command.Author.UserId == "admin1"
+				&& command.Author.Name == "Admin User"),
+			Arg.Any<CancellationToken>());
+
+		cut.Markup.Should().NotContain("Create article");
 	}
 
 	[Fact]
-	public void ShowsUnpublishButton_ForPublishedArticle_WhenUserCanEdit()
+	public void CreateArticleAsync_KeepsPanelOpen_WhenSaveFails()
 	{
 		// Arrange
-		var articles = new List<ArticleDto> { CreateArticle("Live Article", "admin1", isPublished: true) };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupEmptyArticles();
+
+		_mediator.Send(Arg.Any<CreateArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Fail<ArticleDto>("Title is too short."));
+
+		var cut = Render<ArticlesPage>();
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Create New Article").Click();
+
+		cut.Find("input.rounded-lg").Change("Up");
+		cut.Find("textarea.rounded-lg").Change("New article content");
 
 		// Act
-		var cut = Render<ArticlesPage>();
-		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
+		cut.Find("form").Submit();
 
 		// Assert
-		buttonLabels.Should().Contain("Unpublish");
-		buttonLabels.Should().NotContain("Publish");
+		cut.Markup.Should().Contain("Title is too short.");
+		cut.Markup.Should().Contain("Create article");
+		cut.Find("input.rounded-lg").GetAttribute("value").Should().Be("Up");
 	}
 
 	[Fact]
@@ -292,7 +375,7 @@ public class ArticlesPageTests : BunitContext
 		var articles = new List<ArticleDto> { article };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupArticles(articles);
 		_mediator.Send(Arg.Any<PublishArticleCommand>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok(article));
 
@@ -309,42 +392,6 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	[Fact]
-	public void CreateArticleAsync_SendsCreateArticleCommand_WithAuthorFromLoggedInUser()
-	{
-		// Arrange
-		var user = CreateAdminUser();
-		SetupAuthState(user);
-		SetupEmptyArticles();
-
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(), CategoryName = "Test Category", Slug = "test-category",
-			Description = "Test description"
-		};
-		_mediator.Send(Arg.Any<GetCategoriesQuery>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto> { category }));
-
-		_mediator.Send(Arg.Any<CreateArticleCommand>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok(CreateArticle("New Article", "admin1", isPublished: false)));
-
-		var cut = Render<ArticlesPage>();
-
-		cut.Find("input.rounded-lg").Change("New Article");
-		cut.Find("textarea.rounded-lg").Change("New article content");
-		cut.Find("select.rounded-lg").Change(category.Id.ToString());
-
-		// Act
-		cut.Find("form").Submit();
-
-		// Assert
-		_mediator.Received(1).Send(
-			Arg.Is<CreateArticleCommand>(command =>
-				command.Author.UserId == "admin1"
-				&& command.Author.Name == "Admin User"),
-			Arg.Any<CancellationToken>());
-	}
-
-	[Fact]
 	public void ClickingUnpublishButton_SendsUnpublishArticleCommand()
 	{
 		// Arrange
@@ -352,7 +399,7 @@ public class ArticlesPageTests : BunitContext
 		var articles = new List<ArticleDto> { article };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
-		SetupArticles(articles, user);
+		SetupArticles(articles);
 		_mediator.Send(Arg.Any<UnpublishArticleCommand>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok(article));
 
@@ -366,6 +413,109 @@ public class ArticlesPageTests : BunitContext
 		_mediator.Received(1).Send(
 			Arg.Is<UnpublishArticleCommand>(command => command.Id == article.Id),
 			Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public void ClickingDelete_RequiresConfirmation_BeforeSendingDeleteArticleCommand()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "admin1", isPublished: true);
+		var articles = new List<ArticleDto> { article };
+		var user = CreateAdminUser();
+		SetupAuthState(user);
+		SetupArticles(articles);
+		_mediator.Send(Arg.Any<DeleteArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok());
+
+		var cut = Render<ArticlesPage>();
+
+		// Act - first click only requests confirmation
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Delete").Click();
+
+		// Assert
+		_mediator.DidNotReceive().Send(Arg.Any<DeleteArticleCommand>(), Arg.Any<CancellationToken>());
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Confirm");
+
+		// Act - confirming sends the command
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Confirm").Click();
+
+		// Assert
+		_mediator.Received(1).Send(
+			Arg.Is<DeleteArticleCommand>(command => command.Id == article.Id),
+			Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public void CancellingDeleteConfirmation_DoesNotSendDeleteArticleCommand()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "admin1", isPublished: true);
+		var articles = new List<ArticleDto> { article };
+		var user = CreateAdminUser();
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Delete").Click();
+
+		// Act
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Cancel").Click();
+
+		// Assert
+		_mediator.DidNotReceive().Send(Arg.Any<DeleteArticleCommand>(), Arg.Any<CancellationToken>());
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Delete");
+	}
+
+	[Fact]
+	public void SortsByTitle_WhenTitleHeaderIsClicked_TogglesDirection()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Bravo", "admin1", isPublished: true),
+			CreateArticle("Alpha", "admin1", isPublished: true)
+		};
+		var user = CreateAdminUser();
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+
+		// Assert default ascending sort (Alpha before Bravo)
+		var titlesBefore = cut.FindAll("td.font-medium").Select(td => td.TextContent.Trim()).ToList();
+		titlesBefore.Should().ContainInOrder("Alpha", "Bravo");
+
+		// Act - click Title header to reverse the sort
+		cut.FindAll("th").First(th => th.TextContent.Trim().StartsWith("Title", StringComparison.Ordinal)).Click();
+
+		// Assert descending sort (Bravo before Alpha)
+		var titlesAfter = cut.FindAll("td.font-medium").Select(td => td.TextContent.Trim()).ToList();
+		titlesAfter.Should().ContainInOrder("Bravo", "Alpha");
+	}
+
+	[Fact]
+	public void PaginatesAtTenRowsPerPage()
+	{
+		// Arrange
+		var articles = Enumerable.Range(1, 15)
+			.Select(i => CreateArticle($"Article {i:00}", "admin1", isPublished: true))
+			.ToList();
+		var user = CreateAdminUser();
+		SetupAuthState(user);
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+
+		// Assert first page shows exactly 10 rows
+		cut.FindAll("tbody tr").Should().HaveCount(10);
+		cut.Markup.Should().Contain("Page 1 of 2");
+
+		// Act
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Next").Click();
+
+		// Assert second page shows the remaining 5 rows
+		cut.FindAll("tbody tr").Should().HaveCount(5);
+		cut.Markup.Should().Contain("Page 2 of 2");
 	}
 
 	// Helper methods
@@ -383,7 +533,7 @@ public class ArticlesPageTests : BunitContext
 			.Returns(Result.Ok<IReadOnlyList<ArticleDto>>(new List<ArticleDto>()));
 	}
 
-	private void SetupArticles(List<ArticleDto> articles, ClaimsPrincipal user)
+	private void SetupArticles(List<ArticleDto> articles)
 	{
 		_mediator.Send(Arg.Any<GetArticlesQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok<IReadOnlyList<ArticleDto>>(articles));
@@ -433,7 +583,7 @@ public class ArticlesPageTests : BunitContext
 		string content = "Test content")
 	{
 		return new ArticleDto(
-			Id: Guid.NewGuid().ToString(),
+			Id: ObjectId.GenerateNewId().ToString(),
 			Title: title,
 			Slug: "test-slug",
 			Content: content,
