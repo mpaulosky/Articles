@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: add Articles list header, create panel, and core grid](2026-08-21-pr-47-feat-add-articles-list-header-create-panel-and-core-grid.md) | release,automation |
 | 2026-08-21 | [feat: add Article edit page (#36)](2026-08-21-pr-44-feat-add-article-edit-page-36.md) | release,automation |
 | 2026-08-21 | [feat: extract shared ArticleForm component (#33)](2026-08-21-pr-43-feat-extract-shared-articleform-component-33.md) | release,automation |
 | 2026-08-21 | [feat: add Article archiving domain, commands, and authorization](2026-08-21-pr-39-feat-add-article-archiving-domain-commands-and-authorization.md) | release,automation |
