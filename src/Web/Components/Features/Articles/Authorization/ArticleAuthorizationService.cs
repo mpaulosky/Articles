@@ -75,6 +75,24 @@ public static class ArticleAuthorizationService
 	}
 
 	/// <summary>
+	///     Gets a value indicating whether the supplied user can archive or unarchive the article.
+	/// </summary>
+	/// <param name="user">The current principal.</param>
+	/// <param name="article">The article being evaluated.</param>
+	/// <returns><c>true</c> when the user can archive or unarchive the article; otherwise <c>false</c>.</returns>
+	public static bool CanArchiveArticle(ClaimsPrincipal? user, ArticleDto article)
+	{
+		ArgumentNullException.ThrowIfNull(article);
+
+		if (user is null || !user.Identity?.IsAuthenticated == true)
+		{
+			return false;
+		}
+
+		return IsInRole(user, "Admin");
+	}
+
+	/// <summary>
 	///     Gets the current authenticated user identifier from the principal.
 	/// </summary>
 	/// <param name="user">The current principal.</param>

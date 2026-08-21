@@ -196,6 +196,88 @@ public class ArticleAuthorizationServiceTests
 	}
 
 	[Fact]
+	public void CanArchiveArticle_AllowsAdminToArchiveAnyArticle()
+	{
+		// Arrange
+		var admin = CreateUser("admin-1", "Admin");
+		var article = CreateArticle("article-14", "Admin article", "author-3", published: true);
+
+		// Act
+		var canArchive = ArticleAuthorizationService.CanArchiveArticle(admin, article);
+
+		// Assert
+		canArchive.Should().BeTrue();
+	}
+
+	[Fact]
+	public void CanArchiveArticle_DeniesAuthorEvenOnTheirOwnArticle()
+	{
+		// Arrange
+		var author = CreateUser("author-1", "Author");
+		var ownArticle = CreateArticle("article-15", "My article", "author-1", published: true);
+
+		// Act
+		var canArchive = ArticleAuthorizationService.CanArchiveArticle(author, ownArticle);
+
+		// Assert
+		canArchive.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanArchiveArticle_ReturnsFalse_WhenUserIsNull()
+	{
+		// Arrange
+		var article = CreateArticle("article-16", "Title", "author-1", published: true);
+
+		// Act
+		var canArchive = ArticleAuthorizationService.CanArchiveArticle(null, article);
+
+		// Assert
+		canArchive.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanArchiveArticle_ReturnsFalse_WhenUserIsNotAuthenticated()
+	{
+		// Arrange
+		var unauthUser = new ClaimsPrincipal(new ClaimsIdentity());
+		var article = CreateArticle("article-17", "Title", "author-1", published: true);
+
+		// Act
+		var canArchive = ArticleAuthorizationService.CanArchiveArticle(unauthUser, article);
+
+		// Assert
+		canArchive.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanArchiveArticle_ReturnsFalse_WhenUserHasOtherRole()
+	{
+		// Arrange
+		var user = CreateUser("user-1", "Reader");
+		var article = CreateArticle("article-18", "Title", "author-1", published: true);
+
+		// Act
+		var canArchive = ArticleAuthorizationService.CanArchiveArticle(user, article);
+
+		// Assert
+		canArchive.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanArchiveArticle_ThrowsArgumentNullException_WhenArticleIsNull()
+	{
+		// Arrange
+		var user = CreateUser("admin-1", "Admin");
+
+		// Act
+		var act = () => ArticleAuthorizationService.CanArchiveArticle(user, null!);
+
+		// Assert
+		act.Should().Throw<ArgumentNullException>();
+	}
+
+	[Fact]
 	public void GetCurrentUserId_ReturnsNull_WhenUserIsNull()
 	{
 		// Act

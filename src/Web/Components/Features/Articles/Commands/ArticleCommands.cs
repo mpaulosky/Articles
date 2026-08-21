@@ -35,3 +35,7 @@ internal sealed record DeleteArticleCommand(string Id) : ICommand<Result>;
 internal sealed record PublishArticleCommand(string Id) : ICommand<Result<ArticleDto>>;
 
 internal sealed record UnpublishArticleCommand(string Id) : ICommand<Result<ArticleDto>>;
+
+internal sealed record ArchiveArticleCommand(string Id) : ICommand<Result<ArticleDto>>;
+
+internal sealed record UnarchiveArticleCommand(string Id) : ICommand<Result<ArticleDto>>;
