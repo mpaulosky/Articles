@@ -15,7 +15,7 @@ name: Squad Release
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 concurrency:
   group: squad-release-${{ github.event.pull_request.number || inputs.pr_number }}
@@ -117,9 +117,16 @@ jobs:
       - name: Mark merged PR as release-eligible
         if: steps.pr.outputs.skip != 'true'
         id: files
+        env:
+          PR_TITLE: ${{ steps.pr.outputs.title }}
         run: |
-          echo "eligible=true" >> "$GITHUB_OUTPUT"
-          echo "reason=merged PR release flow" >> "$GITHUB_OUTPUT"
+          if echo "$PR_TITLE" | grep -q '\[skip-release\]'; then
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            echo "reason=automated docs PR opted out via [skip-release] marker" >> "$GITHUB_OUTPUT"
+          else
+            echo "eligible=true" >> "$GITHUB_OUTPUT"
+            echo "reason=merged PR release flow" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Check existing release marker
         if: steps.pr.outputs.skip != 'true' && steps.files.outputs.eligible == 'true'
@@ -141,20 +148,20 @@ jobs:
           fi
 
       - name: Setup .NET
-        if: steps.idempotency.outputs.already_released != 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true'
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
 
       - name: Install GitVersion
-        if: steps.idempotency.outputs.already_released != 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true'
         continue-on-error: true
         uses: gittools/actions/gitversion/setup@v4.7.0
         with:
           versionSpec: "6.x"
 
       - name: Get version base from GitVersion
-        if: steps.idempotency.outputs.already_released != 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true'
         id: gitversion
         continue-on-error: true
         uses: gittools/actions/gitversion/execute@v4.7.0
@@ -162,7 +169,7 @@ jobs:
           configFilePath: GitVersion.yml
 
       - name: Compute next version
-        if: steps.idempotency.outputs.already_released != 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true'
         id: version
         env:
           LABELS_JSON: ${{ steps.pr.outputs.labels }}
@@ -229,7 +236,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Update release blog and README files
-        if: steps.idempotency.outputs.already_released != 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true'
         id: docs
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -379,7 +386,6 @@ jobs:
                 continue
               row_date = html.escape(parts[0])
               title_cell = parts[1]
-              tags_cell = html.escape(parts[2])
               link_match = re.search(r"\[([^\]]+)\]\(([^)]+)\)", title_cell)
               if link_match:
                 row_title = html.escape(link_match.group(1))
@@ -388,9 +394,10 @@ jobs:
                 row_title = html.escape(title_cell)
                 row_href = "blogs/README.md"
               html_items.append(
-                  f'  <li><strong>{row_date}</strong> — '
-                  f'<a href="{row_href}">{row_title}</a> '
-                  f'<code>{tags_cell}</code></li>'
+                  "  <li>\n"
+                  f'    <span class="mini-meta">{row_date}</span>\n'
+                  f'    <a href="{row_href}">{row_title}</a>\n'
+                  "  </li>"
               )
 
             if not html_items:
@@ -401,8 +408,7 @@ jobs:
             blog_html_block = "\n".join(
                 [
                     "<!-- BLOG_HTML_START -->",
-                    "<h2>Latest release blogs</h2>",
-                    "<ul>",
+                    '<ul class="blog-list">',
                     *html_items,
                     "</ul>",
                     "<!-- BLOG_HTML_END -->",
@@ -417,10 +423,10 @@ jobs:
                   flags=re.DOTALL,
               )
             else:
-              blog_html_indented = blog_html_block.replace("\n", "\n\t\t")
+              blog_html_indented = blog_html_block.replace("\n", "\n          ")
               docs_index = re.sub(
-                  r'(<div class="nav-links">.*?</div>)',
-                  lambda match: match.group(1) + "\n\n\t\t" + blog_html_indented,
+                  r'(<section[^>]*id="blogs"[^>]*>\s*<h2>[^<]*</h2>)',
+                  lambda match: match.group(1) + "\n          " + blog_html_indented,
                   docs_index,
                   count=1,
                   flags=re.DOTALL,
@@ -437,9 +443,12 @@ jobs:
           echo "docs_changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push docs updates
-        if: steps.idempotency.outputs.already_released != 'true' && steps.docs.outputs.docs_changed == 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true' && steps.docs.outputs.docs_changed == 'true'
         id: commit
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -450,27 +459,28 @@ jobs:
             exit 0
           fi
 
-          git commit -m "docs: add release blog for PR #${{ steps.pr.outputs.number }} [skip ci]"
+          # main is rules-protected and requires a pull request, so the docs
+          # update goes out on its own branch/PR rather than a direct push.
+          # The [skip-release] marker keeps this PR's own merge from
+          # triggering another run of this workflow.
+          BRANCH="docs/release-notes-pr-${PR_NUMBER}"
+          git checkout -b "$BRANCH"
+          git commit -m "docs: add release blog for PR #${PR_NUMBER} [skip-release]"
+          git push origin "$BRANCH"
+          git checkout main
 
-          PUSH_OUTPUT=$(git push origin HEAD:main 2>&1)
-          PUSH_STATUS=$?
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "docs: add release blog for PR #${PR_NUMBER} [skip-release]" \
+            --body "Automated release-notes update generated for #${PR_NUMBER}. Opened by the release workflow; the [skip-release] title marker keeps its own merge from starting another release."
 
-          if [ "$PUSH_STATUS" -eq 0 ]; then
-            echo "committed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          gh pr merge "$BRANCH" --auto --squash
 
-          if echo "$PUSH_OUTPUT" | grep -Eqi 'Repository rule violations found|Changes must be made through a pull request|Protected branch update failed|pre-receive hook declined|Required status check|GH006|GH013'; then
-            echo "::warning::Direct push to main is blocked by repository rules; release proceeds without the docs commit."
-            echo "committed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "$PUSH_OUTPUT"
-          exit "$PUSH_STATUS"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Create tag and release
-        if: steps.idempotency.outputs.already_released != 'true'
+        if: steps.files.outputs.eligible == 'true' && steps.idempotency.outputs.already_released != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.version.outputs.tag }}
