@@ -1,3 +1,5 @@
+using AngleSharp.Dom;
+
 using Bunit;
 
 using Domain.Abstractions;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Models;
@@ -34,6 +37,10 @@ public class ArticlesPageTests : BunitContext
 
 	public ArticlesPageTests()
 	{
+		// QuickGrid imports its own JS module for column-options positioning; the grid's data,
+		// sorting, filtering, and paging behavior under test don't depend on it.
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
 		_mediator = Substitute.For<IMediator>();
 		_authStateProvider = Substitute.For<AuthenticationStateProvider>();
 		_category = new CategoryDto
@@ -492,7 +499,7 @@ public class ArticlesPageTests : BunitContext
 		titlesBefore.Should().ContainInOrder("Alpha", "Bravo");
 
 		// Act - click Title header to reverse the sort
-		cut.FindAll("th").First(th => th.TextContent.Trim().StartsWith("Title", StringComparison.Ordinal)).Click();
+		FindColumnHeader(cut, "Title").QuerySelector("button.col-title")!.Click();
 
 		// Assert descending sort (Bravo before Alpha)
 		var titlesAfter = cut.FindAll("td.font-medium").Select(td => td.TextContent.Trim()).ToList();
@@ -512,16 +519,17 @@ public class ArticlesPageTests : BunitContext
 
 		var cut = Render<ArticlesPage>();
 
-		// Assert first page shows exactly 10 rows
-		cut.FindAll("tbody tr").Should().HaveCount(10);
-		cut.Markup.Should().Contain("Page 1 of 2");
+		// Assert first page shows exactly 10 populated rows (QuickGrid pads short pages with blank rows,
+		// but page 1 of 15 items at 10/page is already full, so there's nothing to pad here)
+		NonEmptyRows(cut).Should().Be(10);
+		PaginationText(cut).Should().Be("Page 1 of 2");
 
 		// Act
-		cut.FindAll("button").First(b => b.TextContent.Trim() == "Next").Click();
+		cut.Find("button.go-next").Click();
 
-		// Assert second page shows the remaining 5 rows
-		cut.FindAll("tbody tr").Should().HaveCount(5);
-		cut.Markup.Should().Contain("Page 2 of 2");
+		// Assert second page shows the remaining 5 populated rows
+		NonEmptyRows(cut).Should().Be(5);
+		PaginationText(cut).Should().Be("Page 2 of 2");
 	}
 
 	[Fact]
@@ -712,6 +720,7 @@ public class ArticlesPageTests : BunitContext
 		SetupArticles(articles);
 
 		var cut = Render<ArticlesPage>();
+		OpenColumnOptions(cut, "Title");
 
 		// Act
 		cut.Find("input[aria-label='Filter by title']").Input("Alph");
@@ -734,6 +743,7 @@ public class ArticlesPageTests : BunitContext
 		SetupArticles(articles);
 
 		var cut = Render<ArticlesPage>();
+		OpenColumnOptions(cut, "Author");
 
 		// Act
 		cut.Find("input[aria-label='Filter by author']").Input("Jane");
@@ -756,6 +766,7 @@ public class ArticlesPageTests : BunitContext
 		SetupArticles(articles);
 
 		var cut = Render<ArticlesPage>();
+		OpenColumnOptions(cut, "Category");
 		var categorySelect = cut.Find("select[aria-label='Filter by category']");
 
 		// Assert - dropdown includes the archived category
@@ -783,6 +794,7 @@ public class ArticlesPageTests : BunitContext
 		SetupArticles(articles);
 
 		var cut = Render<ArticlesPage>();
+		OpenColumnOptions(cut, "Status");
 		var statusSelect = cut.Find("select[aria-label='Filter by status']");
 
 		// Act
@@ -808,6 +820,27 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	// Helper methods
+
+	private static IElement FindColumnHeader(IRenderedComponent<ArticlesPage> cut, string columnTitle)
+	{
+		return cut.FindAll("th")
+			.First(th => th.QuerySelector(".col-title-text")?.TextContent.Trim() == columnTitle);
+	}
+
+	private static void OpenColumnOptions(IRenderedComponent<ArticlesPage> cut, string columnTitle)
+	{
+		FindColumnHeader(cut, columnTitle).QuerySelector("button.col-options-button")!.Click();
+	}
+
+	private static int NonEmptyRows(IRenderedComponent<ArticlesPage> cut)
+	{
+		return cut.FindAll("tbody tr").Count(tr => !string.IsNullOrWhiteSpace(tr.TextContent));
+	}
+
+	private static string PaginationText(IRenderedComponent<ArticlesPage> cut)
+	{
+		return Regex.Replace(cut.Find("div.pagination-text").TextContent, @"\s+", " ").Trim();
+	}
 
 	private void SetupAuthState(ClaimsPrincipal user)
 	{

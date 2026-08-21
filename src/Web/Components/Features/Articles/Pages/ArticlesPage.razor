@@ -1,6 +1,7 @@
 @page "/articles"
 @rendermode InteractiveServer
 @using System.Security.Claims
+@using Microsoft.AspNetCore.Components.QuickGrid
 @using static Domain.Helpers.DomainHelpers
 @using Web.Components.Features.Articles.Authorization
 @using Web.Components.Features.Articles.Commands
@@ -27,16 +28,14 @@
 				<label class="flex items-center gap-2 text-sm font-medium text-(--app-text)">
 					<input type="checkbox"
 								 class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
-								 @bind="_showMyArticlesOnly"
-								 @bind:after="HandleFilterChanged" />
+								 @bind="_showMyArticlesOnly" />
 					Show My Articles Only
 				</label>
 
 				<label class="flex items-center gap-2 text-sm font-medium text-(--app-text)">
 					<input type="checkbox"
 								 class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
-								 @bind="_includeArchived"
-								 @bind:after="HandleFilterChanged" />
+								 @bind="_includeArchived" />
 					Include Archived
 				</label>
 
@@ -83,9 +82,8 @@
 							 placeholder="Search by title or author..."
 							 class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 							 @bind="_searchText"
-							 @bind:event="oninput"
-							 @bind:after="HandleFilterChanged" />
-				<span class="app-badge">@FilteredArticles.Count total</span>
+							 @bind:event="oninput" />
+				<span class="app-badge">@FilteredArticleList.Count total</span>
 			</div>
 		</div>
 
@@ -98,215 +96,173 @@
 		{
 			<p class="app-copy">Loading articles...</p>
 		}
-		else if (FilteredArticles.Count == 0)
+		else if (FilteredArticleList.Count == 0)
 		{
 			<p class="app-copy">No articles to show yet.</p>
 		}
 		else
 		{
 			<div class="overflow-x-auto">
-				<table class="w-full text-left text-sm">
-					<thead>
-						<tr class="border-b border-slate-200 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:border-slate-700 dark:text-slate-400">
-							@foreach (var column in SortColumns)
+				<QuickGrid TGridItem="ArticleDto" Items="@FilteredArticles" Pagination="@_pagination" Class="zebra-grid w-full text-left text-sm">
+					<TemplateColumn Title="Title" Sortable="true" IsDefaultSortColumn="true"
+													 SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.Title))"
+													 Class="font-medium text-(--app-text)">
+						<ChildContent Context="context">
+							@context.Title
+							@if (context.IsArchived)
 							{
-								<th class="cursor-pointer px-3 py-2 select-none" @onclick="() => SetSort(column)">
-									@ColumnLabel(column)@SortIndicator(column)
-								</th>
+								<span class="app-badge ml-2" role="status">Archived</span>
 							}
-							<th class="px-3 py-2">Actions</th>
-						</tr>
-						<tr class="border-b border-slate-200 text-xs dark:border-slate-700">
-							<th class="px-3 py-2">
-								<input type="text"
-											 aria-label="Filter by title"
-											 placeholder="Filter title"
-											 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-											 @bind="_titleFilter"
-											 @bind:event="oninput"
-											 @bind:after="HandleFilterChanged" />
-							</th>
-							<th class="px-3 py-2">
-								<input type="text"
-											 aria-label="Filter by author"
-											 placeholder="Filter author"
-											 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-											 @bind="_authorFilter"
-											 @bind:event="oninput"
-											 @bind:after="HandleFilterChanged" />
-							</th>
-							<th class="px-3 py-2">
-								<select aria-label="Filter by category"
-												class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-												@bind="_categoryFilter"
-												@bind:after="HandleFilterChanged">
-									<option value="">All categories</option>
-									@foreach (var category in _categories)
-									{
-										<option value="@category.Id.ToString()">@category.CategoryName@(category.IsArchived ? " (archived)" : "")</option>
-									}
-								</select>
-							</th>
-							<th class="px-3 py-2">
-								<select aria-label="Filter by status"
-												class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-												@bind="_statusFilter"
-												@bind:after="HandleFilterChanged">
-									<option value="All">All</option>
-									<option value="Published">Published</option>
-									<option value="Draft">Draft</option>
-								</select>
-							</th>
-							<th class="px-3 py-2"></th>
-							<th class="px-3 py-2"></th>
-						</tr>
-					</thead>
-					<tbody>
-						@{ var rowIndex = 0; }
-						@foreach (var article in PagedArticles)
-						{
-							var canEdit = ArticleAuthorizationService.CanEditArticle(_currentUser, article);
-							var canArchive = ArticleAuthorizationService.CanArchiveArticle(_currentUser, article);
-							var rowClass = rowIndex % 2 == 0
-								? "bg-white dark:bg-slate-900"
-								: "bg-slate-50 dark:bg-slate-950/40";
-							rowIndex++;
+						</ChildContent>
+						<ColumnOptions>
+							<input type="text"
+										 aria-label="Filter by title"
+										 placeholder="Filter title"
+										 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+										 @bind="_titleFilter"
+										 @bind:event="oninput" />
+						</ColumnOptions>
+					</TemplateColumn>
 
-							<tr class="border-b border-slate-100 @rowClass dark:border-slate-800">
-								<td class="px-3 py-2 font-medium text-(--app-text)">
-									@article.Title
-									@if (article.IsArchived)
-									{
-										<span class="app-badge ml-2" role="status">Archived</span>
-									}
-								</td>
-								<td class="px-3 py-2">@article.Author.Name</td>
-								<td class="px-3 py-2">@article.Category.CategoryName</td>
-								<td class="px-3 py-2">@(article.IsPublished ? "Published" : "Draft")</td>
-								<td class="px-3 py-2">@(article.IsPublished && article.PublishedOn is { } publishedOn ? publishedOn.ToString("MMM d, yyyy") : "—")</td>
-								<td class="px-3 py-2">
-									<div class="flex flex-wrap items-center gap-2">
-										<a href="@($"/articles/{article.Id}")"
-											 class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800">
-											View
-										</a>
+					<PropertyColumn Property="@(a => a.Author.Name)" Title="Author" Sortable="true">
+						<ColumnOptions>
+							<input type="text"
+										 aria-label="Filter by author"
+										 placeholder="Filter author"
+										 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+										 @bind="_authorFilter"
+										 @bind:event="oninput" />
+						</ColumnOptions>
+					</PropertyColumn>
 
-										@if (canEdit)
-										{
-											@if (article.IsPublished)
-											{
-												<button type="button"
-																class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-																@onclick="() => UnpublishArticleAsync(article.Id)">
-													Unpublish
-												</button>
-											}
-											else
-											{
-												<button type="button"
-																class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-																@onclick="() => PublishArticleAsync(article.Id)">
-													Publish
-												</button>
-											}
+					<PropertyColumn Property="@(a => a.Category.CategoryName)" Title="Category" Sortable="true">
+						<ColumnOptions>
+							<select aria-label="Filter by category"
+											class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+											@bind="_categoryFilter">
+								<option value="">All categories</option>
+								@foreach (var category in _categories)
+								{
+									<option value="@category.Id.ToString()">@category.CategoryName@(category.IsArchived ? " (archived)" : "")</option>
+								}
+							</select>
+						</ColumnOptions>
+					</PropertyColumn>
 
-											<a href="@($"/articles/{article.Id}/edit")"
-												 class="rounded border border-sky-500 px-2.5 py-1.5 text-sm font-medium text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30">
-												Edit
-											</a>
+					<TemplateColumn Title="Status" Sortable="true" SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.IsPublished))">
+						<ChildContent Context="context">
+							@(context.IsPublished ? "Published" : "Draft")
+						</ChildContent>
+						<ColumnOptions>
+							<select aria-label="Filter by status"
+											class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+											@bind="_statusFilter">
+								<option value="All">All</option>
+								<option value="Published">Published</option>
+								<option value="Draft">Draft</option>
+							</select>
+						</ColumnOptions>
+					</TemplateColumn>
 
-											@if (_pendingDeleteId == article.Id)
-											{
-												<span class="text-sm text-slate-600 dark:text-slate-300">Delete this article?</span>
-												<button type="button"
-																class="rounded border border-rose-500 bg-rose-50 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50"
-																@onclick="() => DeleteArticleAsync(article.Id)">
-													Confirm
-												</button>
-												<button type="button"
-																class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-																@onclick="CancelDelete">
-													Cancel
-												</button>
-											}
-											else
-											{
-												<button type="button"
-																class="rounded border border-rose-500 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-																@onclick="() => RequestDelete(article.Id)">
-													Delete
-												</button>
-											}
-										}
+					<TemplateColumn Title="Published" Sortable="true" SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.PublishedOn))">
+						@(context.IsPublished && context.PublishedOn is { } publishedOn ? publishedOn.ToString("MMM d, yyyy") : "—")
+					</TemplateColumn>
 
-										@if (canArchive)
-										{
-											@if (article.IsArchived)
-											{
-												<button type="button"
-																class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-																@onclick="() => UnarchiveArticleAsync(article.Id)">
-													Unarchive
-												</button>
-											}
-											else
-											{
-												<button type="button"
-																class="rounded border border-amber-500 px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-																@onclick="() => ArchiveArticleAsync(article.Id)">
-													Archive
-												</button>
-											}
-										}
-									</div>
-								</td>
-							</tr>
+					<TemplateColumn Title="Actions" Sortable="false">
+						@{
+							var canEdit = ArticleAuthorizationService.CanEditArticle(_currentUser, context);
+							var canArchive = ArticleAuthorizationService.CanArchiveArticle(_currentUser, context);
 						}
-					</tbody>
-				</table>
+						<div class="flex flex-wrap items-center gap-2">
+							<a href="@($"/articles/{context.Id}")"
+								 class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800">
+								View
+							</a>
+
+							@if (canEdit)
+							{
+								@if (context.IsPublished)
+								{
+									<button type="button"
+													class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+													@onclick="() => UnpublishArticleAsync(context.Id)">
+										Unpublish
+									</button>
+								}
+								else
+								{
+									<button type="button"
+													class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+													@onclick="() => PublishArticleAsync(context.Id)">
+										Publish
+									</button>
+								}
+
+								<a href="@($"/articles/{context.Id}/edit")"
+									 class="rounded border border-sky-500 px-2.5 py-1.5 text-sm font-medium text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30">
+									Edit
+								</a>
+
+								@if (_pendingDeleteId == context.Id)
+								{
+									<span class="text-sm text-slate-600 dark:text-slate-300">Delete this article?</span>
+									<button type="button"
+													class="rounded border border-rose-500 bg-rose-50 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50"
+													@onclick="() => DeleteArticleAsync(context.Id)">
+										Confirm
+									</button>
+									<button type="button"
+													class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+													@onclick="CancelDelete">
+										Cancel
+									</button>
+								}
+								else
+								{
+									<button type="button"
+													class="rounded border border-rose-500 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+													@onclick="() => RequestDelete(context.Id)">
+										Delete
+									</button>
+								}
+							}
+
+							@if (canArchive)
+							{
+								@if (context.IsArchived)
+								{
+									<button type="button"
+													class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+													@onclick="() => UnarchiveArticleAsync(context.Id)">
+										Unarchive
+									</button>
+								}
+								else
+								{
+									<button type="button"
+													class="rounded border border-amber-500 px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+													@onclick="() => ArchiveArticleAsync(context.Id)">
+										Archive
+									</button>
+								}
+							}
+						</div>
+					</TemplateColumn>
+				</QuickGrid>
 			</div>
 
-			<div class="mt-4 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
-				<span>Page @_currentPage of @TotalPages</span>
-				<div class="flex gap-2">
-					<button type="button"
-									class="rounded border border-slate-400 px-2.5 py-1.5 font-medium disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600"
-									disabled="@(_currentPage <= 1)"
-									@onclick="PreviousPage">
-						Previous
-					</button>
-					<button type="button"
-									class="rounded border border-slate-400 px-2.5 py-1.5 font-medium disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600"
-									disabled="@(_currentPage >= TotalPages)"
-									@onclick="NextPage">
-						Next
-					</button>
-				</div>
+			<div class="mt-4 flex justify-end text-sm text-slate-600 dark:text-slate-300">
+				<Paginator State="@_pagination" />
 			</div>
 		}
 	</section>
 </section>
 
 @code {
-	private const int PageSize = 10;
-
-	private enum SortColumn
-	{
-		Title,
-		Author,
-		Category,
-		Status,
-		Published
-	}
-
-	private static readonly SortColumn[] SortColumns =
-	[
-		SortColumn.Title, SortColumn.Author, SortColumn.Category, SortColumn.Status, SortColumn.Published
-	];
-
 	private readonly ArticleFormModel _form = new();
 	private readonly List<ArticleDto> _articles = [];
 	private readonly List<CategoryDto> _categories = [];
+	private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
 	private bool _loading;
 	private bool _saving;
 	private bool _showCreatePanel;
@@ -321,11 +277,8 @@
 	private string? _loadError;
 	private string? _pendingDeleteId;
 	private ClaimsPrincipal? _currentUser;
-	private SortColumn _sortColumn = SortColumn.Title;
-	private bool _sortAscending = true;
-	private int _currentPage = 1;
 
-	private List<ArticleDto> FilteredArticles =>
+	private List<ArticleDto> FilteredArticleList =>
 	[
 		.. _articles
 			.Where(article => !_showMyArticlesOnly || IsOwnedByCurrentUser(article))
@@ -337,31 +290,7 @@
 			.Where(MatchesStatusFilter)
 	];
 
-	private List<ArticleDto> SortedArticles
-	{
-		get
-		{
-			var filtered = FilteredArticles.AsEnumerable();
-
-			var ordered = _sortColumn switch
-			{
-				SortColumn.Author => Order(filtered, article => article.Author.Name),
-				SortColumn.Category => Order(filtered, article => article.Category.CategoryName),
-				SortColumn.Status => Order(filtered, article => article.IsPublished),
-				SortColumn.Published => Order(filtered, article => article.PublishedOn ?? DateTime.MinValue),
-				_ => Order(filtered, article => article.Title)
-			};
-
-			return [.. ordered];
-		}
-	}
-
-	private int TotalPages => Math.Max(1, (int)Math.Ceiling(FilteredArticles.Count / (double)PageSize));
-
-	private List<ArticleDto> PagedArticles =>
-	[
-		.. SortedArticles.Skip((_currentPage - 1) * PageSize).Take(PageSize)
-	];
+	private IQueryable<ArticleDto> FilteredArticles => FilteredArticleList.AsQueryable();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -369,11 +298,6 @@
 		_currentUser = authState.User;
 		await LoadCategoriesAsync();
 		await LoadAsync();
-	}
-
-	private IOrderedEnumerable<ArticleDto> Order<TKey>(IEnumerable<ArticleDto> source, Func<ArticleDto, TKey> keySelector)
-	{
-		return _sortAscending ? source.OrderBy(keySelector) : source.OrderByDescending(keySelector);
 	}
 
 	private bool IsOwnedByCurrentUser(ArticleDto article)
@@ -417,46 +341,6 @@
 		};
 	}
 
-	private static string ColumnLabel(SortColumn column) => column switch
-	{
-		SortColumn.Title => "Title",
-		SortColumn.Author => "Author",
-		SortColumn.Category => "Category",
-		SortColumn.Status => "Status",
-		SortColumn.Published => "Published",
-		_ => string.Empty
-	};
-
-	private string SortIndicator(SortColumn column)
-	{
-		if (column != _sortColumn)
-		{
-			return string.Empty;
-		}
-
-		return _sortAscending ? " ▲" : " ▼";
-	}
-
-	private void SetSort(SortColumn column)
-	{
-		if (_sortColumn == column)
-		{
-			_sortAscending = !_sortAscending;
-		}
-		else
-		{
-			_sortColumn = column;
-			_sortAscending = true;
-		}
-
-		_currentPage = 1;
-	}
-
-	private void HandleFilterChanged()
-	{
-		_currentPage = 1;
-	}
-
 	private void OpenCreatePanel()
 	{
 		_showCreatePanel = true;
@@ -467,22 +351,6 @@
 		_showCreatePanel = false;
 		_error = null;
 		_form.Reset();
-	}
-
-	private void PreviousPage()
-	{
-		if (_currentPage > 1)
-		{
-			_currentPage--;
-		}
-	}
-
-	private void NextPage()
-	{
-		if (_currentPage < TotalPages)
-		{
-			_currentPage++;
-		}
 	}
 
 	private void RequestDelete(string id)
@@ -526,11 +394,6 @@
 		}
 
 		_loading = false;
-
-		if (_currentPage > TotalPages)
-		{
-			_currentPage = TotalPages;
-		}
 	}
 
 	private async Task CreateArticleAsync()

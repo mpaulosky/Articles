@@ -257,6 +257,15 @@ code {
 	}
 }
 
+/* Zebra-striped rows for QuickGrid tables (e.g. the Articles list). */
+.zebra-grid tbody tr:nth-child(even) > td {
+	background-color: rgba(148, 163, 184, 0.08);
+}
+
+:root[data-theme="dark"] .zebra-grid tbody tr:nth-child(even) > td {
+	background-color: rgba(148, 163, 184, 0.1);
+}
+
 ::selection {
 	background: rgba(96, 165, 250, 0.22);
 }
