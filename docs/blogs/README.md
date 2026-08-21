@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: extract shared ArticleForm component (#33)](2026-08-21-pr-43-feat-extract-shared-articleform-component-33.md) | release,automation |
 | 2026-08-21 | [feat: add Article archiving domain, commands, and authorization](2026-08-21-pr-39-feat-add-article-archiving-domain-commands-and-authorization.md) | release,automation |
 | 2026-08-21 | [fix: run required Build Solution check on docs-only PRs](2026-08-21-pr-29-fix-run-required-build-solution-check-on-docs-only-prs.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
