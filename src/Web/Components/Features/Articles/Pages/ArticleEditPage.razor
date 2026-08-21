@@ -1,0 +1,133 @@
+@page "/articles/{Id}/edit"
+@rendermode InteractiveServer
+@using System.Security.Claims
+@using static Domain.Helpers.DomainHelpers
+@using Web.Components.Features.Articles.Authorization
+@using Web.Components.Features.Articles.Commands
+@using Web.Components.Features.Articles.Components
+@using Web.Components.Features.Articles.Models
+@using Web.Components.Features.Articles.Queries
+@using Web.Components.Features.Categories.Models
+@using Web.Components.Features.Categories.Queries
+@inject IMediator Sender
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>@(_article is null ? "Edit article" : $"Edit {_article.Title}")</PageTitle>
+
+<section class="app-page-stack">
+	<div class="app-page-card">
+		<p class="app-pill">Publishing</p>
+		<h1 class="app-h1">Edit article</h1>
+	</div>
+
+	<section class="app-panel-card">
+		@if (_loading)
+		{
+			<p class="app-copy">Loading article...</p>
+		}
+		else if (_article is null)
+		{
+			<div class="alert-error" role="alert">@(_error ?? "Article not found.")</div>
+		}
+		else
+		{
+			@if (!string.IsNullOrWhiteSpace(_error))
+			{
+				<div class="alert-error" role="alert">@_error</div>
+			}
+
+			<ArticleForm Model="_form"
+									 Categories="_categories"
+									 Saving="_saving"
+									 SubmitLabel="Save changes"
+									 OnValidSubmit="SaveArticleAsync" />
+		}
+	</section>
+</section>
+
+@code {
+	[Parameter]
+	public string Id { get; set; } = string.Empty;
+
+	private readonly ArticleFormModel _form = new();
+	private readonly List<CategoryDto> _categories = [];
+	private ArticleDto? _article;
+	private bool _loading = true;
+	private bool _saving;
+	private string? _error;
+	private ClaimsPrincipal? _currentUser;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		_currentUser = authState.User;
+		await LoadCategoriesAsync();
+		await LoadArticleAsync();
+	}
+
+	private async Task LoadCategoriesAsync()
+	{
+		var result = await Sender.Send(new GetCategoriesQuery());
+		if (result.Success)
+		{
+			_categories.Clear();
+			_categories.AddRange(result.Value ?? []);
+		}
+	}
+
+	private async Task LoadArticleAsync()
+	{
+		_loading = true;
+		_error = null;
+		_article = null;
+
+		var result = await Sender.Send(new GetArticleByIdQuery(Id));
+		if (!result.Success || result.Value is null)
+		{
+			_error = result.Error ?? "Article not found.";
+			_loading = false;
+			return;
+		}
+
+		if (!ArticleAuthorizationService.CanEditArticle(_currentUser, result.Value))
+		{
+			_error = "You don't have permission to edit this article.";
+			_loading = false;
+			return;
+		}
+
+		_article = result.Value;
+		_form.Title = _article.Title;
+		_form.Content = _article.Content;
+		_form.CategoryId = _article.Category.Id.ToString();
+		_loading = false;
+	}
+
+	private async Task SaveArticleAsync()
+	{
+		_saving = true;
+		_error = null;
+
+		var title = _form.Title.Trim();
+		var category = _categories.FirstOrDefault(c => c.Id.ToString() == _form.CategoryId);
+		var result = await Sender.Send(new UpdateArticleCommand(
+			Id,
+			title,
+			title.GenerateSlug(),
+			_form.Content.Trim(),
+			category,
+			ClearCategory: category is null));
+
+		if (result.Success)
+		{
+			Navigation.NavigateTo($"/articles/{Id}");
+		}
+		else
+		{
+			_error = result.Error;
+		}
+
+		_saving = false;
+	}
+}
