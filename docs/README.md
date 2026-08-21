@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: extract shared ArticleForm component (#33)](docs/blogs/2026-08-21-pr-43-feat-extract-shared-articleform-component-33.md) | release,automation |
 | 2026-08-21 | [feat: add Article archiving domain, commands, and authorization](docs/blogs/2026-08-21-pr-39-feat-add-article-archiving-domain-commands-and-authorization.md) | release,automation |
 | 2026-08-21 | [fix: run required Build Solution check on docs-only PRs](docs/blogs/2026-08-21-pr-29-fix-run-required-build-solution-check-on-docs-only-prs.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](docs/blogs/2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
 | 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](docs/blogs/2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
-| 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](docs/blogs/2026-08-20-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: extract shared ArticleForm component (#33)](docs/blogs/2026-08-21-pr-43-feat-extract-shared-articleform-component-33.md) | release,automation |
 | 2026-08-21 | [feat: add Article archiving domain, commands, and authorization](docs/blogs/2026-08-21-pr-39-feat-add-article-archiving-domain-commands-and-authorization.md) | release,automation |
 | 2026-08-21 | [fix: run required Build Solution check on docs-only PRs](docs/blogs/2026-08-21-pr-29-fix-run-required-build-solution-check-on-docs-only-prs.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](docs/blogs/2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
 | 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](docs/blogs/2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
-| 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](docs/blogs/2026-08-20-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
