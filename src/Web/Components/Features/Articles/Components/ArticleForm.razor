@@ -1,0 +1,58 @@
+@using Web.Components.Features.Articles.Models
+@using Web.Components.Features.Categories.Models
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div class="space-y-4">
+		<div>
+			<label class="block text-sm font-medium text-(--app-text)">Title</label>
+			<InputText @bind-Value="Model.Title"
+								 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+		</div>
+
+		<div>
+			<label class="block text-sm font-medium text-(--app-text)">Body</label>
+			<InputTextArea @bind-Value="Model.Content"
+										 class="mt-1 min-h-32 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+		</div>
+
+		<div>
+			<label class="block text-sm font-medium text-(--app-text)">Category</label>
+			<InputSelect @bind-Value="Model.CategoryId"
+									 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+				<option value="">Select a category</option>
+				@foreach (var category in Categories)
+				{
+					<option value="@category.Id.ToString()">@category.CategoryName</option>
+				}
+			</InputSelect>
+		</div>
+
+		<button type="submit"
+						class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+						disabled="@Saving">
+			@(Saving ? "Saving..." : SubmitLabel)
+		</button>
+	</div>
+</EditForm>
+
+@code {
+	[Parameter, EditorRequired]
+	public ArticleFormModel Model { get; set; } = default!;
+
+	[Parameter, EditorRequired]
+	public IReadOnlyList<CategoryDto> Categories { get; set; } = [];
+
+	[Parameter]
+	public bool Saving { get; set; }
+
+	[Parameter]
+	public string SubmitLabel { get; set; } = "Save";
+
+	[Parameter]
+	public EventCallback OnValidSubmit { get; set; }
+
+	private Task HandleValidSubmit() => OnValidSubmit.InvokeAsync();
+}

@@ -4,6 +4,7 @@
 @using static Domain.Helpers.DomainHelpers
 @using Web.Components.Features.Articles.Authorization
 @using Web.Components.Features.Articles.Commands
+@using Web.Components.Features.Articles.Components
 @using Web.Components.Features.Articles.Models
 @using Web.Components.Features.Articles.Queries
 @using Web.Components.Features.Categories.Models
@@ -32,42 +33,11 @@
 				<div class="alert-error" role="alert">@_error</div>
 			}
 
-			<EditForm Model="_form" OnValidSubmit="CreateArticleAsync">
-				<DataAnnotationsValidator />
-				<ValidationSummary />
-
-				<div class="space-y-4">
-					<div>
-						<label class="block text-sm font-medium text-(--app-text)">Title</label>
-						<InputText @bind-Value="_form.Title"
-											 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
-					</div>
-
-					<div>
-						<label class="block text-sm font-medium text-(--app-text)">Body</label>
-						<InputTextArea @bind-Value="_form.Content"
-													 class="mt-1 min-h-32 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
-					</div>
-
-					<div>
-						<label class="block text-sm font-medium text-(--app-text)">Category</label>
-						<InputSelect @bind-Value="_form.CategoryId"
-												 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
-							<option value="">Select a category</option>
-							@foreach (var category in _categories)
-							{
-								<option value="@category.Id.ToString()">@category.CategoryName</option>
-							}
-						</InputSelect>
-					</div>
-
-					<button type="submit"
-									class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
-									disabled="@_saving">
-						@(_saving ? "Saving..." : "Create article")
-					</button>
-				</div>
-			</EditForm>
+			<ArticleForm Model="_form"
+									 Categories="_categories"
+									 Saving="_saving"
+									 SubmitLabel="Create article"
+									 OnValidSubmit="CreateArticleAsync" />
 		</section>
 
 		<section class="app-panel-card">
@@ -250,20 +220,6 @@
 		else
 		{
 			_error = result.Error;
-		}
-	}
-
-	private sealed class ArticleFormModel
-	{
-		public string Title { get; set; } = string.Empty;
-		public string Content { get; set; } = string.Empty;
-		public string CategoryId { get; set; } = string.Empty;
-
-		public void Reset()
-		{
-			Title = string.Empty;
-			Content = string.Empty;
-			CategoryId = string.Empty;
 		}
 	}
 }
