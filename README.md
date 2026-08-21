@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [fix: repair release workflow's validation dispatch loop](docs/blogs/2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
 | 2026-08-21 | [fix: finish issue #32 - real QuickGrid, glossary, idempotency tests, seed data](docs/blogs/2026-08-21-pr-51-fix-finish-issue-32-real-quickgrid-glossary-idempotency-tests-seed-data.md) | release,automation |
 | 2026-08-21 | [feat: add archiving, search, and column filters to Articles list (#38)](docs/blogs/2026-08-21-pr-49-feat-add-archiving-search-and-column-filters-to-articles-list-38.md) | release,automation |
 | 2026-08-21 | [feat: add Articles list header, create panel, and core grid](docs/blogs/2026-08-21-pr-47-feat-add-articles-list-header-create-panel-and-core-grid.md) | release,automation |
 | 2026-08-21 | [feat: add Article edit page (#36)](docs/blogs/2026-08-21-pr-44-feat-add-article-edit-page-36.md) | release,automation |
-| 2026-08-21 | [feat: extract shared ArticleForm component (#33)](docs/blogs/2026-08-21-pr-43-feat-extract-shared-articleform-component-33.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [fix: repair release workflow's validation dispatch loop](docs/blogs/2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
 | 2026-08-21 | [fix: finish issue #32 - real QuickGrid, glossary, idempotency tests, seed data](docs/blogs/2026-08-21-pr-51-fix-finish-issue-32-real-quickgrid-glossary-idempotency-tests-seed-data.md) | release,automation |
 | 2026-08-21 | [feat: add archiving, search, and column filters to Articles list (#38)](docs/blogs/2026-08-21-pr-49-feat-add-archiving-search-and-column-filters-to-articles-list-38.md) | release,automation |
 | 2026-08-21 | [feat: add Articles list header, create panel, and core grid](docs/blogs/2026-08-21-pr-47-feat-add-articles-list-header-create-panel-and-core-grid.md) | release,automation |
 | 2026-08-21 | [feat: add Article edit page (#36)](docs/blogs/2026-08-21-pr-44-feat-add-article-edit-page-36.md) | release,automation |
-| 2026-08-21 | [feat: extract shared ArticleForm component (#33)](docs/blogs/2026-08-21-pr-43-feat-extract-shared-articleform-component-33.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
