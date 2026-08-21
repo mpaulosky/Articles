@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-21 | [feat: add Article archiving domain, commands, and authorization](2026-08-21-pr-39-feat-add-article-archiving-domain-commands-and-authorization.md) | release,automation |
 | 2026-08-21 | [fix: run required Build Solution check on docs-only PRs](2026-08-21-pr-29-fix-run-required-build-solution-check-on-docs-only-prs.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
 | 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
