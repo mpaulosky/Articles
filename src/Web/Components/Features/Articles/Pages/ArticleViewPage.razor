@@ -1,0 +1,94 @@
+@page "/articles/{Id}"
+@rendermode InteractiveServer
+@using System.Security.Claims
+@using Web.Components.Features.Articles.Authorization
+@using Web.Components.Features.Articles.Models
+@using Web.Components.Features.Articles.Queries
+@inject IMediator Sender
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@(_article is null ? "Article" : _article.Title)</PageTitle>
+
+<section class="app-page-stack">
+	<div class="app-page-card">
+		<p class="app-pill">Publishing</p>
+		<h1 class="app-h1">Article</h1>
+	</div>
+
+	<section class="app-panel-card">
+		@if (_loading)
+		{
+			<p class="app-copy">Loading article...</p>
+		}
+		else if (!string.IsNullOrWhiteSpace(_error))
+		{
+			<div class="alert-error" role="alert">@_error</div>
+		}
+		else if (_article is not null)
+		{
+			<div class="flex flex-col gap-4">
+				<div class="flex flex-wrap items-center gap-2">
+					@if (_article.IsArchived)
+					{
+						<span class="app-badge" role="status">Archived</span>
+					}
+					<span class="app-badge">@(_article.IsPublished ? "Published" : "Draft")</span>
+				</div>
+
+				<h2 class="app-h1">@_article.Title</h2>
+
+				<p class="text-sm text-slate-600 dark:text-slate-300">
+					By @_article.Author.Name &middot; @_article.Category.CategoryName
+					@if (_article.IsPublished && _article.PublishedOn is not null)
+					{
+						<text> &middot; Published @_article.PublishedOn.Value.ToString("MMM d, yyyy")</text>
+					}
+				</p>
+
+				<p class="whitespace-pre-line text-slate-700 dark:text-slate-200">@_article.Content</p>
+			</div>
+		}
+	</section>
+</section>
+
+@code {
+	[Parameter]
+	public string Id { get; set; } = string.Empty;
+
+	private ArticleDto? _article;
+	private bool _loading = true;
+	private string? _error;
+	private ClaimsPrincipal? _currentUser;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		_currentUser = authState.User;
+		await LoadAsync();
+	}
+
+	private async Task LoadAsync()
+	{
+		_loading = true;
+		_error = null;
+		_article = null;
+
+		var result = await Sender.Send(new GetArticleByIdQuery(Id));
+		if (!result.Success || result.Value is null)
+		{
+			_error = result.Error ?? "Article not found.";
+			_loading = false;
+			return;
+		}
+
+		if (!ArticleAuthorizationService.CanViewArticle(_currentUser, result.Value))
+		{
+			_error = "You don't have permission to view this article.";
+			_loading = false;
+			return;
+		}
+
+		_article = result.Value;
+		_loading = false;
+	}
+}
