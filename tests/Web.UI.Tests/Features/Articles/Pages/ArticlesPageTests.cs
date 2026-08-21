@@ -30,6 +30,7 @@ public class ArticlesPageTests : BunitContext
 	private readonly IMediator _mediator;
 	private readonly AuthenticationStateProvider _authStateProvider;
 	private readonly CategoryDto _category;
+	private readonly CategoryDto _archivedCategory;
 
 	public ArticlesPageTests()
 	{
@@ -40,9 +41,14 @@ public class ArticlesPageTests : BunitContext
 			Id = ObjectId.GenerateNewId(), CategoryName = "Test Category", Slug = "test-category",
 			Description = "Test description"
 		};
+		_archivedCategory = new CategoryDto
+		{
+			Id = ObjectId.GenerateNewId(), CategoryName = "Retired Category", Slug = "retired-category",
+			Description = "Retired description", IsArchived = true
+		};
 
 		_mediator.Send(Arg.Any<GetCategoriesQuery>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto> { _category }));
+			.Returns(Result.Ok<IReadOnlyList<CategoryDto>>(new List<CategoryDto> { _category, _archivedCategory }));
 
 		Services.AddSingleton(_mediator);
 		Services.AddSingleton(_authStateProvider);
@@ -518,6 +524,289 @@ public class ArticlesPageTests : BunitContext
 		cut.Markup.Should().Contain("Page 2 of 2");
 	}
 
+	[Fact]
+	public void IncludeArchivedCheckbox_UncheckedByDefault_ExcludesArchivedArticles()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Active Article", "admin1", isPublished: true),
+			CreateArticle("Archived Article", "admin1", isPublished: true, isArchived: true)
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		cut.Markup.Should().Contain("Active Article");
+		cut.Markup.Should().NotContain("Archived Article");
+	}
+
+	[Fact]
+	public void CheckingIncludeArchived_IncludesArchivedArticlesInTable()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Active Article", "admin1", isPublished: true),
+			CreateArticle("Archived Article", "admin1", isPublished: true, isArchived: true)
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+
+		// Act
+		cut.FindAll("input[type=checkbox]")[1].Change(true);
+
+		// Assert
+		cut.Markup.Should().Contain("Active Article");
+		cut.Markup.Should().Contain("Archived Article");
+	}
+
+	[Fact]
+	public void ShowsArchivedBadge_NextToTitle_ForArchivedArticle()
+	{
+		// Arrange
+		var articles = new List<ArticleDto> { CreateArticle("Retired Article", "admin1", isPublished: true, isArchived: true) };
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+		cut.FindAll("input[type=checkbox]")[1].Change(true);
+
+		// Act
+		var titleCell = cut.FindAll("td.font-medium")
+			.First(td => td.TextContent.Contains("Retired Article", StringComparison.Ordinal));
+
+		// Assert
+		var badge = titleCell.QuerySelector("span.app-badge");
+		badge.Should().NotBeNull();
+		badge!.TextContent.Trim().Should().Be("Archived");
+	}
+
+	[Fact]
+	public void ShowsArchiveAndUnarchiveActions_ForAdmin_OnEveryRow()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Active Article", "author1", isPublished: true),
+			CreateArticle("Archived Article", "author1", isPublished: true, isArchived: true)
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+		cut.FindAll("input[type=checkbox]")[1].Change(true);
+
+		// Assert
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Archive");
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Unarchive");
+	}
+
+	[Fact]
+	public void HidesArchiveAndUnarchiveActions_ForNonAdmin_EvenOnOwnArticle()
+	{
+		// Arrange
+		var articles = new List<ArticleDto> { CreateArticle("My Article", "author1", isPublished: true) };
+		SetupAuthState(CreateAuthorUser("author1"));
+		SetupArticles(articles);
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		cut.FindAll("button").Should()
+			.NotContain(b => b.TextContent.Trim() == "Archive" || b.TextContent.Trim() == "Unarchive");
+	}
+
+	[Fact]
+	public void ClickingArchiveButton_SendsArchiveArticleCommand()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "author1", isPublished: true);
+		var articles = new List<ArticleDto> { article };
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+		_mediator.Send(Arg.Any<ArchiveArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok(article));
+
+		var cut = Render<ArticlesPage>();
+		var archiveButton = cut.FindAll("button").First(b => b.TextContent.Trim() == "Archive");
+
+		// Act
+		archiveButton.Click();
+
+		// Assert
+		_mediator.Received(1).Send(
+			Arg.Is<ArchiveArticleCommand>(command => command.Id == article.Id),
+			Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public void ClickingUnarchiveButton_SendsUnarchiveArticleCommand()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "author1", isPublished: true, isArchived: true);
+		var articles = new List<ArticleDto> { article };
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+		_mediator.Send(Arg.Any<UnarchiveArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok(article));
+
+		var cut = Render<ArticlesPage>();
+		cut.FindAll("input[type=checkbox]")[1].Change(true);
+		var unarchiveButton = cut.FindAll("button").First(b => b.TextContent.Trim() == "Unarchive");
+
+		// Act
+		unarchiveButton.Click();
+
+		// Assert
+		_mediator.Received(1).Send(
+			Arg.Is<UnarchiveArticleCommand>(command => command.Id == article.Id),
+			Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public void GlobalSearch_NarrowsTable_ByTitleOrAuthor()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Alpha Article", "admin1", isPublished: true, authorName: "Jane Doe"),
+			CreateArticle("Beta Article", "admin1", isPublished: true, authorName: "John Smith")
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+
+		// Act - matches by title
+		cut.Find("input[type=search]").Input("Alpha");
+
+		// Assert
+		cut.Markup.Should().Contain("Alpha Article");
+		cut.Markup.Should().NotContain("Beta Article");
+
+		// Act - matches by author
+		cut.Find("input[type=search]").Input("Smith");
+
+		// Assert
+		cut.Markup.Should().Contain("Beta Article");
+		cut.Markup.Should().NotContain("Alpha Article");
+	}
+
+	[Fact]
+	public void TitleColumnFilter_NarrowsTable_ByPartialTitle()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Alpha Article", "admin1", isPublished: true),
+			CreateArticle("Beta Article", "admin1", isPublished: true)
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+
+		// Act
+		cut.Find("input[aria-label='Filter by title']").Input("Alph");
+
+		// Assert
+		cut.Markup.Should().Contain("Alpha Article");
+		cut.Markup.Should().NotContain("Beta Article");
+	}
+
+	[Fact]
+	public void AuthorColumnFilter_NarrowsTable_ByPartialAuthorName()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Alpha Article", "admin1", isPublished: true, authorName: "Jane Doe"),
+			CreateArticle("Beta Article", "admin1", isPublished: true, authorName: "John Smith")
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+
+		// Act
+		cut.Find("input[aria-label='Filter by author']").Input("Jane");
+
+		// Assert
+		cut.Markup.Should().Contain("Alpha Article");
+		cut.Markup.Should().NotContain("Beta Article");
+	}
+
+	[Fact]
+	public void CategoryColumnFilter_ListsArchivedCategories_AndNarrowsTableToSelectedCategory()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Alpha Article", "admin1", isPublished: true, category: _category),
+			CreateArticle("Beta Article", "admin1", isPublished: true, category: _archivedCategory)
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+		var categorySelect = cut.Find("select[aria-label='Filter by category']");
+
+		// Assert - dropdown includes the archived category
+		categorySelect.QuerySelectorAll("option").Should().Contain(
+			o => o.TextContent.Contains(_archivedCategory.CategoryName, StringComparison.Ordinal));
+
+		// Act
+		categorySelect.Change(_archivedCategory.Id.ToString());
+
+		// Assert
+		cut.Markup.Should().Contain("Beta Article");
+		cut.Markup.Should().NotContain("Alpha Article");
+	}
+
+	[Fact]
+	public void StatusColumnFilter_NarrowsTableToPublishedOrDraft()
+	{
+		// Arrange
+		var articles = new List<ArticleDto>
+		{
+			CreateArticle("Published Article", "admin1", isPublished: true),
+			CreateArticle("Draft Article", "admin1", isPublished: false)
+		};
+		SetupAuthState(CreateAdminUser());
+		SetupArticles(articles);
+
+		var cut = Render<ArticlesPage>();
+		var statusSelect = cut.Find("select[aria-label='Filter by status']");
+
+		// Act
+		statusSelect.Change("Published");
+
+		// Assert
+		cut.Markup.Should().Contain("Published Article");
+		cut.Markup.Should().NotContain("Draft Article");
+
+		// Act
+		statusSelect.Change("Draft");
+
+		// Assert
+		cut.Markup.Should().Contain("Draft Article");
+		cut.Markup.Should().NotContain("Published Article");
+
+		// Act
+		statusSelect.Change("All");
+
+		// Assert
+		cut.Markup.Should().Contain("Published Article");
+		cut.Markup.Should().Contain("Draft Article");
+	}
+
 	// Helper methods
 
 	private void SetupAuthState(ClaimsPrincipal user)
@@ -580,22 +869,24 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	private static ArticleDto CreateArticle(string title, string authorId, bool isPublished,
-		string content = "Test content")
+		string content = "Test content", bool isArchived = false, string authorName = "Test Author",
+		CategoryDto? category = null)
 	{
 		return new ArticleDto(
 			Id: ObjectId.GenerateNewId().ToString(),
 			Title: title,
 			Slug: "test-slug",
 			Content: content,
-			Author: new AuthorDto(authorId, "Test Author"),
-			Category: new CategoryDto
+			Author: new AuthorDto(authorId, authorName),
+			Category: category ?? new CategoryDto
 			{
 				CategoryName = "Test Category", Slug = "test-category", Description = "Test description"
 			},
 			CreatedAt: DateTime.UtcNow,
 			UpdatedAt: DateTime.UtcNow,
 			IsPublished: isPublished,
-			PublishedOn: isPublished ? DateTime.UtcNow : null
+			PublishedOn: isPublished ? DateTime.UtcNow : null,
+			IsArchived: isArchived
 		);
 	}
 

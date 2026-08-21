@@ -32,6 +32,14 @@
 					Show My Articles Only
 				</label>
 
+				<label class="flex items-center gap-2 text-sm font-medium text-(--app-text)">
+					<input type="checkbox"
+								 class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
+								 @bind="_includeArchived"
+								 @bind:after="HandleFilterChanged" />
+					Include Archived
+				</label>
+
 				<button type="button"
 								class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500"
 								@onclick="OpenCreatePanel">
@@ -67,9 +75,18 @@
 	}
 
 	<section class="app-panel-card">
-		<div class="app-section-header">
+		<div class="app-section-header flex-wrap gap-3">
 			<h2 class="app-section-title">Articles</h2>
-			<span class="app-badge">@FilteredArticles.Count total</span>
+			<div class="flex flex-1 flex-wrap items-center justify-end gap-3">
+				<input type="search"
+							 aria-label="Search articles by title or author"
+							 placeholder="Search by title or author..."
+							 class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+							 @bind="_searchText"
+							 @bind:event="oninput"
+							 @bind:after="HandleFilterChanged" />
+				<span class="app-badge">@FilteredArticles.Count total</span>
+			</div>
 		</div>
 
 		@if (!string.IsNullOrWhiteSpace(_loadError))
@@ -99,19 +116,70 @@
 							}
 							<th class="px-3 py-2">Actions</th>
 						</tr>
+						<tr class="border-b border-slate-200 text-xs dark:border-slate-700">
+							<th class="px-3 py-2">
+								<input type="text"
+											 aria-label="Filter by title"
+											 placeholder="Filter title"
+											 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+											 @bind="_titleFilter"
+											 @bind:event="oninput"
+											 @bind:after="HandleFilterChanged" />
+							</th>
+							<th class="px-3 py-2">
+								<input type="text"
+											 aria-label="Filter by author"
+											 placeholder="Filter author"
+											 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+											 @bind="_authorFilter"
+											 @bind:event="oninput"
+											 @bind:after="HandleFilterChanged" />
+							</th>
+							<th class="px-3 py-2">
+								<select aria-label="Filter by category"
+												class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+												@bind="_categoryFilter"
+												@bind:after="HandleFilterChanged">
+									<option value="">All categories</option>
+									@foreach (var category in _categories)
+									{
+										<option value="@category.Id.ToString()">@category.CategoryName@(category.IsArchived ? " (archived)" : "")</option>
+									}
+								</select>
+							</th>
+							<th class="px-3 py-2">
+								<select aria-label="Filter by status"
+												class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+												@bind="_statusFilter"
+												@bind:after="HandleFilterChanged">
+									<option value="All">All</option>
+									<option value="Published">Published</option>
+									<option value="Draft">Draft</option>
+								</select>
+							</th>
+							<th class="px-3 py-2"></th>
+							<th class="px-3 py-2"></th>
+						</tr>
 					</thead>
 					<tbody>
 						@{ var rowIndex = 0; }
 						@foreach (var article in PagedArticles)
 						{
 							var canEdit = ArticleAuthorizationService.CanEditArticle(_currentUser, article);
+							var canArchive = ArticleAuthorizationService.CanArchiveArticle(_currentUser, article);
 							var rowClass = rowIndex % 2 == 0
 								? "bg-white dark:bg-slate-900"
 								: "bg-slate-50 dark:bg-slate-950/40";
 							rowIndex++;
 
 							<tr class="border-b border-slate-100 @rowClass dark:border-slate-800">
-								<td class="px-3 py-2 font-medium text-(--app-text)">@article.Title</td>
+								<td class="px-3 py-2 font-medium text-(--app-text)">
+									@article.Title
+									@if (article.IsArchived)
+									{
+										<span class="app-badge ml-2" role="status">Archived</span>
+									}
+								</td>
 								<td class="px-3 py-2">@article.Author.Name</td>
 								<td class="px-3 py-2">@article.Category.CategoryName</td>
 								<td class="px-3 py-2">@(article.IsPublished ? "Published" : "Draft")</td>
@@ -170,6 +238,26 @@
 												</button>
 											}
 										}
+
+										@if (canArchive)
+										{
+											@if (article.IsArchived)
+											{
+												<button type="button"
+																class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+																@onclick="() => UnarchiveArticleAsync(article.Id)">
+													Unarchive
+												</button>
+											}
+											else
+											{
+												<button type="button"
+																class="rounded border border-amber-500 px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+																@onclick="() => ArchiveArticleAsync(article.Id)">
+													Archive
+												</button>
+											}
+										}
 									</div>
 								</td>
 							</tr>
@@ -223,6 +311,12 @@
 	private bool _saving;
 	private bool _showCreatePanel;
 	private bool _showMyArticlesOnly;
+	private bool _includeArchived;
+	private string _searchText = string.Empty;
+	private string _titleFilter = string.Empty;
+	private string _authorFilter = string.Empty;
+	private string _categoryFilter = string.Empty;
+	private string _statusFilter = "All";
 	private string? _error;
 	private string? _loadError;
 	private string? _pendingDeleteId;
@@ -233,7 +327,14 @@
 
 	private List<ArticleDto> FilteredArticles =>
 	[
-		.. _articles.Where(article => !_showMyArticlesOnly || IsOwnedByCurrentUser(article))
+		.. _articles
+			.Where(article => !_showMyArticlesOnly || IsOwnedByCurrentUser(article))
+			.Where(article => _includeArchived || !article.IsArchived)
+			.Where(MatchesGlobalSearch)
+			.Where(MatchesTitleFilter)
+			.Where(MatchesAuthorFilter)
+			.Where(MatchesCategoryFilter)
+			.Where(MatchesStatusFilter)
 	];
 
 	private List<ArticleDto> SortedArticles
@@ -279,6 +380,41 @@
 	{
 		var currentUserId = ArticleAuthorizationService.GetCurrentUserId(_currentUser);
 		return !string.IsNullOrWhiteSpace(currentUserId) && article.Author.UserId == currentUserId;
+	}
+
+	private bool MatchesGlobalSearch(ArticleDto article)
+	{
+		return string.IsNullOrWhiteSpace(_searchText)
+		       || article.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase)
+		       || article.Author.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase);
+	}
+
+	private bool MatchesTitleFilter(ArticleDto article)
+	{
+		return string.IsNullOrWhiteSpace(_titleFilter)
+		       || article.Title.Contains(_titleFilter, StringComparison.OrdinalIgnoreCase);
+	}
+
+	private bool MatchesAuthorFilter(ArticleDto article)
+	{
+		return string.IsNullOrWhiteSpace(_authorFilter)
+		       || article.Author.Name.Contains(_authorFilter, StringComparison.OrdinalIgnoreCase);
+	}
+
+	private bool MatchesCategoryFilter(ArticleDto article)
+	{
+		return string.IsNullOrWhiteSpace(_categoryFilter)
+		       || article.Category.Id.ToString() == _categoryFilter;
+	}
+
+	private bool MatchesStatusFilter(ArticleDto article)
+	{
+		return _statusFilter switch
+		{
+			"Published" => article.IsPublished,
+			"Draft" => !article.IsPublished,
+			_ => true
+		};
 	}
 
 	private static string ColumnLabel(SortColumn column) => column switch
@@ -458,6 +594,34 @@
 	{
 		_error = null;
 		var result = await Sender.Send(new UnpublishArticleCommand(id));
+		if (result.Success)
+		{
+			await LoadAsync();
+		}
+		else
+		{
+			_error = result.Error;
+		}
+	}
+
+	private async Task ArchiveArticleAsync(string id)
+	{
+		_error = null;
+		var result = await Sender.Send(new ArchiveArticleCommand(id));
+		if (result.Success)
+		{
+			await LoadAsync();
+		}
+		else
+		{
+			_error = result.Error;
+		}
+	}
+
+	private async Task UnarchiveArticleAsync(string id)
+	{
+		_error = null;
+		var result = await Sender.Send(new UnarchiveArticleCommand(id));
 		if (result.Success)
 		{
 			await LoadAsync();
