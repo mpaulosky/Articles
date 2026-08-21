@@ -90,6 +90,14 @@ public sealed class Article
 	[BsonElement("category")]
 	public CategoryDto Category { get; private set; } = CategoryDto.Empty;
 
+	/// <summary>
+	///     Gets a value indicating whether the article is archived. Archiving is independent of
+	///     <see cref="IsPublished" /> and hides the article from the default article list until unarchived.
+	/// </summary>
+	[BsonElement("isArchived")]
+	[BsonRepresentation(BsonType.Boolean)]
+	public bool IsArchived { get; private set; }
+
 	private Article()
 	{
 	}
@@ -147,6 +155,34 @@ public sealed class Article
 
 		IsPublished = false;
 		PublishedOn = null;
+		Touch();
+	}
+
+	/// <summary>
+	///     Archives the article, hiding it from the default article list. Independent of <see cref="IsPublished" />.
+	/// </summary>
+	public void Archive()
+	{
+		if (IsArchived)
+		{
+			return;
+		}
+
+		IsArchived = true;
+		Touch();
+	}
+
+	/// <summary>
+	///     Unarchives the article, restoring it to the default article list. Independent of <see cref="IsPublished" />.
+	/// </summary>
+	public void Unarchive()
+	{
+		if (!IsArchived)
+		{
+			return;
+		}
+
+		IsArchived = false;
 		Touch();
 	}
 

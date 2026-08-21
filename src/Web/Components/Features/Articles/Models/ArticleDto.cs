@@ -26,7 +26,8 @@ public sealed record ArticleDto(
 	DateTime CreatedAt,
 	DateTime? UpdatedAt,
 	bool IsPublished,
-	DateTime? PublishedOn)
+	DateTime? PublishedOn,
+	bool IsArchived = false)
 {
 	/// <summary>
 	///     Maps an entity to a DTO using explicit application logic instead of a mapper library.
@@ -47,6 +48,7 @@ public sealed record ArticleDto(
 			article.CreatedAt,
 			article.UpdatedAt,
 			article.IsPublished,
-			article.PublishedOn);
+			article.PublishedOn,
+			article.IsArchived);
 	}
 }

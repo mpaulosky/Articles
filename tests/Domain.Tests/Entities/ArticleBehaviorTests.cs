@@ -35,6 +35,7 @@ public class ArticleBehaviorTests
 		article.UpdatedAt.Should().BeNull();
 		article.IsPublished.Should().BeFalse();
 		article.PublishedOn.Should().BeNull();
+		article.IsArchived.Should().BeFalse();
 		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
 	}
 
@@ -117,6 +118,90 @@ public class ArticleBehaviorTests
 		publishedOnWhilePublished.Should().NotBeNull();
 		article.IsPublished.Should().BeFalse();
 		article.PublishedOn.Should().BeNull();
+	}
+
+	[Fact]
+	public void ArchiveAndUnarchiveToggleArchivedState()
+	{
+		// Arrange
+		var article = Article.Create("Post", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+
+		// Act
+		article.Archive();
+		var archivedState = article.IsArchived;
+		article.Unarchive();
+
+		// Assert
+		archivedState.Should().BeTrue();
+		article.IsArchived.Should().BeFalse();
+	}
+
+	[Fact]
+	public void ArchiveDoesNotChangePublishedState()
+	{
+		// Arrange
+		var article = Article.Create("Post", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+		article.Publish();
+
+		// Act
+		article.Archive();
+
+		// Assert
+		article.IsArchived.Should().BeTrue();
+		article.IsPublished.Should().BeTrue();
+		article.PublishedOn.Should().NotBeNull();
+	}
+
+	[Fact]
+	public void UnarchiveDoesNotChangePublishedState()
+	{
+		// Arrange
+		var article = Article.Create("Post", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+		article.Archive();
+
+		// Act
+		article.Unarchive();
+
+		// Assert
+		article.IsArchived.Should().BeFalse();
+		article.IsPublished.Should().BeFalse();
+	}
+
+	[Fact]
+	public void ArchiveIdempotentWhenAlreadyArchived()
+	{
+		// Arrange
+		var article = Article.Create("Post", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+		article.Archive();
+		var firstArchiveTime = article.UpdatedAt;
+
+		// Act
+		System.Threading.Thread.Sleep(10);
+		article.Archive();
+
+		// Assert
+		article.IsArchived.Should().BeTrue();
+		article.UpdatedAt.Should().Be(firstArchiveTime);
+	}
+
+	[Fact]
+	public void UnarchiveIdempotentWhenAlreadyUnarchived()
+	{
+		// Arrange
+		var article = Article.Create("Post", "Body",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+		var creationTime = article.UpdatedAt;
+
+		// Act
+		article.Unarchive();
+
+		// Assert
+		article.IsArchived.Should().BeFalse();
+		article.UpdatedAt.Should().Be(creationTime);
 	}
 
 	[Fact]

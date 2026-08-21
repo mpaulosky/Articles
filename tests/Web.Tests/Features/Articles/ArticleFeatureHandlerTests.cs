@@ -469,6 +469,142 @@ public class ArticleFeatureHandlerTests
 		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
 	}
 
+	[Fact]
+	public async Task ArchiveArticleCommandArchivesArticleAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var createCommand = new CreateArticleCommand(
+			"Article To Archive",
+			"article-to-archive",
+			"Content",
+			new AuthorDto("user-1", "Author", "author@example.com"));
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+
+		var command = new ArchiveArticleCommand(created.Value!.Id);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value!.IsArchived.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task ArchiveArticleCommandDoesNotChangePublishedStateAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var createCommand = new CreateArticleCommand(
+			"Live Archived Article",
+			"live-archived-article",
+			"Content",
+			new AuthorDto("user-1", "Author", "author@example.com"));
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+		await handler.Handle(new PublishArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
+
+		var command = new ArchiveArticleCommand(created.Value.Id);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value!.IsArchived.Should().BeTrue();
+		result.Value.IsPublished.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task ArchiveArticleCommandReturnsNotFoundWhenArticleDoesNotExistAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var command = new ArchiveArticleCommand(ObjectId.GenerateNewId().ToString());
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
+	}
+
+	[Fact]
+	public async Task ArchiveArticleCommandReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var command = new ArchiveArticleCommand("invalid-id");
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+	}
+
+	[Fact]
+	public async Task UnarchiveArticleCommandUnarchivesArticleAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var createCommand = new CreateArticleCommand(
+			"Article To Unarchive",
+			"article-to-unarchive",
+			"Content",
+			new AuthorDto("user-1", "Author", "author@example.com"));
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+		await handler.Handle(new ArchiveArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
+
+		var command = new UnarchiveArticleCommand(created.Value.Id);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value!.IsArchived.Should().BeFalse();
+	}
+
+	[Fact]
+	public async Task UnarchiveArticleCommandReturnsNotFoundWhenArticleDoesNotExistAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var command = new UnarchiveArticleCommand(ObjectId.GenerateNewId().ToString());
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
+	}
+
+	[Fact]
+	public async Task UnarchiveArticleCommandReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var command = new UnarchiveArticleCommand("invalid-id");
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+	}
+
 	private static ArticlesMongoDbContext CreateContext()
 	{
 		var options = new DbContextOptionsBuilder<ArticlesMongoDbContext>()
