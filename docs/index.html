@@ -194,6 +194,13 @@
         font-size: 0.88rem;
       }
 
+      .releases-list .mini-meta {
+        display: inline;
+        margin-bottom: 0;
+        margin-right: 10px;
+        font-size: inherit;
+      }
+
       .quick-links {
         display: grid;
         gap: 12px;
@@ -385,7 +392,7 @@
             .join("");
 
           list.innerHTML =
-            '<ul class="blog-list">' +
+            '<ul class="blog-list releases-list">' +
             items +
             "</ul>" +
             '<p class="release-list-footer"><a href="' +
