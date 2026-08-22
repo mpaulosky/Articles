@@ -1,0 +1,48 @@
+@using Web.Components.Features.Categories.Models
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div class="space-y-4">
+		<div>
+			<label class="block text-sm font-medium text-(--app-text)">Name</label>
+			<InputText @bind-Value="Model.Name"
+								 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+		</div>
+
+		<div>
+			<label class="block text-sm font-medium text-(--app-text)">Description</label>
+			<InputTextArea @bind-Value="Model.Description"
+										 class="mt-1 min-h-28 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+		</div>
+
+		<div class="flex items-center gap-2">
+			<button type="submit"
+							class="app-button app-button-primary"
+							disabled="@Saving">
+				@(Saving ? "Saving..." : SubmitLabel)
+			</button>
+			@FooterActions
+		</div>
+	</div>
+</EditForm>
+
+@code {
+	[Parameter, EditorRequired]
+	public CategoryFormModel Model { get; set; } = default!;
+
+	[Parameter]
+	public bool Saving { get; set; }
+
+	[Parameter]
+	public string SubmitLabel { get; set; } = "Save";
+
+	[Parameter]
+	public EventCallback OnValidSubmit { get; set; }
+
+	[Parameter]
+	public RenderFragment? FooterActions { get; set; }
+
+	private Task HandleValidSubmit() => OnValidSubmit.InvokeAsync();
+}
