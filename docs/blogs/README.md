@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [test: add auth wiring coverage (closes #76)](2026-08-22-pr-95-test-add-auth-wiring-coverage-closes-76.md) | release,automation |
 | 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
 | 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
 | 2026-08-22 | [test: add Category.Empty regression coverage (closes #79)](2026-08-22-pr-89-test-add-category-empty-regression-coverage-closes-79.md) | release,automation |
