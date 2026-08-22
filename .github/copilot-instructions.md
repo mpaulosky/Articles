@@ -49,7 +49,7 @@
 - Run the narrowest relevant test or validation command during iteration. Typical commands are:
 
   ```bash
-  dotnet test Articles.slnx --nologo
+  dotnet test Articles.slnx
   dotnet build Articles.slnx --configuration Release
   npx --yes markdownlint-cli2 "**/*.md"
   ```
