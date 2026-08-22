@@ -1,12 +1,19 @@
 using System.Security.Claims;
+
 using Microsoft.AspNetCore.Components.Web;
+
 using Bunit;
+
 using Domain.Abstractions;
+
 using FluentAssertions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+
 using NSubstitute;
+
 using Web.Components.Features.UserManagement.AddUserRoles;
 using Web.Components.Features.UserManagement;
 using Web.Components.Features.UserManagement.GetUserRoles;
@@ -58,11 +65,7 @@ public class ManageRolesTests : BunitContext
 	{
 		// Arrange
 		var normalUser = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.Name, "Normal User"),
-				new Claim(ClaimTypes.Role, "User")
-			},
+			new[] { new Claim(ClaimTypes.Name, "Normal User"), new Claim(ClaimTypes.Role, "User") },
 			"TestAuthType"));
 
 		AddAuthorization();
@@ -90,11 +93,7 @@ public class ManageRolesTests : BunitContext
 			new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User" }),
 			new UserWithRolesDto("user-2", "bob@example.com", "Bob", new[] { "Admin", "User" })
 		};
-		var roles = new[]
-		{
-			new RoleDto("role-1", "Admin"),
-			new RoleDto("role-2", "Editor")
-		};
+		var roles = new[] { new RoleDto("role-1", "Admin"), new RoleDto("role-2", "Editor") };
 		var mediator = Substitute.For<IMediator>();
 		mediator.Send(Arg.Any<GetUsersWithRolesQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok<IReadOnlyList<UserWithRolesDto>>(users));
@@ -102,11 +101,7 @@ public class ManageRolesTests : BunitContext
 			.Returns(Result.Ok<IReadOnlyList<RoleDto>>(roles));
 
 		var adminUser = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.Name, "Admin User"),
-				new Claim(ClaimTypes.Role, "Admin")
-			},
+			new[] { new Claim(ClaimTypes.Name, "Admin User"), new Claim(ClaimTypes.Role, "Admin") },
 			"TestAuthType"));
 
 		AddAuthorization();
@@ -136,11 +131,7 @@ public class ManageRolesTests : BunitContext
 			.Returns(Result.Ok<IReadOnlyList<RoleDto>>(new[] { new RoleDto("role-1", "Admin") }));
 
 		var adminUser = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.Name, "Admin User"),
-				new Claim(ClaimTypes.Role, "Admin")
-			},
+			new[] { new Claim(ClaimTypes.Name, "Admin User"), new Claim(ClaimTypes.Role, "Admin") },
 			"TestAuthType"));
 
 		AddAuthorization();
@@ -160,10 +151,7 @@ public class ManageRolesTests : BunitContext
 	public async Task ClickingInactiveRoleToggle_AssignsTheRoleAndRefreshes()
 	{
 		// Arrange
-		var initialUsers = new[]
-		{
-			new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User" })
-		};
+		var initialUsers = new[] { new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User" }) };
 		var refreshedUsers = new[]
 		{
 			new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User", "Admin" })
@@ -180,11 +168,7 @@ public class ManageRolesTests : BunitContext
 			.Returns(Result.Ok());
 
 		var adminUser = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.Name, "Admin User"),
-				new Claim(ClaimTypes.Role, "Admin")
-			},
+			new[] { new Claim(ClaimTypes.Name, "Admin User"), new Claim(ClaimTypes.Role, "Admin") },
 			"TestAuthType"));
 
 		AddAuthorization();
@@ -212,10 +196,7 @@ public class ManageRolesTests : BunitContext
 		{
 			new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User", "Admin" })
 		};
-		var refreshedUsers = new[]
-		{
-			new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User" })
-		};
+		var refreshedUsers = new[] { new UserWithRolesDto("user-1", "alice@example.com", "Alice", new[] { "User" }) };
 		var roles = new[] { new RoleDto("role-1", "Admin") };
 		var mediator = Substitute.For<IMediator>();
 		mediator.Send(Arg.Any<GetUsersWithRolesQuery>(), Arg.Any<CancellationToken>())
@@ -228,11 +209,7 @@ public class ManageRolesTests : BunitContext
 			.Returns(Result.Ok());
 
 		var adminUser = new ClaimsPrincipal(new ClaimsIdentity(
-			new[]
-			{
-				new Claim(ClaimTypes.Name, "Admin User"),
-				new Claim(ClaimTypes.Role, "Admin")
-			},
+			new[] { new Claim(ClaimTypes.Name, "Admin User"), new Claim(ClaimTypes.Role, "Admin") },
 			"TestAuthType"));
 
 		AddAuthorization();
