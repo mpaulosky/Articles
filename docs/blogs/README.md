@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-blog.yml](2026-08-22-pr-61-delete-github-workflows-squad-milestone-blog-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-blog-readme-sync.yml](2026-08-22-pr-59-delete-github-workflows-squad-blog-readme-sync-yml.md) | release,automation |
 | 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |

@@ -57,6 +57,7 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](docs/blogs/2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-blog.yml](docs/blogs/2026-08-22-pr-61-delete-github-workflows-squad-milestone-blog-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-blog-readme-sync.yml](docs/blogs/2026-08-22-pr-59-delete-github-workflows-squad-blog-readme-sync-yml.md) | release,automation |
 | 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](docs/blogs/2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
@@ -114,6 +115,7 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](docs/blogs/2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-blog.yml](docs/blogs/2026-08-22-pr-61-delete-github-workflows-squad-milestone-blog-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-blog-readme-sync.yml](docs/blogs/2026-08-22-pr-59-delete-github-workflows-squad-blog-readme-sync-yml.md) | release,automation |
 | 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](docs/blogs/2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
