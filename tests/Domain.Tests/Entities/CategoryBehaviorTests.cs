@@ -18,6 +18,25 @@ namespace Domain.Entities;
 public class CategoryBehaviorTests
 {
 	[Fact]
+	public void CategoryEmptyIsFreshBlankState()
+	{
+		// Arrange
+
+		// Act
+		var empty = Category.Empty;
+
+		// Assert
+		empty.Should().NotBeSameAs(Category.Empty);
+		empty.Id.Should().Be(ObjectId.Empty);
+		empty.Name.Should().BeEmpty();
+		empty.Description.Should().BeEmpty();
+		empty.Slug.Should().BeEmpty();
+		empty.CreatedOn.Should().Be(DateTimeOffset.UnixEpoch);
+		empty.ModifiedOn.Should().BeNull();
+		empty.IsArchived.Should().BeFalse();
+	}
+
+	[Fact]
 	public void CategoryDtoEmptyIsFreshBlankState()
 	{
 		// Arrange
