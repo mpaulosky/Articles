@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](docs/blogs/2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
 | 2026-08-22 | [Slug-based article routes, category archive, and E2E test scaffolding](docs/blogs/2026-08-22-pr-55-slug-based-article-routes-category-archive-and-e2e-test-scaffolding.md) | release,automation |
 | 2026-08-21 | [fix: repair release workflow's validation dispatch loop](docs/blogs/2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
 | 2026-08-21 | [fix: finish issue #32 - real QuickGrid, glossary, idempotency tests, seed data](docs/blogs/2026-08-21-pr-51-fix-finish-issue-32-real-quickgrid-glossary-idempotency-tests-seed-data.md) | release,automation |
 | 2026-08-21 | [feat: add archiving, search, and column filters to Articles list (#38)](docs/blogs/2026-08-21-pr-49-feat-add-archiving-search-and-column-filters-to-articles-list-38.md) | release,automation |
-| 2026-08-21 | [feat: add Articles list header, create panel, and core grid](docs/blogs/2026-08-21-pr-47-feat-add-articles-list-header-create-panel-and-core-grid.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](docs/blogs/2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
 | 2026-08-22 | [Slug-based article routes, category archive, and E2E test scaffolding](docs/blogs/2026-08-22-pr-55-slug-based-article-routes-category-archive-and-e2e-test-scaffolding.md) | release,automation |
 | 2026-08-21 | [fix: repair release workflow's validation dispatch loop](docs/blogs/2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
 | 2026-08-21 | [fix: finish issue #32 - real QuickGrid, glossary, idempotency tests, seed data](docs/blogs/2026-08-21-pr-51-fix-finish-issue-32-real-quickgrid-glossary-idempotency-tests-seed-data.md) | release,automation |
 | 2026-08-21 | [feat: add archiving, search, and column filters to Articles list (#38)](docs/blogs/2026-08-21-pr-49-feat-add-archiving-search-and-column-filters-to-articles-list-38.md) | release,automation |
-| 2026-08-21 | [feat: add Articles list header, create panel, and core grid](docs/blogs/2026-08-21-pr-47-feat-add-articles-list-header-create-panel-and-core-grid.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
