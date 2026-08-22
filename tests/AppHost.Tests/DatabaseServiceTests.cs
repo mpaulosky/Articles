@@ -24,6 +24,27 @@ public class DatabaseServiceTests
 	}
 
 	[Fact]
+	public void GetMongoRootPassword_ReturnsConfiguredPasswordFromEnvironment()
+	{
+		// Arrange
+		var originalPassword = Environment.GetEnvironmentVariable("MONGO_INITDB_ROOT_PASSWORD");
+		Environment.SetEnvironmentVariable("MONGO_INITDB_ROOT_PASSWORD", "dev-secret");
+
+		try
+		{
+			// Act
+			var password = DatabaseService.GetMongoRootPassword();
+
+			// Assert
+			password.Should().Be("dev-secret");
+		}
+		finally
+		{
+			Environment.SetEnvironmentVariable("MONGO_INITDB_ROOT_PASSWORD", originalPassword);
+		}
+	}
+
+	[Fact]
 	public void AddMongoDbServicesAttachesMongoDevelopmentCommandsToServerResource()
 	{
 		// Arrange

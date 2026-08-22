@@ -138,7 +138,6 @@ public class CategoryBehaviorTests
 		var firstArchiveTime = category.ModifiedOn;
 
 		// Act
-		Thread.Sleep(10);
 		category.Archive();
 
 		// Assert

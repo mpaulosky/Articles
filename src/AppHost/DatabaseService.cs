@@ -32,6 +32,16 @@ public static class DatabaseService
 	}
 
 	/// <summary>
+	///   Gets the configured MongoDB root password used for local development.
+	/// </summary>
+	/// <returns>The MongoDB root password, or the default development password when no environment override is supplied.</returns>
+	public static string GetMongoRootPassword()
+	{
+		return Environment.GetEnvironmentVariable("MONGO_INITDB_ROOT_PASSWORD")
+			?? "articles-local-dev";
+	}
+
+	/// <summary>
 	///   Adds MongoDB services to the distributed application builder, including resource tagging, grouping, and improved
 	///   seeding logic.
 	/// </summary>
@@ -41,11 +51,8 @@ public static class DatabaseService
 		this IDistributedApplicationBuilder builder)
 	{
 		var (mongoImageTag, mongoDataVolumeName) = MongoDbResourceSettings;
-
-		// Fixed, non-secret local-dev credentials — required so the root user stays valid across AppHost
-		// restarts when the data volume below is reused. See the comment on MongoDbResourceSettings.
 		var mongoUserName = builder.AddParameter("mongo-username", "mongoadmin");
-		var mongoPassword = builder.AddParameter("mongo-password", "articles-local-dev", secret: true);
+		var mongoPassword = builder.AddParameter("mongo-password", GetMongoRootPassword(), secret: true);
 
 		var server = builder.AddMongoDB(AppHostConstants.Server, userName: mongoUserName, password: mongoPassword)
 			.WithImage("mongo", mongoImageTag);
