@@ -27,7 +27,7 @@ public class AuthWiringExtensionsTests
 	public async Task AddAuth0Authentication_WhenEnvironmentIsTesting_UsesCookieAuthenticationDefaults()
 	{
 		// Arrange
-		var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
+		var builder = CreateTestWebApplicationBuilder();
 		builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
 		{
 			["Auth0:Domain"] = "example.auth0.com",
@@ -50,7 +50,7 @@ public class AuthWiringExtensionsTests
 	public void AddAuth0Authentication_WhenConfigurationIsMissing_ThrowsInvalidOperationException()
 	{
 		// Arrange
-		var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Production" });
+		var builder = CreateTestWebApplicationBuilder(environmentName: "Production");
 		builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>());
 
 		// Act
@@ -65,7 +65,7 @@ public class AuthWiringExtensionsTests
 	public void UseAuth0Authentication_WhenApplicationIsBuilt_DoesNotThrow()
 	{
 		// Arrange
-		var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
+		var builder = CreateTestWebApplicationBuilder();
 		builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
 		{
 			["Auth0:Domain"] = "example.auth0.com",
@@ -235,20 +235,11 @@ public class AuthWiringExtensionsTests
 	{
 		var contentRootPath = Path.Combine(Path.GetTempPath(), "Articles-WebTests", Guid.NewGuid().ToString("N"));
 		Directory.CreateDirectory(contentRootPath);
-		var originalCurrentDirectory = Directory.GetCurrentDirectory();
-		Directory.SetCurrentDirectory(contentRootPath);
 
-		try
+		return WebApplication.CreateBuilder(new WebApplicationOptions
 		{
-			return WebApplication.CreateBuilder(new WebApplicationOptions
-			{
-				EnvironmentName = environmentName, ContentRootPath = contentRootPath
-			});
-		}
-		finally
-		{
-			Directory.SetCurrentDirectory(originalCurrentDirectory);
-		}
+			EnvironmentName = environmentName, ContentRootPath = contentRootPath
+		});
 	}
 
 	private sealed class TestOptionsMonitor<T>(T options) : IOptionsMonitor<T>
