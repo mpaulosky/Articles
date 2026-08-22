@@ -76,7 +76,7 @@ public sealed class CategoriesPageTests : BunitContext
 	}
 
 	[Fact]
-	public void ShowsDeleteButton_ForEachCategory()
+	public void ShowsEditAndArchiveButtons_ForEachCategory()
 	{
 		// Arrange
 		var categories = CreateTestCategories();
@@ -86,8 +86,65 @@ public sealed class CategoriesPageTests : BunitContext
 		var cut = Render<CategoriesPage>();
 
 		// Assert
-		var deleteButtons = cut.FindAll("button:contains('Delete')");
-		deleteButtons.Count.Should().Be(2, "each category should have a delete button");
+		var editButtons = cut.FindAll("button:contains('Edit')");
+		editButtons.Count.Should().Be(2, "each category should have an edit button");
+		var archiveButtons = cut.FindAll("button:contains('Archive')");
+		archiveButtons.Count.Should().Be(2, "each category should have an archive button");
+	}
+
+	[Fact]
+	public void HidesArchivedCategories_ByDefault()
+	{
+		// Arrange
+		var categories = new List<CategoryDto>
+		{
+			CreateCategory("Technology", "technology", "Tech articles"),
+			CreateCategory("Lifestyle", "lifestyle", "Lifestyle content", isArchived: true)
+		};
+		SetupCategories(categories);
+
+		// Act
+		var cut = Render<CategoriesPage>();
+
+		// Assert
+		cut.Markup.Should().Contain("Technology");
+		cut.Markup.Should().NotContain("Lifestyle");
+	}
+
+	[Fact]
+	public void ShowsArchivedCategories_WhenIncludeArchivedIsChecked()
+	{
+		// Arrange
+		var categories = new List<CategoryDto>
+		{
+			CreateCategory("Technology", "technology", "Tech articles"),
+			CreateCategory("Lifestyle", "lifestyle", "Lifestyle content", isArchived: true)
+		};
+		SetupCategories(categories);
+		var cut = Render<CategoriesPage>();
+
+		// Act
+		cut.Find("input[type='checkbox']").Change(true);
+
+		// Assert
+		cut.Markup.Should().Contain("Lifestyle");
+		cut.Markup.Should().Contain("Archived");
+	}
+
+	[Fact]
+	public void ShowsEditForm_WhenEditButtonClicked()
+	{
+		// Arrange
+		var categories = new List<CategoryDto> { CreateCategory("Technology", "technology", "Tech articles") };
+		SetupCategories(categories);
+		var cut = Render<CategoriesPage>();
+
+		// Act
+		cut.Find("button:contains('Edit')").Click();
+
+		// Assert
+		cut.Markup.Should().Contain("Save changes");
+		cut.Markup.Should().Contain("Cancel");
 	}
 
 	[Fact]
@@ -136,7 +193,7 @@ public sealed class CategoriesPageTests : BunitContext
 
 		// Assert
 		cut.Markup.Should().Contain("rounded-xl border", "category cards should have proper styling");
-		cut.Markup.Should().Contain("Delete", "category cards should have delete button");
+		cut.Markup.Should().Contain("Archive", "category cards should have archive button");
 	}
 
 	[Fact]
@@ -196,11 +253,15 @@ public sealed class CategoriesPageTests : BunitContext
 		];
 	}
 
-	private static CategoryDto CreateCategory(string name, string slug, string description)
+	private static CategoryDto CreateCategory(string name, string slug, string description, bool isArchived = false)
 	{
 		return new CategoryDto
 		{
-			Id = ObjectId.GenerateNewId(), CategoryName = name, Slug = slug, Description = description
+			Id = ObjectId.GenerateNewId(),
+			CategoryName = name,
+			Slug = slug,
+			Description = description,
+			IsArchived = isArchived
 		};
 	}
 

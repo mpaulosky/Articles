@@ -125,4 +125,32 @@ public sealed class Category
 		Slug = name.GenerateSlug();
 		ModifiedOn = DateTime.UtcNow;
 	}
+
+	/// <summary>
+	///     Archives the category, hiding it from the default category list.
+	/// </summary>
+	public void Archive()
+	{
+		if (IsArchived)
+		{
+			return;
+		}
+
+		IsArchived = true;
+		ModifiedOn = DateTime.UtcNow;
+	}
+
+	/// <summary>
+	///     Unarchives the category, restoring it to the default category list.
+	/// </summary>
+	public void Unarchive()
+	{
+		if (!IsArchived)
+		{
+			return;
+		}
+
+		IsArchived = false;
+		ModifiedOn = DateTime.UtcNow;
+	}
 }

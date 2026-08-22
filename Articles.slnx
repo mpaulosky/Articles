@@ -11,5 +11,6 @@
         <Project Path="tests/Domain.Tests/Domain.Tests.csproj" />
         <Project Path="tests/Web.Tests/Web.Tests.csproj" />
         <Project Path="tests/Web.UI.Tests/Web.UI.Tests.csproj" />
+        <Project Path="tests/Web.E2E.Tests/Web.E2E.Tests.csproj" />
     </Folder>
 </Solution>

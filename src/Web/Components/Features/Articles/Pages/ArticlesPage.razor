@@ -20,30 +20,32 @@
 	<div class="app-page-card">
 		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 			<div>
-				<p class="app-pill">Publishing</p>
-				<h1 class="app-h1">All Articles</h1>
+				<h2 class="app-h2">All Articles</h2>
 			</div>
-
+			<div>
+				<p class="app-pill">Publishing</p>
+			</div>
 			<div class="flex flex-wrap items-center gap-4">
 				<label class="flex items-center gap-2 text-sm font-medium text-(--app-text)">
-					<input type="checkbox"
-								 class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
+					<input type="checkbox" class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
 								 @bind="_showMyArticlesOnly" />
 					Show My Articles Only
 				</label>
 
 				<label class="flex items-center gap-2 text-sm font-medium text-(--app-text)">
-					<input type="checkbox"
-								 class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
+					<input type="checkbox" class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
 								 @bind="_includeArchived" />
 					Include Archived
 				</label>
 
-				<button type="button"
-								class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500"
-								@onclick="OpenCreatePanel">
-					Create New Article
-				</button>
+				@if (_canCreateArticle)
+				{
+					<button type="button"
+									class="app-button app-button-primary"
+									@onclick="OpenCreatePanel">
+						Create New Article
+					</button>
+				}
 			</div>
 		</div>
 	</div>
@@ -54,7 +56,7 @@
 			<div class="app-section-header">
 				<h2 class="app-section-title">Create article</h2>
 				<button type="button"
-								class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+								class="app-button app-button-secondary"
 								@onclick="CloseCreatePanel">
 					Cancel
 				</button>
@@ -65,10 +67,7 @@
 				<div class="alert-error" role="alert">@_error</div>
 			}
 
-			<ArticleForm Model="_form"
-									 Categories="_categories"
-									 Saving="_saving"
-									 SubmitLabel="Create article"
+			<ArticleForm Model="_form" Categories="_categories" Saving="_saving" SubmitLabel="Create article"
 									 OnValidSubmit="CreateArticleAsync" />
 		</section>
 	}
@@ -77,12 +76,9 @@
 		<div class="app-section-header flex-wrap gap-3">
 			<h2 class="app-section-title">Articles</h2>
 			<div class="flex flex-1 flex-wrap items-center justify-end gap-3">
-				<input type="search"
-							 aria-label="Search articles by title or author"
-							 placeholder="Search by title or author..."
+				<input type="search" aria-label="Search articles by title or author" placeholder="Search by title or author..."
 							 class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-							 @bind="_searchText"
-							 @bind:event="oninput" />
+							 @bind="_searchText" @bind:event="oninput" />
 				<span class="app-badge">@FilteredArticleList.Count total</span>
 			</div>
 		</div>
@@ -103,10 +99,10 @@
 		else
 		{
 			<div class="overflow-x-auto">
-				<QuickGrid TGridItem="ArticleDto" Items="@FilteredArticles" Pagination="@_pagination" Class="zebra-grid w-full text-left text-sm">
+				<QuickGrid TGridItem="ArticleDto" Items="@FilteredArticles" Pagination="@_pagination"
+									 Class="zebra-grid w-full text-left text-sm">
 					<TemplateColumn Title="Title" Sortable="true" IsDefaultSortColumn="true"
-													 SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.Title))"
-													 Class="font-medium text-(--app-text)">
+													SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.Title))" Class="font-medium text-(--app-text)">
 						<ChildContent Context="context">
 							@context.Title
 							@if (context.IsArchived)
@@ -115,23 +111,17 @@
 							}
 						</ChildContent>
 						<ColumnOptions>
-							<input type="text"
-										 aria-label="Filter by title"
-										 placeholder="Filter title"
+							<input type="text" aria-label="Filter by title" placeholder="Filter title"
 										 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-										 @bind="_titleFilter"
-										 @bind:event="oninput" />
+										 @bind="_titleFilter" @bind:event="oninput" />
 						</ColumnOptions>
 					</TemplateColumn>
 
 					<PropertyColumn Property="@(a => a.Author.Name)" Title="Author" Sortable="true">
 						<ColumnOptions>
-							<input type="text"
-										 aria-label="Filter by author"
-										 placeholder="Filter author"
+							<input type="text" aria-label="Filter by author" placeholder="Filter author"
 										 class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs font-normal text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-										 @bind="_authorFilter"
-										 @bind:event="oninput" />
+										 @bind="_authorFilter" @bind:event="oninput" />
 						</ColumnOptions>
 					</PropertyColumn>
 
@@ -143,7 +133,8 @@
 								<option value="">All categories</option>
 								@foreach (var category in _categories)
 								{
-									<option value="@category.Id.ToString()">@category.CategoryName@(category.IsArchived ? " (archived)" : "")</option>
+									<option value="@category.Id.ToString()">@category.CategoryName@(category.IsArchived ? " (archived)" : "")
+									</option>
 								}
 							</select>
 						</ColumnOptions>
@@ -164,89 +155,84 @@
 						</ColumnOptions>
 					</TemplateColumn>
 
-					<TemplateColumn Title="Published" Sortable="true" SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.PublishedOn))">
+					<TemplateColumn Title="Published" Sortable="true"
+													SortBy="@(GridSort<ArticleDto>.ByAscending(a => a.PublishedOn))">
 						@(context.IsPublished && context.PublishedOn is { } publishedOn ? publishedOn.ToString("MMM d, yyyy") : "—")
 					</TemplateColumn>
 
-					<TemplateColumn Title="Actions" Sortable="false">
-						@{
-							var canEdit = ArticleAuthorizationService.CanEditArticle(_currentUser, context);
-							var canArchive = ArticleAuthorizationService.CanArchiveArticle(_currentUser, context);
-						}
-						<div class="flex flex-wrap items-center gap-2">
-							<a href="@($"/articles/{context.Id}")"
-								 class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800">
-								View
-							</a>
+					<TemplateColumn Sortable="false" Class="text-center">
+						<HeaderTemplate>
+							<div class="flex justify-center font-bold">Actions</div>
+						</HeaderTemplate>
+						<ChildContent Context="context">
+							@{
+								var canEdit = ArticleAuthorizationService.CanEditArticle(_currentUser, context);
+								var canArchive = ArticleAuthorizationService.CanArchiveArticle(_currentUser, context);
+								const string btnShape = "w-24 rounded-lg border px-2 py-1 text-center text-xs font-medium";
+								const string baseBtn = $"{btnShape} border-slate-400 text-slate-600 dark:border-slate-600 dark:text-slate-300";
+								const string neutralHover = "hover:bg-slate-100 dark:hover:bg-slate-800";
+								const string skyHover = "hover:border-sky-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30";
+								const string emeraldHover = "hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30";
+								const string amberHover = "hover:border-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30";
+								const string disabledClass = $"{btnShape} cursor-not-allowed border-slate-300 text-slate-400 opacity-60 dark:border-slate-700 dark:text-slate-600";
+							}
+							<div class="flex flex-nowrap items-center justify-center gap-1.5 whitespace-nowrap">
+								<a href="@($"/articles/{context.Slug}")" class="@baseBtn @neutralHover">
+									View
+								</a>
 
-							@if (canEdit)
-							{
+								@if (canEdit)
+								{
+									<a href="@($"/articles/{context.Slug}/edit")" class="@baseBtn @skyHover">
+										Edit
+									</a>
+								}
+								else
+								{
+									<span aria-disabled="true" title="You don't have permission to edit this article" class="@disabledClass">
+										Edit
+									</span>
+								}
+
 								@if (context.IsPublished)
 								{
-									<button type="button"
-													class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+									<button type="button" disabled="@(!canEdit)"
+													title="@(canEdit ? null : "You don't have permission to edit this article")"
+													class="@(canEdit ? $"{baseBtn} {neutralHover}" : disabledClass)"
 													@onclick="() => UnpublishArticleAsync(context.Id)">
 										Unpublish
 									</button>
 								}
 								else
 								{
-									<button type="button"
-													class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+									<button type="button" disabled="@(!canEdit)"
+													title="@(canEdit ? null : "You don't have permission to edit this article")"
+													class="@(canEdit ? $"{baseBtn} {emeraldHover}" : disabledClass)"
 													@onclick="() => PublishArticleAsync(context.Id)">
 										Publish
 									</button>
 								}
 
-								<a href="@($"/articles/{context.Id}/edit")"
-									 class="rounded border border-sky-500 px-2.5 py-1.5 text-sm font-medium text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30">
-									Edit
-								</a>
-
-								@if (_pendingDeleteId == context.Id)
-								{
-									<span class="text-sm text-slate-600 dark:text-slate-300">Delete this article?</span>
-									<button type="button"
-													class="rounded border border-rose-500 bg-rose-50 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50"
-													@onclick="() => DeleteArticleAsync(context.Id)">
-										Confirm
-									</button>
-									<button type="button"
-													class="rounded border border-slate-400 px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-													@onclick="CancelDelete">
-										Cancel
-									</button>
-								}
-								else
-								{
-									<button type="button"
-													class="rounded border border-rose-500 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-													@onclick="() => RequestDelete(context.Id)">
-										Delete
-									</button>
-								}
-							}
-
-							@if (canArchive)
-							{
 								@if (context.IsArchived)
 								{
-									<button type="button"
-													class="rounded border border-emerald-500 px-2.5 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+									<button type="button" disabled="@(!canArchive)"
+													title="@(canArchive ? null : "Only administrators can archive articles")"
+													class="@(canArchive ? $"{baseBtn} {emeraldHover}" : disabledClass)"
 													@onclick="() => UnarchiveArticleAsync(context.Id)">
 										Unarchive
 									</button>
 								}
 								else
 								{
-									<button type="button"
-													class="rounded border border-amber-500 px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-													@onclick="() => ArchiveArticleAsync(context.Id)">
+									<button type="button" disabled="@(!canArchive)"
+													title="@(canArchive ? null : "Only administrators can archive articles")"
+													class="@(canArchive ? $"{baseBtn} {amberHover}" : disabledClass)"
+													@onclick="() => RequestArchive(context.Id)">
 										Archive
 									</button>
 								}
-							}
-						</div>
+							</div>
+						</ChildContent>
 					</TemplateColumn>
 				</QuickGrid>
 			</div>
@@ -257,6 +243,32 @@
 		}
 	</section>
 </section>
+
+@if (_pendingArchiveId is not null)
+{
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4" role="presentation"
+			 @onclick="CancelArchive">
+		<div class="app-panel-card w-full max-w-sm" role="dialog"
+				 aria-modal="true" aria-labelledby="archive-modal-title" @onclick:stopPropagation="true">
+			<h2 id="archive-modal-title" class="text-lg font-semibold text-(--app-text)">Archive article?</h2>
+			<p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+				"@_pendingArchiveTitle" will be hidden from the default articles list. You can unarchive it later.
+			</p>
+			<div class="mt-6 flex justify-end gap-2">
+				<button type="button"
+								class="app-button app-button-secondary"
+								@onclick="CancelArchive">
+					Cancel
+				</button>
+				<button type="button"
+								class="app-button app-button-warning"
+								@onclick="() => ArchiveArticleAsync(_pendingArchiveId!)">
+					Confirm
+				</button>
+			</div>
+		</div>
+	</div>
+}
 
 @code {
 	private readonly ArticleFormModel _form = new();
@@ -275,8 +287,9 @@
 	private string _statusFilter = "All";
 	private string? _error;
 	private string? _loadError;
-	private string? _pendingDeleteId;
+	private string? _pendingArchiveId;
 	private ClaimsPrincipal? _currentUser;
+	private bool _canCreateArticle;
 
 	private List<ArticleDto> FilteredArticleList =>
 	[
@@ -292,10 +305,13 @@
 
 	private IQueryable<ArticleDto> FilteredArticles => FilteredArticleList.AsQueryable();
 
+	private string? _pendingArchiveTitle => _articles.FirstOrDefault(a => a.Id == _pendingArchiveId)?.Title;
+
 	protected override async Task OnInitializedAsync()
 	{
 		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 		_currentUser = authState.User;
+		_canCreateArticle = ArticleAuthorizationService.CanCreateArticle(_currentUser);
 		await LoadCategoriesAsync();
 		await LoadAsync();
 	}
@@ -309,26 +325,26 @@
 	private bool MatchesGlobalSearch(ArticleDto article)
 	{
 		return string.IsNullOrWhiteSpace(_searchText)
-		       || article.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase)
-		       || article.Author.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase);
+					 || article.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase)
+					 || article.Author.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase);
 	}
 
 	private bool MatchesTitleFilter(ArticleDto article)
 	{
 		return string.IsNullOrWhiteSpace(_titleFilter)
-		       || article.Title.Contains(_titleFilter, StringComparison.OrdinalIgnoreCase);
+					 || article.Title.Contains(_titleFilter, StringComparison.OrdinalIgnoreCase);
 	}
 
 	private bool MatchesAuthorFilter(ArticleDto article)
 	{
 		return string.IsNullOrWhiteSpace(_authorFilter)
-		       || article.Author.Name.Contains(_authorFilter, StringComparison.OrdinalIgnoreCase);
+					 || article.Author.Name.Contains(_authorFilter, StringComparison.OrdinalIgnoreCase);
 	}
 
 	private bool MatchesCategoryFilter(ArticleDto article)
 	{
 		return string.IsNullOrWhiteSpace(_categoryFilter)
-		       || article.Category.Id.ToString() == _categoryFilter;
+					 || article.Category.Id.ToString() == _categoryFilter;
 	}
 
 	private bool MatchesStatusFilter(ArticleDto article)
@@ -353,14 +369,14 @@
 		_form.Reset();
 	}
 
-	private void RequestDelete(string id)
+	private void RequestArchive(string id)
 	{
-		_pendingDeleteId = id;
+		_pendingArchiveId = id;
 	}
 
-	private void CancelDelete()
+	private void CancelArchive()
 	{
-		_pendingDeleteId = null;
+		_pendingArchiveId = null;
 	}
 
 	private async Task LoadCategoriesAsync()
@@ -424,21 +440,6 @@
 		_saving = false;
 	}
 
-	private async Task DeleteArticleAsync(string id)
-	{
-		_error = null;
-		_pendingDeleteId = null;
-		var result = await Sender.Send(new DeleteArticleCommand(id));
-		if (result.Success)
-		{
-			await LoadAsync();
-		}
-		else
-		{
-			_error = result.Error;
-		}
-	}
-
 	private async Task PublishArticleAsync(string id)
 	{
 		_error = null;
@@ -470,6 +471,7 @@
 	private async Task ArchiveArticleAsync(string id)
 	{
 		_error = null;
+		_pendingArchiveId = null;
 		var result = await Sender.Send(new ArchiveArticleCommand(id));
 		if (result.Success)
 		{

@@ -30,11 +30,14 @@
 			</InputSelect>
 		</div>
 
-		<button type="submit"
-						class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
-						disabled="@Saving">
-			@(Saving ? "Saving..." : SubmitLabel)
-		</button>
+		<div class="flex items-center gap-2">
+			<button type="submit"
+							class="app-button app-button-primary"
+							disabled="@Saving">
+				@(Saving ? "Saving..." : SubmitLabel)
+			</button>
+			@FooterActions
+		</div>
 	</div>
 </EditForm>
 
@@ -53,6 +56,9 @@
 
 	[Parameter]
 	public EventCallback OnValidSubmit { get; set; }
+
+	[Parameter]
+	public RenderFragment? FooterActions { get; set; }
 
 	private Task HandleValidSubmit() => OnValidSubmit.InvokeAsync();
 }

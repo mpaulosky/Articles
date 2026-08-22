@@ -80,7 +80,7 @@ public class ArticlesPageTests : BunitContext
 	public void RendersHeaderBar_WithHeadingCheckboxAndCreateButton()
 	{
 		// Arrange
-		SetupAuthState(CreateAnonymousUser());
+		SetupAuthState(CreateAdminUser());
 		SetupEmptyArticles();
 
 		// Act
@@ -90,6 +90,48 @@ public class ArticlesPageTests : BunitContext
 		cut.Markup.Should().Contain("All Articles");
 		cut.Markup.Should().Contain("Show My Articles Only");
 		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Create New Article");
+	}
+
+	[Fact]
+	public void ShowsCreateButton_WhenUserIsAuthor()
+	{
+		// Arrange
+		SetupAuthState(CreateAuthorUser("author1"));
+		SetupEmptyArticles();
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Create New Article");
+	}
+
+	[Fact]
+	public void HidesCreateButton_WhenUserIsRegularUser()
+	{
+		// Arrange
+		SetupAuthState(CreateAuthenticatedUser("regularUser"));
+		SetupEmptyArticles();
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		cut.FindAll("button").Should().NotContain(b => b.TextContent.Trim() == "Create New Article");
+	}
+
+	[Fact]
+	public void HidesCreateButton_WhenUserIsAnonymous()
+	{
+		// Arrange
+		SetupAuthState(CreateAnonymousUser());
+		SetupEmptyArticles();
+
+		// Act
+		var cut = Render<ArticlesPage>();
+
+		// Assert
+		cut.FindAll("button").Should().NotContain(b => b.TextContent.Trim() == "Create New Article");
 	}
 
 	[Fact]
@@ -149,11 +191,11 @@ public class ArticlesPageTests : BunitContext
 		// Assert
 		var viewLink = cut.FindAll("a").FirstOrDefault(a => a.TextContent.Trim() == "View");
 		viewLink.Should().NotBeNull();
-		viewLink!.GetAttribute("href").Should().Be($"/articles/{articles[0].Id}");
+		viewLink!.GetAttribute("href").Should().Be($"/articles/{articles[0].Slug}");
 	}
 
 	[Fact]
-	public void ShowsEditPublishDeleteButtons_WhenUserCanEdit()
+	public void ShowsEditPublishButtons_WhenUserCanEdit()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("Test Article 1", "admin1", isPublished: true) };
@@ -170,11 +212,10 @@ public class ArticlesPageTests : BunitContext
 		// Admin can edit any article
 		linkLabels.Should().Contain("Edit");
 		buttonLabels.Should().Contain("Unpublish");
-		buttonLabels.Should().Contain("Delete");
 	}
 
 	[Fact]
-	public void HidesEditPublishDeleteButtons_WhenUserCannotEdit()
+	public void DisablesEditPublishButtons_WhenUserCannotEdit()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("Test Article 1", "author1", isPublished: true) };
@@ -184,20 +225,20 @@ public class ArticlesPageTests : BunitContext
 
 		// Act
 		var cut = Render<ArticlesPage>();
-		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
 		var linkLabels = cut.FindAll("a").Select(a => a.TextContent.Trim()).ToList();
+		var unpublishButton = cut.FindAll("button").First(b => b.TextContent.Trim() == "Unpublish");
 
 		// Assert
-		// The article is visible (published) but this user cannot edit it
+		// The article is visible (published), but this user cannot edit it, so Edit/Unpublish
+		// stay in place (same button positions for every row) but are shown disabled.
 		cut.Markup.Should().Contain("Test Article 1");
 		linkLabels.Should().NotContain("Edit");
-		buttonLabels.Should().NotContain("Publish");
-		buttonLabels.Should().NotContain("Unpublish");
-		buttonLabels.Should().NotContain("Delete");
+		cut.FindAll("span").Should().Contain(s => s.TextContent.Trim() == "Edit" && s.HasAttribute("aria-disabled"));
+		unpublishButton.HasAttribute("disabled").Should().BeTrue();
 	}
 
 	[Fact]
-	public void HidesEditPublishDeleteButtons_ForOtherAuthorsArticle_WhenUserIsAuthor()
+	public void HidesEditPublishButtons_ForOtherAuthorsArticle_WhenUserIsAuthor()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("Someone Else's Article", "author2", isPublished: true) };
@@ -207,16 +248,14 @@ public class ArticlesPageTests : BunitContext
 
 		// Act
 		var cut = Render<ArticlesPage>();
-		var buttonLabels = cut.FindAll("button").Select(b => b.TextContent.Trim()).ToList();
 		var linkLabels = cut.FindAll("a").Select(a => a.TextContent.Trim()).ToList();
 
 		// Assert
 		linkLabels.Should().NotContain("Edit");
-		buttonLabels.Should().NotContain("Delete");
 	}
 
 	[Fact]
-	public void ShowsEditPublishDeleteButtons_ForOwnArticle_WhenUserIsAuthor()
+	public void ShowsEditPublishButtons_ForOwnArticle_WhenUserIsAuthor()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("My Article", "author1", isPublished: false) };
@@ -232,7 +271,6 @@ public class ArticlesPageTests : BunitContext
 		// Assert
 		linkLabels.Should().Contain("Edit");
 		buttonLabels.Should().Contain("Publish");
-		buttonLabels.Should().Contain("Delete");
 	}
 
 	[Fact]
@@ -429,24 +467,24 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	[Fact]
-	public void ClickingDelete_RequiresConfirmation_BeforeSendingDeleteArticleCommand()
+	public void ClickingArchive_RequiresConfirmation_BeforeSendingArchiveArticleCommand()
 	{
 		// Arrange
-		var article = CreateArticle("Test Article", "admin1", isPublished: true);
+		var article = CreateArticle("Test Article", "author1", isPublished: true);
 		var articles = new List<ArticleDto> { article };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
 		SetupArticles(articles);
-		_mediator.Send(Arg.Any<DeleteArticleCommand>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok());
+		_mediator.Send(Arg.Any<ArchiveArticleCommand>(), Arg.Any<CancellationToken>())
+			.Returns(Result.Ok(article));
 
 		var cut = Render<ArticlesPage>();
 
 		// Act - first click only requests confirmation
-		cut.FindAll("button").First(b => b.TextContent.Trim() == "Delete").Click();
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Archive").Click();
 
 		// Assert
-		_mediator.DidNotReceive().Send(Arg.Any<DeleteArticleCommand>(), Arg.Any<CancellationToken>());
+		_mediator.DidNotReceive().Send(Arg.Any<ArchiveArticleCommand>(), Arg.Any<CancellationToken>());
 		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Confirm");
 
 		// Act - confirming sends the command
@@ -454,29 +492,29 @@ public class ArticlesPageTests : BunitContext
 
 		// Assert
 		_mediator.Received(1).Send(
-			Arg.Is<DeleteArticleCommand>(command => command.Id == article.Id),
+			Arg.Is<ArchiveArticleCommand>(command => command.Id == article.Id),
 			Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
-	public void CancellingDeleteConfirmation_DoesNotSendDeleteArticleCommand()
+	public void CancellingArchiveConfirmation_DoesNotSendArchiveArticleCommand()
 	{
 		// Arrange
-		var article = CreateArticle("Test Article", "admin1", isPublished: true);
+		var article = CreateArticle("Test Article", "author1", isPublished: true);
 		var articles = new List<ArticleDto> { article };
 		var user = CreateAdminUser();
 		SetupAuthState(user);
 		SetupArticles(articles);
 
 		var cut = Render<ArticlesPage>();
-		cut.FindAll("button").First(b => b.TextContent.Trim() == "Delete").Click();
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Archive").Click();
 
 		// Act
 		cut.FindAll("button").First(b => b.TextContent.Trim() == "Cancel").Click();
 
 		// Assert
-		_mediator.DidNotReceive().Send(Arg.Any<DeleteArticleCommand>(), Arg.Any<CancellationToken>());
-		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Delete");
+		_mediator.DidNotReceive().Send(Arg.Any<ArchiveArticleCommand>(), Arg.Any<CancellationToken>());
+		cut.FindAll("button").Should().Contain(b => b.TextContent.Trim() == "Archive");
 	}
 
 	[Fact]
@@ -616,7 +654,7 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	[Fact]
-	public void HidesArchiveAndUnarchiveActions_ForNonAdmin_EvenOnOwnArticle()
+	public void DisablesArchiveAction_ForNonAdmin_EvenOnOwnArticle()
 	{
 		// Arrange
 		var articles = new List<ArticleDto> { CreateArticle("My Article", "author1", isPublished: true) };
@@ -625,10 +663,11 @@ public class ArticlesPageTests : BunitContext
 
 		// Act
 		var cut = Render<ArticlesPage>();
+		var archiveButton = cut.FindAll("button").First(b => b.TextContent.Trim() == "Archive");
 
 		// Assert
-		cut.FindAll("button").Should()
-			.NotContain(b => b.TextContent.Trim() == "Archive" || b.TextContent.Trim() == "Unarchive");
+		// Stays visible in the same position as the admin view, just disabled.
+		archiveButton.HasAttribute("disabled").Should().BeTrue();
 	}
 
 	[Fact]
@@ -643,10 +682,10 @@ public class ArticlesPageTests : BunitContext
 			.Returns(Result.Ok(article));
 
 		var cut = Render<ArticlesPage>();
-		var archiveButton = cut.FindAll("button").First(b => b.TextContent.Trim() == "Archive");
 
-		// Act
-		archiveButton.Click();
+		// Act - archiving requires confirmation before the command is sent
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Archive").Click();
+		cut.FindAll("button").First(b => b.TextContent.Trim() == "Confirm").Click();
 
 		// Assert
 		_mediator.Received(1).Send(

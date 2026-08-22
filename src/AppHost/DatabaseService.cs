@@ -22,10 +22,12 @@ public static class DatabaseService
 		get
 		{
 			// Keep the MongoDB image pinned to a known-good tag so local AppHost startup stays deterministic.
-			// Also keep local-dev data ephemeral so restarted AppHost instances do not inherit stale root credentials
-			// or database state from an earlier run. Reusing a fixed named volume can leave behind auth state that
-			// makes the health probe fail even though the Mongo container itself is up.
-			return ("8.2.12", null);
+			// Persist local-dev data in a named volume so seeded categories/articles survive AppHost restarts.
+			// This is safe to reuse across runs only because AddMongoDbServices pins the root username/password
+			// below — MongoDB only reads MONGO_INITDB_ROOT_* on the very first startup against an empty data
+			// directory, so a fresh, randomly generated password on a later run would otherwise no longer match
+			// the credentials already initialized in the volume and the health probe would fail.
+			return ("8.2.12", "articles-mongo-data");
 		}
 	}
 
@@ -40,7 +42,12 @@ public static class DatabaseService
 	{
 		var (mongoImageTag, mongoDataVolumeName) = MongoDbResourceSettings;
 
-		var server = builder.AddMongoDB(AppHostConstants.Server)
+		// Fixed, non-secret local-dev credentials — required so the root user stays valid across AppHost
+		// restarts when the data volume below is reused. See the comment on MongoDbResourceSettings.
+		var mongoUserName = builder.AddParameter("mongo-username", "mongoadmin");
+		var mongoPassword = builder.AddParameter("mongo-password", "articles-local-dev", secret: true);
+
+		var server = builder.AddMongoDB(AppHostConstants.Server, userName: mongoUserName, password: mongoPassword)
 			.WithImage("mongo", mongoImageTag);
 
 		if (!string.IsNullOrWhiteSpace(mongoDataVolumeName))

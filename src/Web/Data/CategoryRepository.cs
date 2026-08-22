@@ -94,26 +94,4 @@ public sealed class CategoryRepository
 		await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 		return category;
 	}
-
-	/// <summary>
-	///     Deletes an existing category by identifier.
-	/// </summary>
-	/// <param name="id">The category identifier.</param>
-	/// <param name="cancellationToken">The cancellation token.</param>
-	/// <returns>True when the category was deleted; otherwise, false.</returns>
-	public async Task<bool> DeleteAsync(ObjectId id, CancellationToken cancellationToken = default)
-	{
-		var category = await _context.Categories
-			.FirstOrDefaultAsync(existing => existing.Id == id, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (category is null)
-		{
-			return false;
-		}
-
-		_context.Categories.Remove(category);
-		await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-		return true;
-	}
 }

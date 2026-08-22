@@ -1,4 +1,4 @@
-@page "/articles/{Id}/edit"
+@page "/articles/{Slug}/edit"
 @rendermode InteractiveServer
 @using System.Security.Claims
 @using static Domain.Helpers.DomainHelpers
@@ -17,8 +17,19 @@
 
 <section class="app-page-stack">
 	<div class="app-page-card">
-		<p class="app-pill">Publishing</p>
-		<h1 class="app-h1">Edit article</h1>
+		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+			<div>
+				<h2 class="app-h2">Edit Articles</h2>
+			</div>
+			<div>
+				<p class="app-pill">Editing</p>
+			</div>
+			<div class="flex flex-wrap items-center gap-4">
+				<button type="button" class="app-button app-button-secondary" @onclick="Cancel">
+					Cancel
+				</button>
+			</div>
+		</div>
 	</div>
 
 	<section class="app-panel-card">
@@ -37,18 +48,16 @@
 				<div class="alert-error" role="alert">@_error</div>
 			}
 
-			<ArticleForm Model="_form"
-									 Categories="_categories"
-									 Saving="_saving"
-									 SubmitLabel="Save changes"
-									 OnValidSubmit="SaveArticleAsync" />
+			<ArticleForm Model="_form" Categories="_categories" Saving="_saving" SubmitLabel="Save changes"
+									 OnValidSubmit="SaveArticleAsync">
+			</ArticleForm>
 		}
 	</section>
 </section>
 
 @code {
 	[Parameter]
-	public string Id { get; set; } = string.Empty;
+	public string Slug { get; set; } = string.Empty;
 
 	private readonly ArticleFormModel _form = new();
 	private readonly List<CategoryDto> _categories = [];
@@ -82,7 +91,7 @@
 		_error = null;
 		_article = null;
 
-		var result = await Sender.Send(new GetArticleByIdQuery(Id));
+		var result = await Sender.Send(new GetArticleBySlugQuery(Slug));
 		if (!result.Success || result.Value is null)
 		{
 			_error = result.Error ?? "Article not found.";
@@ -112,7 +121,7 @@
 		var title = _form.Title.Trim();
 		var category = _categories.FirstOrDefault(c => c.Id.ToString() == _form.CategoryId);
 		var result = await Sender.Send(new UpdateArticleCommand(
-			Id,
+			_article!.Id,
 			title,
 			title.GenerateSlug(),
 			_form.Content.Trim(),
@@ -121,7 +130,7 @@
 
 		if (result.Success)
 		{
-			Navigation.NavigateTo($"/articles/{Id}");
+			Navigation.NavigateTo($"/articles/{result.Value!.Slug}");
 		}
 		else
 		{
@@ -129,5 +138,10 @@
 		}
 
 		_saving = false;
+	}
+
+	private void Cancel()
+	{
+		Navigation.NavigateTo("/articles");
 	}
 }

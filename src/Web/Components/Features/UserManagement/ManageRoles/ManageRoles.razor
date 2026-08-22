@@ -7,12 +7,19 @@
 @attribute [Authorize(Roles = "Admin")]
 
 
-@if (_loading)
-{
-	<p>Loading users...</p>
-}
-else
-{
+<PageTitle>Manage Roles</PageTitle>
+
+<section class="app-page-stack">
+	<div class="app-page-card">
+		<h2 class="app-h2">Manage User Roles</h2>
+		@if (_availableRoles.Count > 0)
+		{
+			<p class="app-copy">
+				Available roles: @string.Join(", ", _availableRoles.Select(role => role.Name))
+			</p>
+		}
+	</div>
+
 	@if (_error is not null)
 	{
 		<div class="alert-error" role="alert">
@@ -21,64 +28,78 @@ else
 		</div>
 	}
 
-	@if (_availableRoles.Any())
-	{
-		<p>Available roles: @string.Join(
-						", ",
-						_availableRoles.Select(role => role.Name))</p>
-		}
-
-		<div class="table-wrapper">
-			<table class="data-table">
-				<thead>
-					<tr>
-						<th>User</th>
-						<th>Email</th>
-						<th>Current Roles</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var user in _users)
-					{
-						<tr>
-							<td>@user.Name</td>
-							<td>@user.Email</td>
-							<td>@string.Join(", ", user.Roles)</td>
-							<td>
-								@foreach (var role in _availableRoles)
-								{
-									var hasRole = user.Roles.Contains(role.Name);
-									if (hasRole)
-									{
-										<button class="@ActiveRoleButtonClass" @onclick="() => RemoveRole(user.UserId, role.Id)">
-											@role.Name: Active (Remove)
-										</button>
-									}
-									else
-									{
-										<button class="@InactiveRoleButtonClass" @onclick="() => AssignRole(user.UserId, role.Id)">
-											@role.Name: Inactive (Add)
-										</button>
-									}
-								}
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+	<section class="app-panel-card">
+		<div class="app-section-header">
+			<h2 class="app-section-title">Users</h2>
+			<span class="app-badge">@_users.Count total</span>
 		</div>
-	}
+
+		@if (_loading)
+		{
+			<p class="app-copy">Loading users...</p>
+		}
+		else if (_users.Count == 0)
+		{
+			<p class="app-copy">No users to show yet.</p>
+		}
+		else
+		{
+			<div class="overflow-x-auto">
+				<table class="app-table zebra-grid">
+					<thead>
+						<tr>
+							<th>User</th>
+							<th>Email</th>
+							<th>Current Roles</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var user in _users)
+						{
+							<tr>
+								<td class="font-medium whitespace-nowrap">@user.Name</td>
+								<td class="text-(--app-text-muted)">@user.Email</td>
+								<td>
+									<div class="flex flex-wrap gap-1">
+										@foreach (var roleName in user.Roles)
+										{
+											<span class="app-badge">@roleName</span>
+										}
+									</div>
+								</td>
+								<td>
+									<div class="flex flex-wrap">
+										@foreach (var role in _availableRoles)
+										{
+											var hasRole = user.Roles.Contains(role.Name);
+											if (hasRole)
+											{
+												<button type="button" class="role-toggle role-toggle-active"
+																title="Remove @role.Name role" @onclick="() => RemoveRole(user.UserId, role.Id)">
+													✓ @role.Name
+												</button>
+											}
+											else
+											{
+												<button type="button" class="role-toggle role-toggle-inactive"
+																title="Add @role.Name role" @onclick="() => AssignRole(user.UserId, role.Id)">
+													+ @role.Name
+												</button>
+											}
+										}
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		}
+	</section>
+</section>
 
 @code {
-	private const string ActiveRoleButtonClass =
-		"inline-block px-3 py-1 text-sm rounded border border-green-600 text-green-600 " +
-		"hover:bg-green-50 dark:hover:bg-green-900/20 transition mr-1 mb-1";
-
-	private const string InactiveRoleButtonClass =
-		"inline-block px-3 py-1 text-sm rounded border border-red-600 text-red-600 " +
-		"hover:bg-red-50 dark:hover:bg-red-900/20 transition mr-1 mb-1";
-
 	private IReadOnlyList<UserWithRolesDto> _users = [];
 	private IReadOnlyList<RoleDto> _availableRoles = [];
 	private bool _loading = true;

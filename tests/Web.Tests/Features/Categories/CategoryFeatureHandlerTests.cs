@@ -79,21 +79,43 @@ public class CategoryFeatureHandlerTests
 	}
 
 	[Fact]
-	public async Task DeleteCategoryCommandDeletesExistingCategoryAsync()
+	public async Task ArchiveCategoryCommandArchivesExistingCategoryAsync()
 	{
 		// Arrange
 		var cancellationToken = TestContext.Current.CancellationToken;
 		await using var context = CreateContext();
 		var repository = new CategoryRepository(context);
 		var handler = new CategoryFeatureHandler(repository);
-		var created = await repository.AddAsync(Category.Create("Archive", "To remove"), cancellationToken);
+		var created = await repository.AddAsync(Category.Create("Archive", "To archive"), cancellationToken);
 
 		// Act
-		var result = await handler.Handle(new DeleteCategoryCommand(created.Id.ToString()), cancellationToken);
+		var result = await handler.Handle(new ArchiveCategoryCommand(created.Id.ToString()), cancellationToken);
 
 		// Assert
 		result.Success.Should().BeTrue();
-		(await repository.GetByIdAsync(created.Id, cancellationToken)).Should().BeNull();
+		result.Value!.IsArchived.Should().BeTrue();
+		(await repository.GetByIdAsync(created.Id, cancellationToken))!.IsArchived.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task UnarchiveCategoryCommandUnarchivesExistingCategoryAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var repository = new CategoryRepository(context);
+		var handler = new CategoryFeatureHandler(repository);
+		var created = await repository.AddAsync(Category.Create("Archive", "To unarchive"), cancellationToken);
+		created.Archive();
+		await repository.UpdateAsync(created, cancellationToken);
+
+		// Act
+		var result = await handler.Handle(new UnarchiveCategoryCommand(created.Id.ToString()), cancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value!.IsArchived.Should().BeFalse();
+		(await repository.GetByIdAsync(created.Id, cancellationToken))!.IsArchived.Should().BeFalse();
 	}
 
 	[Fact]
@@ -219,13 +241,13 @@ public class CategoryFeatureHandlerTests
 	}
 
 	[Fact]
-	public async Task DeleteCategoryCommandReturnsValidationFailureForInvalidIdAsync()
+	public async Task ArchiveCategoryCommandReturnsValidationFailureForInvalidIdAsync()
 	{
 		// Arrange
 		var cancellationToken = TestContext.Current.CancellationToken;
 		await using var context = CreateContext();
 		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
-		var command = new DeleteCategoryCommand("invalid-id");
+		var command = new ArchiveCategoryCommand("invalid-id");
 
 		// Act
 		var result = await handler.Handle(command, cancellationToken);
@@ -237,13 +259,49 @@ public class CategoryFeatureHandlerTests
 	}
 
 	[Fact]
-	public async Task DeleteCategoryCommandReturnsNotFoundWhenCategoryDoesNotExistAsync()
+	public async Task ArchiveCategoryCommandReturnsNotFoundWhenCategoryDoesNotExistAsync()
 	{
 		// Arrange
 		var cancellationToken = TestContext.Current.CancellationToken;
 		await using var context = CreateContext();
 		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
-		var command = new DeleteCategoryCommand(ObjectId.GenerateNewId().ToString());
+		var command = new ArchiveCategoryCommand(ObjectId.GenerateNewId().ToString());
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
+		result.Error.Should().Be("Category not found.");
+	}
+
+	[Fact]
+	public async Task UnarchiveCategoryCommandReturnsValidationFailureForInvalidIdAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+		var command = new UnarchiveCategoryCommand("invalid-id");
+
+		// Act
+		var result = await handler.Handle(command, cancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
+		result.Error.Should().Be("The category id is not valid.");
+	}
+
+	[Fact]
+	public async Task UnarchiveCategoryCommandReturnsNotFoundWhenCategoryDoesNotExistAsync()
+	{
+		// Arrange
+		var cancellationToken = TestContext.Current.CancellationToken;
+		await using var context = CreateContext();
+		var handler = new CategoryFeatureHandler(new CategoryRepository(context));
+		var command = new UnarchiveCategoryCommand(ObjectId.GenerateNewId().ToString());
 
 		// Act
 		var result = await handler.Handle(command, cancellationToken);

@@ -12,7 +12,7 @@ namespace AppHost;
 public class DatabaseServiceTests
 {
 	[Fact]
-	public void GetMongoDbResourceSettingsUsesLatestMongoImageWithoutPersistentVolume()
+	public void GetMongoDbResourceSettingsUsesLatestMongoImageWithPersistentVolume()
 	{
 		// Arrange
 		// Act
@@ -20,7 +20,7 @@ public class DatabaseServiceTests
 
 		// Assert
 		settings.ImageTag.Should().Be("8.2.12");
-		settings.DataVolumeName.Should().BeNull();
+		settings.DataVolumeName.Should().Be("articles-mongo-data");
 	}
 
 	[Fact]

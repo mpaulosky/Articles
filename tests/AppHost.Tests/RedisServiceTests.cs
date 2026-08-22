@@ -185,7 +185,7 @@ public class RedisServiceTests
 		var context =
 			(UpdateCommandStateContext)Activator.CreateInstance(typeof(UpdateCommandStateContext), nonPublic: true)!;
 		SetProperty(context, nameof(UpdateCommandStateContext.ResourceSnapshot), snapshot);
-		SetProperty(context, nameof(UpdateCommandStateContext.ServiceProvider), serviceProvider);
+		SetProperty(context, nameof(UpdateCommandStateContext.Services), serviceProvider);
 		return context;
 	}
 
@@ -195,7 +195,7 @@ public class RedisServiceTests
 	{
 		var context = (ExecuteCommandContext)Activator.CreateInstance(typeof(ExecuteCommandContext), nonPublic: true)!;
 		SetProperty(context, nameof(ExecuteCommandContext.ResourceName), resourceName);
-		SetProperty(context, nameof(ExecuteCommandContext.ServiceProvider), serviceProvider);
+		SetProperty(context, nameof(ExecuteCommandContext.Services), serviceProvider);
 		SetProperty(context, nameof(ExecuteCommandContext.CancellationToken), CancellationToken.None);
 		return context;
 	}

@@ -11,8 +11,17 @@
 	<div class="app-page-card">
 		<div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 			<div>
-				<p class="app-pill">Content model</p>
-				<h1 class="app-h1">Categories</h1>
+				<h2 class="app-h2">Categories</h2>
+			</div>
+			<div>
+				<p class="app-pill">Details</p>
+			</div>
+			<div class="flex flex-wrap items-center gap-4">
+				<label class="flex items-center gap-2 text-sm font-medium text-(--app-text)">
+					<input type="checkbox" class="h-4 w-4 rounded border-slate-400 text-sky-600 focus:ring-sky-500"
+								 @bind="_includeArchived" />
+					Include Archived
+				</label>
 			</div>
 		</div>
 	</div>
@@ -44,7 +53,7 @@
 					</div>
 
 					<button type="submit"
-									class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+									class="app-button app-button-primary"
 									disabled="@_saving">
 						@(_saving ? "Saving..." : "Save category")
 					</button>
@@ -55,38 +64,99 @@
 		<section class="app-panel-card">
 			<div class="app-section-header">
 				<h2 class="app-section-title">Category list</h2>
-				<span class="app-badge">@_categories.Count total</span>
+				<span class="app-badge">@FilteredCategories.Count total</span>
 			</div>
 
 			@if (_loading)
 			{
 				<p class="app-copy">Loading categories...</p>
 			}
-			else if (_categories.Count == 0)
+			else if (FilteredCategories.Count == 0)
 			{
 				<p class="app-copy">No categories yet. Create the first one on the left.</p>
 			}
 			else
 			{
 				<div class="space-y-3">
-					@foreach (var category in _categories)
+					@foreach (var category in FilteredCategories)
 					{
 						<div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
-							<div class="flex items-start justify-between gap-3">
-								<div>
-									<h3 class="text-lg font-semibold text-(--app-text)">@category.CategoryName</h3>
-									<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">@category.Slug</p>
-								</div>
-								<button type="button"
-												class="rounded border border-rose-500 px-2.5 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-												@onclick="() => DeleteCategoryAsync(category.Id.ToString())">
-									Delete
-								</button>
-							</div>
-
-							@if (!string.IsNullOrWhiteSpace(category.Description))
+							@if (_editingCategoryId == category.Id.ToString())
 							{
-								<p class="mt-2 text-sm text-slate-700 dark:text-slate-200">@category.Description</p>
+								<EditForm Model="_editForm" OnValidSubmit="UpdateCategoryAsync">
+									<DataAnnotationsValidator />
+									<ValidationSummary />
+
+									<div class="space-y-3">
+										<div>
+											<label class="block text-sm font-medium text-(--app-text)">Name</label>
+											<InputText @bind-Value="_editForm.Name"
+																 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+										</div>
+
+										<div>
+											<label class="block text-sm font-medium text-(--app-text)">Description</label>
+											<InputTextArea @bind-Value="_editForm.Description"
+																	 class="mt-1 min-h-20 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+										</div>
+
+										<div class="flex items-center gap-2">
+											<button type="submit"
+															class="app-button app-button-primary"
+															disabled="@_saving">
+												@(_saving ? "Saving..." : "Save changes")
+											</button>
+											<button type="button"
+															class="app-button app-button-secondary"
+															@onclick="CancelEdit">
+												Cancel
+											</button>
+										</div>
+									</div>
+								</EditForm>
+							}
+							else
+							{
+								<div class="flex items-start justify-between gap-3">
+									<div>
+										<h3 class="text-lg font-semibold text-(--app-text)">
+											@category.CategoryName
+											@if (category.IsArchived)
+											{
+												<span class="app-badge ml-2" role="status">Archived</span>
+											}
+										</h3>
+										<p class="mt-1 text-sm text-slate-600 dark:text-slate-300">@category.Slug</p>
+									</div>
+									<div class="flex flex-nowrap items-center gap-1.5 whitespace-nowrap">
+										<button type="button"
+														class="app-button app-button-primary"
+														@onclick="() => StartEdit(category)">
+											Edit
+										</button>
+										@if (category.IsArchived)
+										{
+											<button type="button"
+															class="app-button app-button-unsetvalue"
+															@onclick="() => UnarchiveCategoryAsync(category.Id.ToString())">
+												Unarchive
+											</button>
+										}
+										else
+										{
+											<button type="button"
+															class="app-button app-button-warning"
+															@onclick="() => RequestArchive(category.Id.ToString())">
+												Archive
+											</button>
+										}
+									</div>
+								</div>
+
+								@if (!string.IsNullOrWhiteSpace(category.Description))
+								{
+									<p class="mt-2 text-sm text-slate-700 dark:text-slate-200">@category.Description</p>
+								}
 							}
 						</div>
 					}
@@ -96,12 +166,47 @@
 	</div>
 </section>
 
+@if (_pendingArchiveId is not null)
+{
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4" role="presentation"
+			 @onclick="CancelArchive">
+		<div class="w-full max-w-sm rounded-2xl border border-(--app-border) bg-(--app-panel) p-6 shadow-xl" role="dialog"
+				 aria-modal="true" aria-labelledby="archive-modal-title" @onclick:stopPropagation="true">
+			<h2 id="archive-modal-title" class="text-lg font-semibold text-(--app-text)">Archive category?</h2>
+			<p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+				"@_pendingArchiveName" will be hidden from the default category list. You can unarchive it later.
+			</p>
+			<div class="mt-6 flex justify-end gap-2">
+				<button type="button"
+								class="rounded-lg border border-slate-400 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+								@onclick="CancelArchive">
+					Cancel
+				</button>
+				<button type="button"
+								class="rounded-lg border border-amber-500 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50"
+								@onclick="() => ArchiveCategoryAsync(_pendingArchiveId!)">
+					Confirm
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
 @code {
 	private readonly CategoryFormModel _form = new();
+	private readonly CategoryFormModel _editForm = new();
 	private readonly List<CategoryDto> _categories = [];
 	private bool _loading;
 	private bool _saving;
+	private bool _includeArchived;
 	private string? _error;
+	private string? _editingCategoryId;
+	private string? _pendingArchiveId;
+
+	private List<CategoryDto> FilteredCategories =>
+		[.. _categories.Where(category => _includeArchived || !category.IsArchived)];
+
+	private string? _pendingArchiveName => _categories.FirstOrDefault(c => c.Id.ToString() == _pendingArchiveId)?.CategoryName;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -146,10 +251,74 @@
 		_saving = false;
 	}
 
-	private async Task DeleteCategoryAsync(string id)
+	private void StartEdit(CategoryDto category)
 	{
 		_error = null;
-		var result = await Sender.Send(new DeleteCategoryCommand(id));
+		_editingCategoryId = category.Id.ToString();
+		_editForm.Name = category.CategoryName;
+		_editForm.Description = category.Description;
+	}
+
+	private void CancelEdit()
+	{
+		_editingCategoryId = null;
+		_editForm.Reset();
+	}
+
+	private async Task UpdateCategoryAsync()
+	{
+		if (_editingCategoryId is null)
+		{
+			return;
+		}
+
+		_saving = true;
+		_error = null;
+
+		var result = await Sender.Send(
+			new UpdateCategoryCommand(_editingCategoryId, _editForm.Name.Trim(), _editForm.Description.Trim()));
+		if (result.Success)
+		{
+			CancelEdit();
+			await LoadAsync();
+		}
+		else
+		{
+			_error = result.Error;
+		}
+
+		_saving = false;
+	}
+
+	private void RequestArchive(string id)
+	{
+		_pendingArchiveId = id;
+	}
+
+	private void CancelArchive()
+	{
+		_pendingArchiveId = null;
+	}
+
+	private async Task ArchiveCategoryAsync(string id)
+	{
+		_error = null;
+		_pendingArchiveId = null;
+		var result = await Sender.Send(new ArchiveCategoryCommand(id));
+		if (result.Success)
+		{
+			await LoadAsync();
+		}
+		else
+		{
+			_error = result.Error;
+		}
+	}
+
+	private async Task UnarchiveCategoryAsync(string id)
+	{
+		_error = null;
+		var result = await Sender.Send(new UnarchiveCategoryCommand(id));
 		if (result.Success)
 		{
 			await LoadAsync();

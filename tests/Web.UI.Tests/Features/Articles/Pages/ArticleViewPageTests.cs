@@ -44,7 +44,7 @@ public class ArticleViewPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Markup.Should().Contain("Test Article");
@@ -63,7 +63,7 @@ public class ArticleViewPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Markup.Should().Contain("Draft Article");
@@ -79,7 +79,7 @@ public class ArticleViewPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Markup.Should().Contain("Archived");
@@ -94,7 +94,7 @@ public class ArticleViewPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Markup.Should().NotContain(">Archived<");
@@ -105,11 +105,11 @@ public class ArticleViewPageTests : BunitContext
 	{
 		// Arrange
 		SetupAuthState(CreateAdminUser());
-		_mediator.Send(Arg.Any<GetArticleByIdQuery>(), Arg.Any<CancellationToken>())
+		_mediator.Send(Arg.Any<GetArticleBySlugQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Fail<ArticleDto>("Article not found.", ResultErrorCode.NotFound));
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, "missing-id"));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, "missing-slug"));
 
 		// Assert
 		cut.Markup.Should().Contain("Article not found.");
@@ -124,7 +124,7 @@ public class ArticleViewPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Markup.Should().Contain("don't have permission");
@@ -137,11 +137,11 @@ public class ArticleViewPageTests : BunitContext
 		// Arrange
 		SetupAuthState(CreateAnonymousUser());
 		var tcs = new TaskCompletionSource<Result<ArticleDto>>();
-		_mediator.Send(Arg.Any<GetArticleByIdQuery>(), Arg.Any<CancellationToken>())
+		_mediator.Send(Arg.Any<GetArticleBySlugQuery>(), Arg.Any<CancellationToken>())
 			.Returns(tcs.Task);
 
 		// Act
-		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Id, "some-id"));
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, "some-slug"));
 
 		// Assert
 		cut.Markup.Should().Contain("Loading article...");
@@ -161,7 +161,7 @@ public class ArticleViewPageTests : BunitContext
 
 	private void SetupArticle(ArticleDto article)
 	{
-		_mediator.Send(Arg.Any<GetArticleByIdQuery>(), Arg.Any<CancellationToken>())
+		_mediator.Send(Arg.Any<GetArticleBySlugQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok(article));
 	}
 

@@ -75,6 +75,20 @@ public sealed class ArticleRepository
 	}
 
 	/// <summary>
+	///     Gets a single article by slug.
+	/// </summary>
+	/// <param name="slug">The article slug.</param>
+	/// <param name="cancellationToken">The cancellation token.</param>
+	/// <returns>The article if it exists; otherwise, null.</returns>
+	public async Task<Article?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
+	{
+		return await _context.Articles
+			.AsNoTracking()
+			.FirstOrDefaultAsync(article => article.Slug == slug, cancellationToken)
+			.ConfigureAwait(false);
+	}
+
+	/// <summary>
 	///     Updates an existing article.
 	/// </summary>
 	/// <param name="article">The article to update.</param>

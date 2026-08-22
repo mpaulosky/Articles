@@ -18,4 +18,6 @@ internal sealed record CreateCategoryCommand(string Name, string Description) : 
 internal sealed record UpdateCategoryCommand(string Id, string Name, string Description)
 	: ICommand<Result<CategoryDto>>;
 
-internal sealed record DeleteCategoryCommand(string Id) : ICommand<Result>;
+internal sealed record ArchiveCategoryCommand(string Id) : ICommand<Result<CategoryDto>>;
+
+internal sealed record UnarchiveCategoryCommand(string Id) : ICommand<Result<CategoryDto>>;
