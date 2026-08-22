@@ -1,4 +1,4 @@
-@page "/articles/{Id}"
+@page "/articles/{Slug}"
 @rendermode InteractiveServer
 @using System.Security.Claims
 @using Web.Components.Features.Articles.Authorization
@@ -6,13 +6,25 @@
 @using Web.Components.Features.Articles.Queries
 @inject IMediator Sender
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>@(_article is null ? "Article" : _article.Title)</PageTitle>
 
 <section class="app-page-stack">
 	<div class="app-page-card">
-		<p class="app-pill">Publishing</p>
-		<h1 class="app-h1">Article</h1>
+		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+			<div>
+				<h2 class="app-h2">View Article</h2>
+			</div>
+			<div>
+				<p class="app-pill">Viewing</p>
+			</div>
+			<div class="flex flex-wrap items-center gap-4">
+				<button type="button" class="app-button app-button-secondary" @onclick="Cancel">
+					Cancel
+				</button>
+			</div>
+		</div>
 	</div>
 
 	<section class="app-panel-card">
@@ -53,7 +65,7 @@
 
 @code {
 	[Parameter]
-	public string Id { get; set; } = string.Empty;
+	public string Slug { get; set; } = string.Empty;
 
 	private ArticleDto? _article;
 	private bool _loading = true;
@@ -73,7 +85,7 @@
 		_error = null;
 		_article = null;
 
-		var result = await Sender.Send(new GetArticleByIdQuery(Id));
+		var result = await Sender.Send(new GetArticleBySlugQuery(Slug));
 		if (!result.Success || result.Value is null)
 		{
 			_error = result.Error ?? "Article not found.";
@@ -90,5 +102,10 @@
 
 		_article = result.Value;
 		_loading = false;
+	}
+
+	private void Cancel()
+	{
+		Navigation.NavigateTo("/articles");
 	}
 }

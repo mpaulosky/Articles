@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @source "../Components";
 
+/*
+ * The in-app theme toggle (see App.razor's inline script) sets a `dark` class and
+ * `data-theme` attribute on <html>. Tailwind's default `dark:` variant only follows
+ * prefers-color-scheme, which ignores that toggle — key it off the class instead so
+ * manual light/dark switching actually affects `dark:` utilities.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
 	--app-bg: #f8fafc;
 	--app-panel: rgba(255, 255, 255, 0.78);
@@ -12,7 +20,11 @@
 	--app-brand: #2563eb;
 	--app-brand-strong: #1d4ed8;
 	--app-brand-soft: rgba(96, 165, 250, 0.12);
-	--app-sidebar: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.96) 100%);
+	--app-sidebar: linear-gradient(
+		180deg,
+		rgba(15, 23, 42, 0.96) 0%,
+		rgba(30, 41, 59, 0.96) 100%
+	);
 }
 
 :root[data-theme="dark"] {
@@ -26,11 +38,15 @@
 	--app-brand: #60a5fa;
 	--app-brand-strong: #bfdbfe;
 	--app-brand-soft: rgba(96, 165, 250, 0.16);
-	--app-sidebar: linear-gradient(180deg, rgba(8, 15, 27, 0.98) 0%, rgba(15, 23, 42, 0.96) 100%);
+	--app-sidebar: linear-gradient(
+		180deg,
+		rgba(8, 15, 27, 0.98) 0%,
+		rgba(15, 23, 42, 0.96) 100%
+	);
 }
 
 html {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 	background-color: var(--app-bg);
 }
 
@@ -43,42 +59,49 @@ body {
 	color: var(--app-text);
 }
 
-a {
-	color: inherit;
-	text-decoration: none;
-}
+@layer base {
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
 
-button {
-	font: inherit;
-}
+	button {
+		font: inherit;
+	}
 
-h1, h2, h3, h4, h5, h6 {
-	margin: 0;
-}
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		margin: 0;
+	}
 
-p {
-	margin: 0;
-}
+	p {
+		margin: 0;
+	}
 
-code {
-	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	code {
+		font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+	}
 }
 
 @layer components {
 	.app-shell {
 		@apply min-h-screen
-		bg-[var(--app-bg)] text-[var(--app-text)]
+		bg-(--app-bg) text-(--app-text)
 		transition-colors duration-300;
 	}
 
 	.app-page {
-		@apply mx-auto flex min-h-screen max-w-7xl flex-col;
+		@apply mx-auto flex min-h-screen w-[90%] flex-col;
 	}
 
 	.app-header {
 		@apply sticky top-4 z-40 mx-4 mt-4
-		rounded-[1.5rem] border border-[var(--app-border)]
-		bg-[var(--app-panel)]/80
+		rounded-3xl border border-(--app-border)
+		bg-(--app-panel)/80
 		shadow-lg shadow-slate-400/40
 		backdrop-blur-sm md:mx-6;
 	}
@@ -88,16 +111,16 @@ code {
 		gap-3 text-sm
 		font-semibold uppercase
 		tracking-[0.22em]
-		text-[var(--app-brand)];
+		text-(--app-brand);
 	}
 
 	.app-brand-mark {
 		@apply flex h-8 w-8
 		items-center justify-center
 		rounded-lg
-		bg-[var(--app-brand-soft)]
+		bg-(--app-brand-soft)
 		text-base font-bold
-		text-[var(--app-brand-strong)];
+		text-(--app-brand-strong);
 	}
 
 	.app-nav {
@@ -105,13 +128,13 @@ code {
 	}
 
 	.app-content-shell {
-		@apply mx-auto max-w-7xl px-4 pt-8 pb-6 md:px-8 lg:px-10;
+		@apply mx-auto w-full px-4 pt-8 pb-6 md:px-8 lg:px-10;
 	}
 
 	.app-footer {
-		@apply mx-4 mb-4 rounded-[1.5rem]
-		border border-[var(--app-border)]
-		bg-[var(--app-panel)]/80
+		@apply mx-4 mb-4 rounded-3xl
+		border border-(--app-border)
+		bg-(--app-panel)/80
 		shadow-lg shadow-slate-400/40
 		backdrop-blur-sm md:mx-6;
 	}
@@ -120,12 +143,12 @@ code {
 		@apply flex flex-col
 		items-center justify-between
 		gap-3 px-4 py-3
-		text-sm text-[var(--app-text-muted)]
+		text-sm text-(--app-text-muted)
 		md:flex-row md:px-6;
 	}
 
 	.app-footer-brand {
-		@apply font-medium text-[var(--app-text)];
+		@apply font-medium text-(--app-text);
 	}
 
 	.app-footer-meta {
@@ -133,17 +156,20 @@ code {
 	}
 
 	.app-footer-label {
-		@apply text-[var(--app-text-muted)];
+		@apply text-(--app-text-muted);
 	}
 
 	.app-footer-value {
-		@apply font-semibold text-[var(--app-brand)];
+		@apply font-semibold text-emerald-600
+		hover:text-emerald-700
+		dark:text-emerald-400
+		dark:hover:text-emerald-300;
 	}
 
 	.app-article {
 		@apply rounded-2xl
-		border border-[var(--app-border)]
-		bg-[var(--app-surface)]
+		border border-(--app-border)
+		bg-(--app-surface)
 		shadow-lg shadow-slate-400/40 md:p-8;
 	}
 
@@ -155,16 +181,16 @@ code {
 		@apply mx-auto w-full
 		max-w-[calc(100%-2rem)]
 		rounded-3xl
-		border border-[var(--app-border)]
-		bg-[var(--app-panel)]
+		border border-(--app-border)
+		bg-(--app-panel)
 		shadow-lg shadow-slate-400/40
 		md:max-w-[calc(100%-1rem)] md:p-8;
 	}
 
 	.app-panel-card {
 		@apply rounded-3xl
-		border border-[var(--app-border)]
-		bg-[var(--app-panel)] p-6
+		border border-(--app-border)
+		bg-(--app-panel) p-6
 		shadow-lg shadow-slate-400/40;
 	}
 
@@ -178,11 +204,27 @@ code {
 	}
 
 	.app-h1 {
-		@apply text-4xl font-black tracking-tight text-[var(--app-text)] md:text-5xl;
+		@apply sm:text-3xl md:text-4xl lg:text-5xl;
 	}
 
+	.app-h2 {
+		@apply sm:text-2xl md:text-3xl lg:text-4xl;
+	}
+
+	.app-h3 {
+		@apply sm:text-xl md:text-2xl lg:text-3xl;
+	}
+
+	.app-h1,
+	.app-h2,
+	.app-h3,
+	.app-h4,
+	.app-h5,
+	.app-h6 {
+		@apply font-black tracking-tight text-(--app-text);
+	}
 	.app-copy {
-		@apply mt-4 max-w-xl text-base text-[var(--app-text-muted)];
+		@apply mt-4 max-w-xl text-base text-(--app-text-muted);
 	}
 
 	.app-stat-grid {
@@ -190,15 +232,15 @@ code {
 	}
 
 	.app-stat-card {
-		@apply rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-3;
+		@apply rounded-2xl border border-(--app-border) bg-(--app-surface) p-3;
 	}
 
 	.app-stat-label {
-		@apply text-[0.65rem] uppercase tracking-[0.18em] text-[var(--app-text-muted)];
+		@apply text-[0.65rem] uppercase tracking-[0.18em] text-(--app-text-muted);
 	}
 
 	.app-stat-value {
-		@apply mt-2 text-lg font-bold text-[var(--app-brand-strong)];
+		@apply mt-2 text-lg font-bold text-(--app-brand-strong);
 	}
 
 	.app-section-header {
@@ -206,18 +248,18 @@ code {
 	}
 
 	.app-section-title {
-		@apply text-xl font-bold text-[var(--app-text)];
+		@apply text-xl font-bold text-(--app-text);
 	}
 
 	.app-badge {
 		@apply rounded-full
-		border border-[var(--app-border)]
-		bg-[var(--app-surface)] px-2.5 py-1
-		text-xs font-medium text-[var(--app-text-muted)];
+		border border-(--app-border)
+		bg-(--app-surface) px-2.5 py-1
+		text-xs font-medium text-(--app-text-muted);
 	}
 
 	.app-body-copy {
-		@apply space-y-4 text-[var(--app-text-muted)];
+		@apply space-y-4 text-(--app-text-muted);
 	}
 
 	.app-list {
@@ -226,34 +268,109 @@ code {
 
 	.app-button {
 		@apply inline-flex items-center justify-center
-		rounded-full border border-[var(--app-border)]
-		bg-[var(--app-surface)] px-4 py-2
-		text-sm font-medium text-[var(--app-text)]
-		shadow-sm transition duration-200
-		hover:border-[var(--app-brand)] hover:text-[var(--app-brand)];
+		rounded-full border px-4 py-2
+		text-sm font-medium
+		shadow-sm transition duration-200;
+	}
+
+	.app-button-primary {
+		@apply border-(--app-brand)
+		bg-(--app-brand) text-white
+		hover:bg-sky-500;
+	}
+
+	.app-button-secondary {
+		@apply border-(--app-border)
+		bg-(--app-surface) text-(--app-text-muted)
+		hover:border-(--app-brand) hover:text-(--app-brand);
+	}
+
+	.app-button-unsetvalue {
+		@apply border-emerald-500
+		 text-emerald-600
+		 hover:bg-emerald-50
+		 dark:hover:bg-emerald-950/30;
+	}
+
+	.app-button-warning {
+		@apply border-amber-500 bg-amber-50
+		text-amber-700
+		hover:bg-amber-100 dark:bg-amber-950/30
+		dark:hover:bg-amber-950/50;
 	}
 
 	.theme-toggle {
 		@apply inline-flex h-10 w-10 items-center justify-center
-		rounded-full border border-[var(--app-border)]
-		bg-[var(--app-surface)] text-lg
+		rounded-full border border-(--app-border)
+		bg-(--app-surface) text-lg
 		shadow-sm transition duration-200
-		hover:-translate-y-0.5 hover:border-[var(--app-brand)] hover:text-[var(--app-brand)];
+		hover:-translate-y-0.5 hover:border-(--app-brand) hover:text-(--app-brand);
 	}
 
 	.theme-nav-link {
 		@apply inline-flex items-center gap-2
 		rounded-lg px-3 py-2
-		text-sm font-medium text-[var(--app-text-muted)]
+		text-sm font-medium text-(--app-text-muted)
 		transition-colors duration-200
-		hover:bg-[var(--app-surface-muted)] hover:text-[var(--app-text)];
+		hover:bg-(--app-surface-muted) hover:text-(--app-text);
 	}
 
 	.theme-surface {
 		@apply rounded-2xl
-		border border-[var(--app-border)]
-		bg-[var(--app-surface)] p-5
+		border border-(--app-border)
+		bg-(--app-surface) p-5
 		shadow-lg shadow-slate-400/40 md:p-8;
+	}
+
+	.alert-error {
+		@apply flex items-center justify-between gap-3
+		rounded-xl border border-rose-300/70
+		bg-rose-50 px-4 py-3
+		text-sm text-rose-700
+		dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300;
+	}
+
+	.alert-dismiss {
+		@apply text-lg leading-none text-rose-500
+		transition hover:text-rose-700
+		dark:text-rose-400 dark:hover:text-rose-200;
+	}
+
+	.app-table {
+		@apply w-full text-left text-sm;
+	}
+
+	.app-table th {
+		@apply border-b border-(--app-border) px-4 py-3
+		text-xs font-semibold uppercase tracking-[0.08em]
+		text-(--app-text-muted);
+	}
+
+	.app-table td {
+		@apply border-b border-(--app-border) px-4 py-3
+		align-top text-(--app-text);
+	}
+
+	.app-table tbody tr:last-child td {
+		@apply border-b-0;
+	}
+
+	.role-toggle {
+		@apply mr-1 mb-1 inline-flex items-center gap-1
+		rounded-full border px-3 py-1
+		text-xs font-medium transition;
+	}
+
+	.role-toggle-active {
+		@apply border-emerald-500 bg-emerald-50 text-emerald-700
+		hover:bg-emerald-100
+		dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/50;
+	}
+
+	.role-toggle-inactive {
+		@apply border-(--app-border) text-(--app-text-muted)
+		hover:border-emerald-500 hover:text-emerald-600
+		dark:hover:border-emerald-400 dark:hover:text-emerald-400;
 	}
 }
 
@@ -269,3 +386,4 @@ code {
 ::selection {
 	background: rgba(96, 165, 250, 0.22);
 }
+

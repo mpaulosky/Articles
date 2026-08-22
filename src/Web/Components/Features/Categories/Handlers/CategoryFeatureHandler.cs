@@ -32,7 +32,8 @@ internal sealed class CategoryFeatureHandler(
 		IRequestHandler<GetCategoriesQuery, Result<IReadOnlyList<CategoryDto>>>,
 		IRequestHandler<GetCategoryByIdQuery, Result<CategoryDto>>,
 		IRequestHandler<UpdateCategoryCommand, Result<CategoryDto>>,
-		IRequestHandler<DeleteCategoryCommand, Result>
+		IRequestHandler<ArchiveCategoryCommand, Result<CategoryDto>>,
+		IRequestHandler<UnarchiveCategoryCommand, Result<CategoryDto>>
 {
 	/// <inheritdoc />
 	public async Task<Result<CategoryDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
@@ -120,19 +121,40 @@ internal sealed class CategoryFeatureHandler(
 	}
 
 	/// <inheritdoc />
-	public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
+	public async Task<Result<CategoryDto>> Handle(ArchiveCategoryCommand request, CancellationToken cancellationToken)
 	{
 		if (!ObjectId.TryParse(request.Id, out var id))
 		{
-			return Result.Fail("The category id is not valid.", ResultErrorCode.Validation);
+			return Result.Fail<CategoryDto>("The category id is not valid.", ResultErrorCode.Validation);
 		}
 
-		var deleted = await repository.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
-		if (!deleted)
+		var category = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+		if (category is null)
 		{
-			return Result.Fail("Category not found.", ResultErrorCode.NotFound);
+			return Result.Fail<CategoryDto>("Category not found.", ResultErrorCode.NotFound);
 		}
 
-		return Result.Ok();
+		category.Archive();
+		var updated = await repository.UpdateAsync(category, cancellationToken).ConfigureAwait(false);
+		return Result.Ok(CategoryDto.FromEntity(updated));
+	}
+
+	/// <inheritdoc />
+	public async Task<Result<CategoryDto>> Handle(UnarchiveCategoryCommand request, CancellationToken cancellationToken)
+	{
+		if (!ObjectId.TryParse(request.Id, out var id))
+		{
+			return Result.Fail<CategoryDto>("The category id is not valid.", ResultErrorCode.Validation);
+		}
+
+		var category = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+		if (category is null)
+		{
+			return Result.Fail<CategoryDto>("Category not found.", ResultErrorCode.NotFound);
+		}
+
+		category.Unarchive();
+		var updated = await repository.UpdateAsync(category, cancellationToken).ConfigureAwait(false);
+		return Result.Ok(CategoryDto.FromEntity(updated));
 	}
 }

@@ -33,17 +33,27 @@ public static class ArticleAuthorizationService
 			return false;
 		}
 
-		if (IsInRole(user, "Admin"))
+		if (IsInRole(user, "Admin") || IsInRole(user, "Author"))
 		{
 			return true;
 		}
 
-		if (IsInRole(user, "Author"))
+		return article.IsPublished;
+	}
+
+	/// <summary>
+	///     Gets a value indicating whether the supplied user can create a new article.
+	/// </summary>
+	/// <param name="user">The current principal.</param>
+	/// <returns><c>true</c> when the user can create articles; otherwise <c>false</c>.</returns>
+	public static bool CanCreateArticle(ClaimsPrincipal? user)
+	{
+		if (user is null || !user.Identity?.IsAuthenticated == true)
 		{
-			return article.Author.UserId == GetCurrentUserId(user);
+			return false;
 		}
 
-		return article.IsPublished;
+		return IsInRole(user, "Admin") || IsInRole(user, "Author");
 	}
 
 	/// <summary>

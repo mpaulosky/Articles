@@ -117,6 +117,65 @@ public class CategoryBehaviorTests
 	}
 
 	[Fact]
+	public void ArchiveSetsIsArchivedTrue()
+	{
+		// Arrange
+		var category = Category.Create("Tech", "Tech articles");
+
+		// Act
+		category.Archive();
+
+		// Assert
+		category.IsArchived.Should().BeTrue();
+	}
+
+	[Fact]
+	public void ArchiveIsIdempotentWhenAlreadyArchived()
+	{
+		// Arrange
+		var category = Category.Create("Tech", "Tech articles");
+		category.Archive();
+		var firstArchiveTime = category.ModifiedOn;
+
+		// Act
+		Thread.Sleep(10);
+		category.Archive();
+
+		// Assert
+		category.IsArchived.Should().BeTrue();
+		category.ModifiedOn.Should().Be(firstArchiveTime);
+	}
+
+	[Fact]
+	public void UnarchiveSetsIsArchivedFalse()
+	{
+		// Arrange
+		var category = Category.Create("Tech", "Tech articles");
+		category.Archive();
+
+		// Act
+		category.Unarchive();
+
+		// Assert
+		category.IsArchived.Should().BeFalse();
+	}
+
+	[Fact]
+	public void UnarchiveIsIdempotentWhenAlreadyUnarchived()
+	{
+		// Arrange
+		var category = Category.Create("Tech", "Tech articles");
+		var beforeModifiedOn = category.ModifiedOn;
+
+		// Act
+		category.Unarchive();
+
+		// Assert
+		category.IsArchived.Should().BeFalse();
+		category.ModifiedOn.Should().Be(beforeModifiedOn);
+	}
+
+	[Fact]
 	public void MyCategoriesContainsExpectedValues()
 	{
 		// Arrange

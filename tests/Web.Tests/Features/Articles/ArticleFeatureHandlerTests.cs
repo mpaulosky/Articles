@@ -161,6 +161,48 @@ public class ArticleFeatureHandlerTests
 	}
 
 	[Fact]
+	public async Task GetArticleBySlugQueryReturnsNotFoundWhenArticleDoesNotExistAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+
+		// Act
+		var result =
+			await handler.Handle(new GetArticleBySlugQuery("missing-slug"), TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeFalse();
+		result.ErrorCode.Should().Be(ResultErrorCode.NotFound);
+		result.Error.Should().Be("Article not found.");
+	}
+
+	[Fact]
+	public async Task GetArticleBySlugQueryReturnsArticleWhenFoundAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
+		var createCommand = new CreateArticleCommand(
+			"Existing Article",
+			"existing-article",
+			"Existing Content",
+			new AuthorDto("author-1", "Author One", "author@example.com"));
+		var createdResult = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+		var articleId = createdResult.Value!.Id;
+
+		// Act
+		var result =
+			await handler.Handle(new GetArticleBySlugQuery("existing-article"), TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value.Should().NotBeNull();
+		result.Value!.Id.Should().Be(articleId);
+		result.Value.Title.Should().Be("Existing Article");
+	}
+
+	[Fact]
 	public async Task UpdateArticleCommandReturnsValidationFailureForInvalidInputAsync()
 	{
 		// Arrange

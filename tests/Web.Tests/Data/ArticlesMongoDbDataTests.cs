@@ -57,7 +57,7 @@ public class ArticlesMongoDbDataTests
 	}
 
 	[Fact]
-	public async Task CategoryRepositoryCanPersistAndDeleteCategoriesAsync()
+	public async Task CategoryRepositoryCanPersistAndArchiveCategoriesAsync()
 	{
 		// Arrange
 		await using var context = CreateContext();
@@ -67,13 +67,15 @@ public class ArticlesMongoDbDataTests
 		// Act
 		var created = await repository.AddAsync(category, TestContext.Current.CancellationToken);
 		var loaded = await repository.GetByIdAsync(created.Id, TestContext.Current.CancellationToken);
-		await repository.DeleteAsync(created.Id, TestContext.Current.CancellationToken);
-		var deleted = await repository.GetByIdAsync(created.Id, TestContext.Current.CancellationToken);
+		created.Archive();
+		await repository.UpdateAsync(created, TestContext.Current.CancellationToken);
+		var archived = await repository.GetByIdAsync(created.Id, TestContext.Current.CancellationToken);
 
 		// Assert
 		loaded.Should().NotBeNull();
 		loaded!.Name.Should().Be("Technology");
-		deleted.Should().BeNull();
+		archived.Should().NotBeNull();
+		archived!.IsArchived.Should().BeTrue();
 	}
 
 	[Fact]

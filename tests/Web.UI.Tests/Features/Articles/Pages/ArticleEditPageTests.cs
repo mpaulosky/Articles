@@ -57,7 +57,7 @@ public class ArticleEditPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Find("input.rounded-lg").GetAttribute("value").Should().Be("Original Title");
@@ -73,7 +73,7 @@ public class ArticleEditPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Find("input.rounded-lg").GetAttribute("value").Should().Be("Original Title");
@@ -88,7 +88,7 @@ public class ArticleEditPageTests : BunitContext
 		SetupArticle(article);
 
 		// Act
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 
 		// Assert
 		cut.Markup.Should().Contain("don't have permission");
@@ -100,11 +100,11 @@ public class ArticleEditPageTests : BunitContext
 	{
 		// Arrange
 		SetupAuthState(CreateAdminUser());
-		_mediator.Send(Arg.Any<GetArticleByIdQuery>(), Arg.Any<CancellationToken>())
+		_mediator.Send(Arg.Any<GetArticleBySlugQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Fail<ArticleDto>("Article not found.", ResultErrorCode.NotFound));
 
 		// Act
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, "missing-id"));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, "missing-slug"));
 
 		// Assert
 		cut.Markup.Should().Contain("Article not found.");
@@ -116,11 +116,11 @@ public class ArticleEditPageTests : BunitContext
 		// Arrange
 		SetupAuthState(CreateAdminUser());
 		var tcs = new TaskCompletionSource<Result<ArticleDto>>();
-		_mediator.Send(Arg.Any<GetArticleByIdQuery>(), Arg.Any<CancellationToken>())
+		_mediator.Send(Arg.Any<GetArticleBySlugQuery>(), Arg.Any<CancellationToken>())
 			.Returns(tcs.Task);
 
 		// Act
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, "some-id"));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, "some-slug"));
 
 		// Assert
 		cut.Markup.Should().Contain("Loading article...");
@@ -139,7 +139,7 @@ public class ArticleEditPageTests : BunitContext
 		_mediator.Send(Arg.Any<UpdateArticleCommand>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok(article));
 
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 		cut.Find("input.rounded-lg").Change("Updated Title");
 		cut.Find("textarea.rounded-lg").Change("Updated content");
 
@@ -155,7 +155,7 @@ public class ArticleEditPageTests : BunitContext
 			Arg.Any<CancellationToken>());
 
 		var navigation = Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>();
-		navigation.Uri.Should().EndWith($"/articles/{article.Id}");
+		navigation.Uri.Should().EndWith($"/articles/{article.Slug}");
 	}
 
 	[Fact]
@@ -168,7 +168,7 @@ public class ArticleEditPageTests : BunitContext
 		_mediator.Send(Arg.Any<UpdateArticleCommand>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Fail<ArticleDto>("Title is too short."));
 
-		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Id, article.Id));
+		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 		cut.Find("input.rounded-lg").Change("Up");
 
 		// Act
@@ -190,7 +190,7 @@ public class ArticleEditPageTests : BunitContext
 
 	private void SetupArticle(ArticleDto article)
 	{
-		_mediator.Send(Arg.Any<GetArticleByIdQuery>(), Arg.Any<CancellationToken>())
+		_mediator.Send(Arg.Any<GetArticleBySlugQuery>(), Arg.Any<CancellationToken>())
 			.Returns(Result.Ok(article));
 	}
 

@@ -16,3 +16,5 @@ namespace Web.Components.Features.Articles.Queries;
 public sealed record GetArticlesQuery : IQuery<Result<IReadOnlyList<ArticleDto>>>;
 
 public sealed record GetArticleByIdQuery(string Id) : IQuery<Result<ArticleDto>>;
+
+public sealed record GetArticleBySlugQuery(string Slug) : IQuery<Result<ArticleDto>>;

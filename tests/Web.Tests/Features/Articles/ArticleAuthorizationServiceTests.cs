@@ -57,20 +57,23 @@ public class ArticleAuthorizationServiceTests
 	}
 
 	[Fact]
-	public void CanViewArticle_AuthorCanOnlyViewTheirOwnArticlesWhenRoleIsAuthor()
+	public void CanViewArticle_AuthorCanViewAllArticles_IncludingOthersUnpublishedWork()
 	{
 		// Arrange
 		var author = CreateUser("author-1", "Author");
 		var ownArticle = CreateArticle("article-5", "My published article", "author-1", published: true);
-		var otherArticle = CreateArticle("article-6", "Someone else published article", "author-2", published: true);
+		var otherPublished = CreateArticle("article-6", "Someone else published article", "author-2", published: true);
+		var otherUnpublished = CreateArticle("article-6b", "Someone else's draft", "author-2", published: false);
 
 		// Act
 		var canViewOwn = ArticleAuthorizationService.CanViewArticle(author, ownArticle);
-		var canViewOther = ArticleAuthorizationService.CanViewArticle(author, otherArticle);
+		var canViewOtherPublished = ArticleAuthorizationService.CanViewArticle(author, otherPublished);
+		var canViewOtherUnpublished = ArticleAuthorizationService.CanViewArticle(author, otherUnpublished);
 
 		// Assert
 		canViewOwn.Should().BeTrue();
-		canViewOther.Should().BeFalse();
+		canViewOtherPublished.Should().BeTrue();
+		canViewOtherUnpublished.Should().BeTrue();
 	}
 
 	[Fact]
@@ -275,6 +278,45 @@ public class ArticleAuthorizationServiceTests
 
 		// Assert
 		act.Should().Throw<ArgumentNullException>();
+	}
+
+	[Theory]
+	[InlineData("Admin", true)]
+	[InlineData("Author", true)]
+	[InlineData("Reader", false)]
+	public void CanCreateArticle_AllowsOnlyAdminAndAuthorRoles(string role, bool expected)
+	{
+		// Arrange
+		var user = CreateUser("user-1", role);
+
+		// Act
+		var canCreate = ArticleAuthorizationService.CanCreateArticle(user);
+
+		// Assert
+		canCreate.Should().Be(expected);
+	}
+
+	[Fact]
+	public void CanCreateArticle_ReturnsFalse_WhenUserIsNull()
+	{
+		// Act
+		var canCreate = ArticleAuthorizationService.CanCreateArticle(null);
+
+		// Assert
+		canCreate.Should().BeFalse();
+	}
+
+	[Fact]
+	public void CanCreateArticle_ReturnsFalse_WhenUserIsNotAuthenticated()
+	{
+		// Arrange
+		var unauthUser = new ClaimsPrincipal(new ClaimsIdentity());
+
+		// Act
+		var canCreate = ArticleAuthorizationService.CanCreateArticle(unauthUser);
+
+		// Assert
+		canCreate.Should().BeFalse();
 	}
 
 	[Fact]

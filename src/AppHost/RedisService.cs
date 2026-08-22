@@ -85,7 +85,7 @@ public static partial class RedisService
 	/// <returns>The new <see cref="ResourceCommandState"/> for the command.</returns>
 	private static ResourceCommandState OnUpdateResourceState(UpdateCommandStateContext context)
 	{
-		var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
+		var logger = context.Services.GetRequiredService<ILogger<Program>>();
 		LogUpdatingResourceState(logger, context.ResourceSnapshot);
 		return context.ResourceSnapshot.HealthStatus is HealthStatus.Healthy ? ResourceCommandState.Enabled : ResourceCommandState.Disabled;
 	}

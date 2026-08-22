@@ -2,8 +2,6 @@ using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
 
-using MongoDB.Bson;
-
 using Web.Components.Features.Categories.Entities;
 using Web.Data;
 
@@ -91,17 +89,21 @@ public class CategoryRepositoryTests
 	}
 
 	[Fact]
-	public async Task DeleteAsync_ReturnsFalseWhenCategoryDoesNotExistAsync()
+	public async Task UpdateAsync_PersistsArchivedStateAsync()
 	{
 		// Arrange
 		await using var context = CreateContext();
 		var repository = new CategoryRepository(context);
+		var created = await repository.AddAsync(Category.Create("Technology", "Technology description"),
+			TestContext.Current.CancellationToken);
+		created.Archive();
 
 		// Act
-		var deleted = await repository.DeleteAsync(ObjectId.GenerateNewId(), TestContext.Current.CancellationToken);
+		await repository.UpdateAsync(created, TestContext.Current.CancellationToken);
 
 		// Assert
-		deleted.Should().BeFalse();
+		var updated = await repository.GetByIdAsync(created.Id, TestContext.Current.CancellationToken);
+		updated!.IsArchived.Should().BeTrue();
 	}
 
 	private static ArticlesMongoDbContext CreateContext()

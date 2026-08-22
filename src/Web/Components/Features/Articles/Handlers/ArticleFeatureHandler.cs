@@ -31,6 +31,7 @@ internal sealed class ArticleFeatureHandler(
 	: IRequestHandler<CreateArticleCommand, Result<ArticleDto>>,
 		IRequestHandler<GetArticlesQuery, Result<IReadOnlyList<ArticleDto>>>,
 		IRequestHandler<GetArticleByIdQuery, Result<ArticleDto>>,
+		IRequestHandler<GetArticleBySlugQuery, Result<ArticleDto>>,
 		IRequestHandler<UpdateArticleCommand, Result<ArticleDto>>,
 		IRequestHandler<DeleteArticleCommand, Result>,
 		IRequestHandler<PublishArticleCommand, Result<ArticleDto>>,
@@ -85,6 +86,18 @@ internal sealed class ArticleFeatureHandler(
 		}
 
 		var article = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+		if (article is null)
+		{
+			return Result.Fail<ArticleDto>("Article not found.", ResultErrorCode.NotFound);
+		}
+
+		return Result.Ok(ArticleDto.FromEntity(article));
+	}
+
+	/// <inheritdoc />
+	public async Task<Result<ArticleDto>> Handle(GetArticleBySlugQuery request, CancellationToken cancellationToken)
+	{
+		var article = await repository.GetBySlugAsync(request.Slug, cancellationToken).ConfigureAwait(false);
 		if (article is null)
 		{
 			return Result.Fail<ArticleDto>("Article not found.", ResultErrorCode.NotFound);
