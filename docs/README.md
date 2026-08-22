@@ -91,7 +91,7 @@ rollout history of workflow-standard and major changes by release.
 
    ```bash
    dotnet build Articles.slnx --configuration Release
-   dotnet test Articles.slnx --nologo
+   dotnet test Articles.slnx
    ```
 
 3. Follow the full contribution workflow in

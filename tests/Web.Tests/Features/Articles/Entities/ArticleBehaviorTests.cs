@@ -4,15 +4,19 @@
 // Company :       mpaulosky
 // Author :        Teqslamer
 // Solution Name : Articles
-// Project Name :  Domain.Tests
+// Project Name :  Web.Tests
 // =============================================
+
+using FluentAssertions;
+
+using MongoDB.Bson;
 
 using Web.Components.Features.Articles.Entities;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Entities;
 using Web.Components.Features.Categories.Models;
 
-namespace Domain.Entities;
+namespace Web.Tests.Features.Articles.Entities;
 
 public class ArticleBehaviorTests
 {

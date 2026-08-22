@@ -1,7 +1,10 @@
 using Bunit;
+
 using FluentAssertions;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using Web.Components.Shared;
 
 namespace Web.UI.Tests.Shared;
