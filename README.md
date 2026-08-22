@@ -58,6 +58,8 @@ rollout history of workflow-standard and major changes by release.
 | Date | Title | Tags |
 |------|-------|------|
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](docs/blogs/2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
+| 2026-08-22 | [Delete .github/workflows/squad-milestone-blog.yml](docs/blogs/2026-08-22-pr-61-delete-github-workflows-squad-milestone-blog-yml.md) | release,automation |
+| 2026-08-22 | [Delete .github/workflows/squad-blog-readme-sync.yml](docs/blogs/2026-08-22-pr-59-delete-github-workflows-squad-blog-readme-sync-yml.md) | release,automation |
 | 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](docs/blogs/2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
 | 2026-08-22 | [Slug-based article routes, category archive, and E2E test scaffolding](docs/blogs/2026-08-22-pr-55-slug-based-article-routes-category-archive-and-e2e-test-scaffolding.md) | release,automation |
 | 2026-08-21 | [fix: repair release workflow's validation dispatch loop](docs/blogs/2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
@@ -114,6 +116,8 @@ notes) and then:
 | Date | Title | Tags |
 |------|-------|------|
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](docs/blogs/2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
+| 2026-08-22 | [Delete .github/workflows/squad-milestone-blog.yml](docs/blogs/2026-08-22-pr-61-delete-github-workflows-squad-milestone-blog-yml.md) | release,automation |
+| 2026-08-22 | [Delete .github/workflows/squad-blog-readme-sync.yml](docs/blogs/2026-08-22-pr-59-delete-github-workflows-squad-blog-readme-sync-yml.md) | release,automation |
 | 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](docs/blogs/2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
 | 2026-08-22 | [Slug-based article routes, category archive, and E2E test scaffolding](docs/blogs/2026-08-22-pr-55-slug-based-article-routes-category-archive-and-e2e-test-scaffolding.md) | release,automation |
 | 2026-08-21 | [fix: repair release workflow's validation dispatch loop](docs/blogs/2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
