@@ -28,7 +28,7 @@ public static class ArticleAuthorizationService
 	{
 		ArgumentNullException.ThrowIfNull(article);
 
-		if (user is null || !user.Identity?.IsAuthenticated == true)
+		if (user?.Identity?.IsAuthenticated != true)
 		{
 			return false;
 		}
@@ -48,7 +48,7 @@ public static class ArticleAuthorizationService
 	/// <returns><c>true</c> when the user can create articles; otherwise <c>false</c>.</returns>
 	public static bool CanCreateArticle(ClaimsPrincipal? user)
 	{
-		if (user is null || !user.Identity?.IsAuthenticated == true)
+		if (user?.Identity?.IsAuthenticated != true)
 		{
 			return false;
 		}
@@ -66,7 +66,7 @@ public static class ArticleAuthorizationService
 	{
 		ArgumentNullException.ThrowIfNull(article);
 
-		if (user is null || !user.Identity?.IsAuthenticated == true)
+		if (user?.Identity?.IsAuthenticated != true)
 		{
 			return false;
 		}
@@ -94,7 +94,7 @@ public static class ArticleAuthorizationService
 	{
 		ArgumentNullException.ThrowIfNull(article);
 
-		if (user is null || !user.Identity?.IsAuthenticated == true)
+		if (user?.Identity?.IsAuthenticated != true)
 		{
 			return false;
 		}
@@ -136,10 +136,7 @@ public static class ArticleAuthorizationService
 		var normalized = role.Trim();
 		foreach (var claim in user.Claims)
 		{
-			if (!SupportedRoleClaimTypes.Contains(claim.Type, StringComparer.OrdinalIgnoreCase)
-			    && !claim.Type.Equals(ClaimTypes.Role, StringComparison.OrdinalIgnoreCase)
-			    && !claim.Type.Equals("roles", StringComparison.OrdinalIgnoreCase)
-			    && !claim.Type.Equals("role", StringComparison.OrdinalIgnoreCase))
+			if (!SupportedRoleClaimTypes.Contains(claim.Type, StringComparer.OrdinalIgnoreCase))
 			{
 				continue;
 			}

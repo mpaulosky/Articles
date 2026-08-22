@@ -23,12 +23,18 @@ public static class DatabaseService
 		{
 			// Keep the MongoDB image pinned to a known-good tag so local AppHost startup stays deterministic.
 			// Persist local-dev data in a named volume so seeded categories/articles survive AppHost restarts.
-			// This is safe to reuse across runs only because AddMongoDbServices pins the root username/password
-			// below — MongoDB only reads MONGO_INITDB_ROOT_* on the very first startup against an empty data
-			// directory, so a fresh, randomly generated password on a later run would otherwise no longer match
-			// the credentials already initialized in the volume and the health probe would fail.
 			return ("8.2.12", "articles-mongo-data");
 		}
+	}
+
+	/// <summary>
+	///   Gets the configured MongoDB root password used for local development.
+	/// </summary>
+	/// <returns>The MongoDB root password, or the default development password when no environment override is supplied.</returns>
+	public static string GetMongoRootPassword()
+	{
+		return Environment.GetEnvironmentVariable("MONGO_INITDB_ROOT_PASSWORD")
+			?? "articles-local-dev";
 	}
 
 	/// <summary>
@@ -41,11 +47,8 @@ public static class DatabaseService
 		this IDistributedApplicationBuilder builder)
 	{
 		var (mongoImageTag, mongoDataVolumeName) = MongoDbResourceSettings;
-
-		// Fixed, non-secret local-dev credentials — required so the root user stays valid across AppHost
-		// restarts when the data volume below is reused. See the comment on MongoDbResourceSettings.
 		var mongoUserName = builder.AddParameter("mongo-username", "mongoadmin");
-		var mongoPassword = builder.AddParameter("mongo-password", "articles-local-dev", secret: true);
+		var mongoPassword = builder.AddParameter("mongo-password", GetMongoRootPassword(), secret: true);
 
 		var server = builder.AddMongoDB(AppHostConstants.Server, userName: mongoUserName, password: mongoPassword)
 			.WithImage("mongo", mongoImageTag);

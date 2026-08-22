@@ -114,9 +114,8 @@
 		out from under any concurrently running `npm run watch:css`, causing intermittent
 		"Can't resolve 'tailwindcss'" failures in the watcher.
 	-->
-	<Target Name="TailwindNpmCi" BeforeTargets="TailwindBuild" Condition="Exists('package.json')"
-			Inputs="$(MSBuildProjectDirectory)/package-lock.json" Outputs="$(MSBuildProjectDirectory)/node_modules/.install-stamp">
-		<Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" />
+	<Target Name="TailwindNpmCi" BeforeTargets="TailwindBuild" Condition="Exists('package.json')" Inputs="$(MSBuildProjectDirectory)/package-lock.json" Outputs="$(MSBuildProjectDirectory)/node_modules/.install-stamp">
+		<Exec Command="$(NpmCommand) ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)" />
 		<Touch Files="$(MSBuildProjectDirectory)/node_modules/.install-stamp" AlwaysCreate="true" />
 	</Target>
 
