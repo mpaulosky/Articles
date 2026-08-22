@@ -14,7 +14,7 @@ using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 using Web.Data;
 
-namespace Web.Tests.Features.Articles;
+namespace Web.Tests.Features.Articles.Handlers;
 
 public class ArticleFeatureHandlerTests
 {

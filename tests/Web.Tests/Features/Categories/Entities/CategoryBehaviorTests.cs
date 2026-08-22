@@ -4,8 +4,12 @@
 // Company :       mpaulosky
 // Author :        Teqslamer
 // Solution Name : Articles
-// Project Name :  Domain.Tests
+// Project Name :  Web.Tests
 // =============================================
+
+using Domain.Helpers;
+
+using FluentAssertions;
 
 using MongoDB.Bson;
 
@@ -13,7 +17,7 @@ using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Entities;
 using Web.Components.Features.Categories.Models;
 
-namespace Domain.Entities;
+namespace Web.Tests.Features.Categories.Entities;
 
 public class CategoryBehaviorTests
 {
@@ -172,6 +176,24 @@ public class CategoryBehaviorTests
 		// Assert
 		category.IsArchived.Should().BeFalse();
 		category.ModifiedOn.Should().Be(beforeModifiedOn);
+	}
+
+	[Fact]
+	public void CategoryEmpty_WhenRequested_ExpectedFreshBlankState()
+	{
+		// Arrange
+
+		// Act
+		var empty = Category.Empty;
+
+		// Assert
+		empty.Id.Should().Be(ObjectId.Empty);
+		empty.Name.Should().BeEmpty();
+		empty.Description.Should().BeEmpty();
+		empty.Slug.Should().BeEmpty();
+		empty.CreatedOn.Should().Be(DateTimeOffset.UnixEpoch);
+		empty.ModifiedOn.Should().BeNull();
+		empty.IsArchived.Should().BeFalse();
 	}
 
 	[Fact]
