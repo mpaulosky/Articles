@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [Switch article routes to slugs, replace category delete with archive](2026-08-22-pr-57-switch-article-routes-to-slugs-replace-category-delete-with-archive.md) | release,automation |
 | 2026-08-22 | [Slug-based article routes, category archive, and E2E test scaffolding](2026-08-22-pr-55-slug-based-article-routes-category-archive-and-e2e-test-scaffolding.md) | release,automation |
 | 2026-08-21 | [fix: repair release workflow's validation dispatch loop](2026-08-21-pr-53-fix-repair-release-workflow-s-validation-dispatch-loop.md) | release,automation |
 | 2026-08-21 | [fix: finish issue #32 - real QuickGrid, glossary, idempotency tests, seed data](2026-08-21-pr-51-fix-finish-issue-32-real-quickgrid-glossary-idempotency-tests-seed-data.md) | release,automation |
