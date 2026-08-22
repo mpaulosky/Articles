@@ -104,14 +104,14 @@
 						<ChildContent Context="context">
 							<div class="flex flex-nowrap items-center justify-center gap-1.5 whitespace-nowrap">
 								<button type="button"
-												class="app-button app-button-primary"
+												class="app-button app-button-primary w-24"
 												@onclick="() => StartEdit(context)">
 									Edit
 								</button>
 								@if (context.IsArchived)
 								{
 									<button type="button"
-													class="app-button app-button-unsetvalue"
+													class="app-button app-button-unsetvalue w-24"
 													@onclick="() => UnarchiveCategoryAsync(context.Id.ToString())">
 										Unarchive
 									</button>
@@ -119,7 +119,7 @@
 								else
 								{
 									<button type="button"
-													class="app-button app-button-warning"
+													class="app-button app-button-warning w-24"
 													@onclick="() => RequestArchive(context.Id.ToString())">
 										Archive
 									</button>
