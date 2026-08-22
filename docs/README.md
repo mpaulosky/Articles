@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [style: pill-shaped buttons and inputs on Articles/Categories pages](docs/blogs/2026-08-22-pr-73-style-pill-shaped-buttons-and-inputs-on-articles-categories-pages.md) | release,automation |
 | 2026-08-22 | [Redesign CategoriesPage to match ArticlesPage](docs/blogs/2026-08-22-pr-71-redesign-categoriespage-to-match-articlespage.md) | release,automation |
 | 2026-08-22 | [fix: authenticate release-notes PR creation with a PAT instead of GITHUB_TOKEN](docs/blogs/2026-08-22-pr-69-fix-authenticate-release-notes-pr-creation-with-a-pat-instead-of-github-token.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-release-blog.yml](docs/blogs/2026-08-22-pr-67-delete-github-workflows-squad-release-blog-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-release.yml](docs/blogs/2026-08-22-pr-64-delete-github-workflows-squad-milestone-release-yml.md) | release,automation |
-| 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](docs/blogs/2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [style: pill-shaped buttons and inputs on Articles/Categories pages](docs/blogs/2026-08-22-pr-73-style-pill-shaped-buttons-and-inputs-on-articles-categories-pages.md) | release,automation |
 | 2026-08-22 | [Redesign CategoriesPage to match ArticlesPage](docs/blogs/2026-08-22-pr-71-redesign-categoriespage-to-match-articlespage.md) | release,automation |
 | 2026-08-22 | [fix: authenticate release-notes PR creation with a PAT instead of GITHUB_TOKEN](docs/blogs/2026-08-22-pr-69-fix-authenticate-release-notes-pr-creation-with-a-pat-instead-of-github-token.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-release-blog.yml](docs/blogs/2026-08-22-pr-67-delete-github-workflows-squad-release-blog-yml.md) | release,automation |
 | 2026-08-22 | [Delete .github/workflows/squad-milestone-release.yml](docs/blogs/2026-08-22-pr-64-delete-github-workflows-squad-milestone-release-yml.md) | release,automation |
-| 2026-08-22 | [Delete .github/workflows/squad-milestone-release-decision.yml](docs/blogs/2026-08-22-pr-62-delete-github-workflows-squad-milestone-release-decision-yml.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
