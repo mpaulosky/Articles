@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
 | 2026-08-22 | [test: add Category.Empty regression coverage (closes #79)](2026-08-22-pr-89-test-add-category-empty-regression-coverage-closes-79.md) | release,automation |
 | 2026-08-22 | [test: deepen Profile coverage (closes #81)](2026-08-22-pr-87-test-deepen-profile-coverage-closes-81.md) | release,automation |
 | 2026-08-22 | [test: deepen RedirectToLogin coverage (closes #82)](2026-08-22-pr-85-test-deepen-redirecttologin-coverage-closes-82.md) | release,automation |
