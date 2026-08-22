@@ -35,7 +35,17 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # A PAT (not GITHUB_TOKEN) is required here: it's persisted as the
+          # git credential for this checkout, and later used by `git push` to
+          # publish the release-notes branch and by `gh pr create` to open
+          # the PR. GitHub treats PRs authored by github-actions[bot] (i.e.
+          # opened via GITHUB_TOKEN) as untrusted and gates every
+          # pull_request-triggered workflow behind a manual "Approve and run"
+          # click. Authoring as a real collaborator (via RELEASE_PR_PAT)
+          # avoids that approval requirement entirely. Falls back to
+          # GITHUB_TOKEN if the PAT secret isn't configured, in which case
+          # the approval-gate workaround further down still applies.
+          token: ${{ secrets.RELEASE_PR_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Resolve PR metadata
         id: pr
@@ -448,7 +458,10 @@ jobs:
         id: commit
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Same PAT-with-fallback as the checkout step (see comment there);
+          # gh pr create authors the PR as whichever identity this token
+          # belongs to.
+          GH_TOKEN: ${{ secrets.RELEASE_PR_PAT || secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
         run: |
           git config user.name "github-actions[bot]"
