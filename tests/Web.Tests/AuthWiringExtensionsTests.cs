@@ -231,6 +231,26 @@ public class AuthWiringExtensionsTests
 		result.Principal.Claims.Should().BeEmpty();
 	}
 
+	private static WebApplicationBuilder CreateTestWebApplicationBuilder(string environmentName = "Testing")
+	{
+		var contentRootPath = Path.Combine(Path.GetTempPath(), "Articles-WebTests", Guid.NewGuid().ToString("N"));
+		Directory.CreateDirectory(contentRootPath);
+		var originalCurrentDirectory = Directory.GetCurrentDirectory();
+		Directory.SetCurrentDirectory(contentRootPath);
+
+		try
+		{
+			return WebApplication.CreateBuilder(new WebApplicationOptions
+			{
+				EnvironmentName = environmentName, ContentRootPath = contentRootPath
+			});
+		}
+		finally
+		{
+			Directory.SetCurrentDirectory(originalCurrentDirectory);
+		}
+	}
+
 	private sealed class TestOptionsMonitor<T>(T options) : IOptionsMonitor<T>
 	{
 		public T CurrentValue => options;

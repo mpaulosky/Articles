@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
-| 2026-08-22 | [style: pill-shaped buttons and inputs on Articles/Categories pages](docs/blogs/2026-08-22-pr-73-style-pill-shaped-buttons-and-inputs-on-articles-categories-pages.md) | release,automation |
-| 2026-08-22 | [Redesign CategoriesPage to match ArticlesPage](docs/blogs/2026-08-22-pr-71-redesign-categoriespage-to-match-articlespage.md) | release,automation |
-| 2026-08-22 | [fix: authenticate release-notes PR creation with a PAT instead of GITHUB_TOKEN](docs/blogs/2026-08-22-pr-69-fix-authenticate-release-notes-pr-creation-with-a-pat-instead-of-github-token.md) | release,automation |
-| 2026-08-22 | [Delete .github/workflows/squad-release-blog.yml](docs/blogs/2026-08-22-pr-67-delete-github-workflows-squad-release-blog-yml.md) | release,automation |
-| 2026-08-22 | [Delete .github/workflows/squad-milestone-release.yml](docs/blogs/2026-08-22-pr-64-delete-github-workflows-squad-milestone-release-yml.md) | release,automation |
+| 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](docs/blogs/2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
+| 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](docs/blogs/2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
+| 2026-08-22 | [test: add Category.Empty regression coverage (closes #79)](docs/blogs/2026-08-22-pr-89-test-add-category-empty-regression-coverage-closes-79.md) | release,automation |
+| 2026-08-22 | [test: deepen Profile coverage (closes #81)](docs/blogs/2026-08-22-pr-87-test-deepen-profile-coverage-closes-81.md) | release,automation |
+| 2026-08-22 | [test: deepen RedirectToLogin coverage (closes #82)](docs/blogs/2026-08-22-pr-85-test-deepen-redirecttologin-coverage-closes-82.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
-| 2026-08-22 | [style: pill-shaped buttons and inputs on Articles/Categories pages](docs/blogs/2026-08-22-pr-73-style-pill-shaped-buttons-and-inputs-on-articles-categories-pages.md) | release,automation |
-| 2026-08-22 | [Redesign CategoriesPage to match ArticlesPage](docs/blogs/2026-08-22-pr-71-redesign-categoriespage-to-match-articlespage.md) | release,automation |
-| 2026-08-22 | [fix: authenticate release-notes PR creation with a PAT instead of GITHUB_TOKEN](docs/blogs/2026-08-22-pr-69-fix-authenticate-release-notes-pr-creation-with-a-pat-instead-of-github-token.md) | release,automation |
-| 2026-08-22 | [Delete .github/workflows/squad-release-blog.yml](docs/blogs/2026-08-22-pr-67-delete-github-workflows-squad-release-blog-yml.md) | release,automation |
-| 2026-08-22 | [Delete .github/workflows/squad-milestone-release.yml](docs/blogs/2026-08-22-pr-64-delete-github-workflows-squad-milestone-release-yml.md) | release,automation |
+| 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](docs/blogs/2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
+| 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](docs/blogs/2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
+| 2026-08-22 | [test: add Category.Empty regression coverage (closes #79)](docs/blogs/2026-08-22-pr-89-test-add-category-empty-regression-coverage-closes-79.md) | release,automation |
+| 2026-08-22 | [test: deepen Profile coverage (closes #81)](docs/blogs/2026-08-22-pr-87-test-deepen-profile-coverage-closes-81.md) | release,automation |
+| 2026-08-22 | [test: deepen RedirectToLogin coverage (closes #82)](docs/blogs/2026-08-22-pr-85-test-deepen-redirecttologin-coverage-closes-82.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
