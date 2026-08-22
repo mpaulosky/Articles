@@ -35,7 +35,8 @@ internal sealed class UserManagementCacheService(
 		CancellationToken ct = default)
 	{
 		// L1 hit (synchronous — no heap allocation)
-		if (localCache.TryGetValue(UserManagementCacheKeys.AllUsers, out List<UserWithRolesDto>? cached) && cached is not null)
+		if (localCache.TryGetValue(UserManagementCacheKeys.AllUsers, out List<UserWithRolesDto>? cached) &&
+		    cached is not null)
 			return cached;
 
 		// L2 hit
@@ -54,7 +55,7 @@ internal sealed class UserManagementCacheService(
 			catch (JsonException)
 			{
 				// Stale or corrupt bytes — remove and fall through to the source
-				await distributedCache.RemoveAsync(UserManagementCacheKeys.AllUsers, CancellationToken.None).ConfigureAwait(false);
+				await distributedCache.RemoveAsync(UserManagementCacheKeys.AllUsers, ct).ConfigureAwait(false);
 			}
 		}
 
@@ -94,7 +95,7 @@ internal sealed class UserManagementCacheService(
 			catch (JsonException)
 			{
 				// Stale or corrupt bytes — remove and fall through to the source
-				await distributedCache.RemoveAsync(UserManagementCacheKeys.AllRoles, CancellationToken.None).ConfigureAwait(false);
+				await distributedCache.RemoveAsync(UserManagementCacheKeys.AllRoles, ct).ConfigureAwait(false);
 			}
 		}
 
@@ -113,14 +114,12 @@ internal sealed class UserManagementCacheService(
 	public async Task InvalidateUsersAsync(CancellationToken ct = default)
 	{
 		localCache.Remove(UserManagementCacheKeys.AllUsers);
-		// CancellationToken.None: the Auth0 mutation already committed — must not be cancelled
-		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllUsers, CancellationToken.None).ConfigureAwait(false);
+		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllUsers, ct).ConfigureAwait(false);
 	}
 
 	public async Task InvalidateRolesAsync(CancellationToken ct = default)
 	{
 		localCache.Remove(UserManagementCacheKeys.AllRoles);
-		// CancellationToken.None: the Auth0 mutation already committed — must not be cancelled
-		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllRoles, CancellationToken.None).ConfigureAwait(false);
+		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllRoles, ct).ConfigureAwait(false);
 	}
 }
