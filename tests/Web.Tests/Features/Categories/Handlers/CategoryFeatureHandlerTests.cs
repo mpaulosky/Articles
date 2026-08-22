@@ -13,7 +13,7 @@ using Web.Components.Features.Categories.Queries;
 using Web.Components.Features.Categories.Validators;
 using Web.Data;
 
-namespace Web.Tests.Features.Categories;
+namespace Web.Tests.Features.Categories.Handlers;
 
 public class CategoryFeatureHandlerTests
 {

@@ -4,14 +4,16 @@
 // Company :       mpaulosky
 // Author :        Teqslamer
 // Solution Name : Articles
-// Project Name :  Domain.Tests
+// Project Name :  Web.Tests
 // =============================================
+
+using FluentAssertions;
 
 using MongoDB.Bson;
 
 using Web.Components.Features.Categories.Models;
 
-namespace Web.Components.Features.Categories.Models;
+namespace Web.Tests.Features.Categories.Models;
 
 public class CategoryDtoBehaviorTests
 {

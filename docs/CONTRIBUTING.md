@@ -59,8 +59,7 @@ DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet build Articles.slnx \
   --configuration Release
 
 # Run the tests
-DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet test Articles.slnx \
-  --nologo
+DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet test Articles.slnx
 
 # Lint Markdown files
 npx --yes markdownlint-cli2 "**/*.md"

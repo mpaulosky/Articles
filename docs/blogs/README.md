@@ -4,6 +4,9 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [test: deepen Profile coverage (closes #81)](2026-08-22-pr-87-test-deepen-profile-coverage-closes-81.md) | release,automation |
+| 2026-08-22 | [test: deepen RedirectToLogin coverage (closes #82)](2026-08-22-pr-85-test-deepen-redirecttologin-coverage-closes-82.md) | release,automation |
+| 2026-08-22 | [test: expand ManageRoles coverage (closes #80)](2026-08-22-pr-83-test-expand-manageroles-coverage-closes-80.md) | release,automation |
 | 2026-08-22 | [style: pill-shaped buttons and inputs on Articles/Categories pages](2026-08-22-pr-73-style-pill-shaped-buttons-and-inputs-on-articles-categories-pages.md) | release,automation |
 | 2026-08-22 | [Redesign CategoriesPage to match ArticlesPage](2026-08-22-pr-71-redesign-categoriespage-to-match-articlespage.md) | release,automation |
 | 2026-08-22 | [fix: authenticate release-notes PR creation with a PAT instead of GITHUB_TOKEN](2026-08-22-pr-69-fix-authenticate-release-notes-pr-creation-with-a-pat-instead-of-github-token.md) | release,automation |

@@ -5,7 +5,7 @@ using Web.Components.Features.Articles.Validators;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 
-namespace Web.Tests.Features.Articles;
+namespace Web.Tests.Features.Articles.Validators;
 
 public class ArticleValidatorsTests
 {
