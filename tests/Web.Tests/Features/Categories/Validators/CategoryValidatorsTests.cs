@@ -3,7 +3,7 @@ using FluentAssertions;
 using Web.Components.Features.Categories.Commands;
 using Web.Components.Features.Categories.Validators;
 
-namespace Web.Tests.Features.Categories;
+namespace Web.Tests.Features.Categories.Validators;
 
 public class CategoryValidatorsTests
 {

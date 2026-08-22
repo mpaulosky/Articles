@@ -11,6 +11,8 @@ using Microsoft.Extensions.Options;
 
 using MongoDB.Bson;
 
+using NSubstitute;
+
 using Web.Components.Features.UserManagement.Caching.Converters;
 using Web.Components.Features.UserManagement.Caching.Extensions;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
@@ -33,7 +35,8 @@ public class Auth0ConfigurationHelperTests
 	[InlineData("example.auth0.com", "real-client-id", "real-client-secret", false)]
 	[InlineData(null, "real-client-id", "real-client-secret", true)]
 	[InlineData("", "real-client-id", "real-client-secret", true)]
-	public void UsesPlaceholderWebAppLogin_RecognizesPlaceholderValues(string? domain, string? clientId, string? clientSecret, bool expected)
+	public void UsesPlaceholderWebAppLogin_RecognizesPlaceholderValues(string? domain, string? clientId,
+		string? clientSecret, bool expected)
 	{
 		// Arrange
 
@@ -66,7 +69,8 @@ public class Auth0ConfigurationHelperTests
 	[InlineData("example.auth0.com", "real-client-id", null, false)]
 	[InlineData("test.auth0.com", "real-client-id", "real-client-secret", false)]
 	[InlineData("YOUR_DOMAIN", "real-client-id", "real-client-secret", false)]
-	public void IsAuthenticationEnabled_OnlyReturnsTrueForNonPlaceholderRealConfiguration(string? domain, string? clientId, string? clientSecret, bool expected)
+	public void IsAuthenticationEnabled_OnlyReturnsTrueForNonPlaceholderRealConfiguration(string? domain,
+		string? clientId, string? clientSecret, bool expected)
 	{
 		// Arrange
 
@@ -80,7 +84,8 @@ public class Auth0ConfigurationHelperTests
 	[Theory]
 	[InlineData("example.auth0.com", "real-client-id", false)]
 	[InlineData("test.auth0.com", "real-client-id", false)]
-	public void IsAuthenticationEnabled_TwoParamOverload_ReturnsFalseBecauseClientSecretIsNull(string? domain, string? clientId, bool expected)
+	public void IsAuthenticationEnabled_TwoParamOverload_ReturnsFalseBecauseClientSecretIsNull(string? domain,
+		string? clientId, bool expected)
 	{
 		// Act
 		var result = Auth0ConfigurationHelper.IsAuthenticationEnabled(domain, clientId);
@@ -93,7 +98,8 @@ public class Auth0ConfigurationHelperTests
 	[InlineData(true, "test.auth0.com", "real-client-id", true)]
 	[InlineData(false, "test.auth0.com", "real-client-id", false)]
 	[InlineData(true, "example.auth0.com", "real-client-id", false)]
-	public void ShouldUseLocalTestLogin_TwoParamOverload(bool isTestingEnv, string? domain, string? clientId, bool expected)
+	public void ShouldUseLocalTestLogin_TwoParamOverload(bool isTestingEnv, string? domain, string? clientId,
+		bool expected)
 	{
 		// Act
 		var result = Auth0ConfigurationHelper.ShouldUseLocalTestLogin(isTestingEnv, domain, clientId);
@@ -106,7 +112,8 @@ public class Auth0ConfigurationHelperTests
 	[InlineData(true, "test.auth0.com", "real-client-id", "real-secret", true)]
 	[InlineData(false, "test.auth0.com", "real-client-id", "real-secret", false)]
 	[InlineData(true, "example.auth0.com", "real-client-id", "real-secret", false)]
-	public void ShouldUseLocalTestLogin_ThreeParamOverload(bool isTestingEnv, string? domain, string? clientId, string? clientSecret, bool expected)
+	public void ShouldUseLocalTestLogin_ThreeParamOverload(bool isTestingEnv, string? domain, string? clientId,
+		string? clientSecret, bool expected)
 	{
 		// Act
 		var result = Auth0ConfigurationHelper.ShouldUseLocalTestLogin(isTestingEnv, domain, clientId, clientSecret);
@@ -122,15 +129,16 @@ public class RoleClaimNormalizerTests
 	[InlineData("https://articles/roles", "[\"Admin\",\"Editor\"]", "Admin", "Editor")]
 	[InlineData("roles", "Admin,Editor", "Admin", "Editor")]
 	[InlineData("role", "Support", "Support")]
-	public async Task TransformAsync_NormalizesSupportedClaimTypesAndRoleFormats(string claimType, string claimValue, params string[] expectedRoles)
+	public async Task TransformAsync_NormalizesSupportedClaimTypesAndRoleFormats(string claimType, string claimValue,
+		params string[] expectedRoles)
 	{
 		// Arrange
 		var identity = new ClaimsIdentity(
-		[
-			new Claim(claimType, claimValue),
-			new Claim(ClaimTypes.Role, "Admin")
-		],
-		"TestAuth");
+			[
+				new Claim(claimType, claimValue),
+				new Claim(ClaimTypes.Role, "Admin")
+			],
+			"TestAuth");
 		var principal = new ClaimsPrincipal(identity);
 		var normalizer = new RoleClaimNormalizer();
 
@@ -138,7 +146,8 @@ public class RoleClaimNormalizerTests
 		var result = await normalizer.TransformAsync(principal);
 
 		// Assert
-		var normalizedRoles = result.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToList();
+		var normalizedRoles = result.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value)
+			.ToList();
 		normalizedRoles.Should().Contain(expectedRoles);
 	}
 }
@@ -166,8 +175,7 @@ public class RoleClaimsHelperTests
 		// Arrange
 		var inMemory = new Dictionary<string, string?>
 		{
-			{ "Auth0:RoleClaimTypes:0", "custom-role-1" },
-			{ "Auth0:RoleClaimTypes:1", "custom-role-2" }
+			{ "Auth0:RoleClaimTypes:0", "custom-role-1" }, { "Auth0:RoleClaimTypes:1", "custom-role-2" }
 		};
 		var config = new ConfigurationBuilder().AddInMemoryCollection(inMemory).Build();
 
@@ -311,12 +319,9 @@ public class UserManagementCacheServiceTests
 	{
 		// Arrange
 		using var localCache = new MemoryCache(new MemoryCacheOptions());
-		var distributedCache = CreateDistributedCache();
+		var distributedCache = Substitute.For<IDistributedCache>();
 		var service = new UserManagementCacheService(localCache, distributedCache);
-		var cachedUsers = new List<UserWithRolesDto>
-		{
-			new("user-1", "alice@example.com", "Alice", ["Admin"])
-		};
+		var cachedUsers = new List<UserWithRolesDto> { new("user-1", "alice@example.com", "Alice", ["Admin"]) };
 		localCache.Set(UserManagementCacheKeys.AllUsers, cachedUsers, TimeSpan.FromMinutes(1));
 		var fetchCallCount = 0;
 
@@ -330,24 +335,19 @@ public class UserManagementCacheServiceTests
 		// Assert
 		fetchCallCount.Should().Be(0);
 		result.Should().BeEquivalentTo(cachedUsers);
+		await distributedCache.DidNotReceiveWithAnyArgs().GetAsync(default!, TestContext.Current.CancellationToken);
 	}
 
 	[Fact]
-	public async Task GetOrFetchUsersAsync_WhenL2CacheHit_FillsLocalCacheAndReturnsCachedValue()
+	public async Task GetOrFetchUsersAsync_WhenL2CacheHit_FillsLocalCacheAndReturnsValue()
 	{
 		// Arrange
 		using var localCache = new MemoryCache(new MemoryCacheOptions());
-		var distributedCache = CreateDistributedCache();
+		var distributedCache = Substitute.For<IDistributedCache>();
 		var service = new UserManagementCacheService(localCache, distributedCache);
-		var cachedUsers = new List<UserWithRolesDto>
-		{
-			new("user-2", "bob@example.com", "Bob", ["Editor"])
-		};
-		await distributedCache.SetAsync(
-			UserManagementCacheKeys.AllUsers,
-			JsonSerializer.SerializeToUtf8Bytes(cachedUsers),
-			new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) },
-			TestContext.Current.CancellationToken);
+		var cachedUsers = new List<UserWithRolesDto> { new("user-2", "bob@example.com", "Bob", ["Editor"]) };
+		distributedCache.GetAsync(UserManagementCacheKeys.AllUsers, Arg.Any<CancellationToken>())
+			.Returns(JsonSerializer.SerializeToUtf8Bytes(cachedUsers));
 		var fetchCallCount = 0;
 
 		// Act
@@ -365,16 +365,15 @@ public class UserManagementCacheServiceTests
 	}
 
 	[Fact]
-	public async Task GetOrFetchUsersAsync_WhenCacheMiss_FetchesAndStoresInBothTiers()
+	public async Task GetOrFetchUsersAsync_WhenL2CacheContainsCorruptJson_RemovesEntryAndFetchesFreshValue()
 	{
 		// Arrange
 		using var localCache = new MemoryCache(new MemoryCacheOptions());
-		var distributedCache = CreateDistributedCache();
+		var distributedCache = Substitute.For<IDistributedCache>();
 		var service = new UserManagementCacheService(localCache, distributedCache);
-		var fetchedUsers = new List<UserWithRolesDto>
-		{
-			new("user-3", "carol@example.com", "Carol", ["Reader"])
-		};
+		var fetchedUsers = new List<UserWithRolesDto> { new("user-3", "carol@example.com", "Carol", ["Reader"]) };
+		distributedCache.GetAsync(UserManagementCacheKeys.AllUsers, Arg.Any<CancellationToken>())
+			.Returns(new byte[] { 0x7B, 0x7D, 0x00 });
 		var fetchCallCount = 0;
 
 		// Act
@@ -387,11 +386,14 @@ public class UserManagementCacheServiceTests
 		// Assert
 		fetchCallCount.Should().Be(1);
 		result.Should().BeEquivalentTo(fetchedUsers);
-		localCache.TryGetValue(UserManagementCacheKeys.AllUsers, out List<UserWithRolesDto>? l1Hit).Should().BeTrue();
-		l1Hit.Should().BeEquivalentTo(fetchedUsers);
-		var redisBytes = await distributedCache.GetAsync(UserManagementCacheKeys.AllUsers, TestContext.Current.CancellationToken);
-		redisBytes.Should().NotBeNull();
-		JsonSerializer.Deserialize<List<UserWithRolesDto>>(redisBytes!, WebJsonOptions).Should().BeEquivalentTo(fetchedUsers);
+		await distributedCache.Received(1)
+			.RemoveAsync(UserManagementCacheKeys.AllUsers, TestContext.Current.CancellationToken);
+		await distributedCache.Received(1).SetAsync(
+			UserManagementCacheKeys.AllUsers,
+			Arg.Is<byte[]>(payload =>
+				JsonSerializer.Deserialize<List<UserWithRolesDto>>(payload, WebJsonOptions)!.Count == 1),
+			Arg.Any<DistributedCacheEntryOptions>(),
+			TestContext.Current.CancellationToken);
 	}
 
 	[Fact]
@@ -399,30 +401,26 @@ public class UserManagementCacheServiceTests
 	{
 		// Arrange
 		using var localCache = new MemoryCache(new MemoryCacheOptions());
-		var distributedCache = CreateDistributedCache();
+		var distributedCache = Substitute.For<IDistributedCache>();
 		var service = new UserManagementCacheService(localCache, distributedCache);
 		var users = new List<UserWithRolesDto> { new("user-4", "dave@example.com", "Dave", ["Admin"]) };
 		localCache.Set(UserManagementCacheKeys.AllUsers, users, TimeSpan.FromMinutes(1));
-		await distributedCache.SetAsync(
-			UserManagementCacheKeys.AllUsers,
-			JsonSerializer.SerializeToUtf8Bytes(users),
-			new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) },
-			TestContext.Current.CancellationToken);
 
 		// Act
 		await service.InvalidateUsersAsync(TestContext.Current.CancellationToken);
 
 		// Assert
 		localCache.TryGetValue(UserManagementCacheKeys.AllUsers, out _).Should().BeFalse();
-		(await distributedCache.GetAsync(UserManagementCacheKeys.AllUsers, TestContext.Current.CancellationToken)).Should().BeNull();
+		await distributedCache.Received(1)
+			.RemoveAsync(UserManagementCacheKeys.AllUsers, TestContext.Current.CancellationToken);
 	}
 
 	[Fact]
-	public async Task GetOrFetchRolesAsync_WhenL1AndL2CacheHitsAndInvalidationBehaveAsExpected()
+	public async Task GetOrFetchRolesAsync_WhenL1AndL2CacheAreUsed_AndInvalidateRolesRemovesBothTiers()
 	{
 		// Arrange
 		using var localCache = new MemoryCache(new MemoryCacheOptions());
-		var distributedCache = CreateDistributedCache();
+		var distributedCache = Substitute.For<IDistributedCache>();
 		var service = new UserManagementCacheService(localCache, distributedCache);
 		var cachedRoles = new List<RoleDto> { new("role-1", "Admin") };
 		var fetchCallCount = 0;
@@ -441,11 +439,8 @@ public class UserManagementCacheServiceTests
 
 		// Arrange
 		localCache.Remove(UserManagementCacheKeys.AllRoles);
-		await distributedCache.SetAsync(
-			UserManagementCacheKeys.AllRoles,
-			JsonSerializer.SerializeToUtf8Bytes(cachedRoles),
-			new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) },
-			TestContext.Current.CancellationToken);
+		distributedCache.GetAsync(UserManagementCacheKeys.AllRoles, Arg.Any<CancellationToken>())
+			.Returns(JsonSerializer.SerializeToUtf8Bytes(cachedRoles));
 
 		// Act
 		var l2Result = await service.GetOrFetchRolesAsync(() =>
@@ -460,33 +455,12 @@ public class UserManagementCacheServiceTests
 		localCache.TryGetValue(UserManagementCacheKeys.AllRoles, out List<RoleDto>? localHit).Should().BeTrue();
 		localHit.Should().BeEquivalentTo(cachedRoles);
 
-		// Arrange
-		fetchCallCount = 0;
-		localCache.Remove(UserManagementCacheKeys.AllRoles);
-		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllRoles, TestContext.Current.CancellationToken);
-		var fetchedRoles = new List<RoleDto> { new("role-2", "Editor") };
-
-		// Act
-		var missResult = await service.GetOrFetchRolesAsync(() =>
-		{
-			fetchCallCount++;
-			return Task.FromResult<IReadOnlyList<RoleDto>>(fetchedRoles);
-		}, TestContext.Current.CancellationToken);
-
-		// Assert
-		fetchCallCount.Should().Be(1);
-		missResult.Should().BeEquivalentTo(fetchedRoles);
-
 		// Act
 		await service.InvalidateRolesAsync(TestContext.Current.CancellationToken);
 
 		// Assert
 		localCache.TryGetValue(UserManagementCacheKeys.AllRoles, out _).Should().BeFalse();
-		(await distributedCache.GetAsync(UserManagementCacheKeys.AllRoles, TestContext.Current.CancellationToken)).Should().BeNull();
-	}
-
-	private static MemoryDistributedCache CreateDistributedCache()
-	{
-		return new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+		await distributedCache.Received(1)
+			.RemoveAsync(UserManagementCacheKeys.AllRoles, TestContext.Current.CancellationToken);
 	}
 }

@@ -7,7 +7,7 @@ using Web.Components.Features.Articles.Models;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 
-namespace Web.Tests.Features.Articles;
+namespace Web.Tests.Features.Articles.Authorization;
 
 public class ArticleAuthorizationServiceTests
 {
