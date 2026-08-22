@@ -23,6 +23,10 @@ public static class DatabaseService
 		{
 			// Keep the MongoDB image pinned to a known-good tag so local AppHost startup stays deterministic.
 			// Persist local-dev data in a named volume so seeded categories/articles survive AppHost restarts.
+			// This is safe to reuse across runs only because AddMongoDbServices pins the root username/password
+			// below — MongoDB only reads MONGO_INITDB_ROOT_* on the very first startup against an empty data
+			// directory, so a fresh, randomly generated password on a later run would otherwise no longer match
+			// the credentials already initialized in the volume and the health probe would fail.
 			return ("8.2.12", "articles-mongo-data");
 		}
 	}
