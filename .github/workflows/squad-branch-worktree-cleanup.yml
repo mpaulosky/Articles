@@ -37,7 +37,7 @@ name: Squad Branch and Worktree Cleanup
         default: false
         type: boolean
   schedule:
-    - cron: "35 3 * * 0"
+    - cron: "35 3 * * *"
 
 permissions:
   contents: write
@@ -54,7 +54,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run cleanup (schedule dry-run; manual apply needs signal)
+      - name: Run cleanup (scheduled runs apply automatically; manual apply needs signal)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -76,7 +76,9 @@ jobs:
 
           ORPHAN_DAYS="${INPUT_ORPHAN_DAYS:-14}"
           if [[ "$EVENT_NAME" == "schedule" ]]; then
-            echo "Schedule trigger enforces dry-run mode."
+            echo "Schedule trigger applies cleanup automatically."
+            APPLY_ARGS+=(--apply)
+            DELETE_REMOTE_ARGS+=(--delete-remote)
           else
             if [[ "${INPUT_APPLY:-false}" == "true" ]]; then
               if [[ "${INPUT_APPLY_SIGNAL:-}" != "APPLY_CLEANUP" ]]; then
