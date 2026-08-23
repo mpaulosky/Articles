@@ -31,6 +31,7 @@ internal static class AuthenticationServiceExtensions
 		IConfiguration configuration)
 	{
 		services.AddHttpContextAccessor();
+		services.AddLogging();
 		services.AddAuthorization();
 
 		var domain = configuration["Auth0:Domain"];
@@ -41,11 +42,11 @@ internal static class AuthenticationServiceExtensions
 		if (!authEnabled)
 		{
 			services.AddAuthentication(options =>
-			{
-				options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-				options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-				options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-			})
+				{
+					options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+					options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+					options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+				})
 				.AddCookie(options =>
 				{
 					options.LoginPath = "/Account/Login";

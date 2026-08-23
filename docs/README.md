@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [test: add auth wiring coverage (closes #76)](docs/blogs/2026-08-22-pr-95-test-add-auth-wiring-coverage-closes-76.md) | release,automation |
 | 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](docs/blogs/2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
 | 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](docs/blogs/2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
 | 2026-08-22 | [test: add Category.Empty regression coverage (closes #79)](docs/blogs/2026-08-22-pr-89-test-add-category-empty-regression-coverage-closes-79.md) | release,automation |
 | 2026-08-22 | [test: deepen Profile coverage (closes #81)](docs/blogs/2026-08-22-pr-87-test-deepen-profile-coverage-closes-81.md) | release,automation |
-| 2026-08-22 | [test: deepen RedirectToLogin coverage (closes #82)](docs/blogs/2026-08-22-pr-85-test-deepen-redirecttologin-coverage-closes-82.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-22 | [test: add auth wiring coverage (closes #76)](docs/blogs/2026-08-22-pr-95-test-add-auth-wiring-coverage-closes-76.md) | release,automation |
 | 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](docs/blogs/2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
 | 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](docs/blogs/2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
 | 2026-08-22 | [test: add Category.Empty regression coverage (closes #79)](docs/blogs/2026-08-22-pr-89-test-add-category-empty-regression-coverage-closes-79.md) | release,automation |
 | 2026-08-22 | [test: deepen Profile coverage (closes #81)](docs/blogs/2026-08-22-pr-87-test-deepen-profile-coverage-closes-81.md) | release,automation |
-| 2026-08-22 | [test: deepen RedirectToLogin coverage (closes #82)](docs/blogs/2026-08-22-pr-85-test-deepen-redirecttologin-coverage-closes-82.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
