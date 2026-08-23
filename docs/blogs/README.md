@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [test: add ArticleRepository integration tests against real MongoDB](2026-08-23-pr-118-test-add-articlerepository-integration-tests-against-real-mongodb.md) | release,automation |
 | 2026-08-23 | [test: scaffold Web.Integration.Tests project with MongoDB TestContainers fixture](2026-08-23-pr-116-test-scaffold-web-integration-tests-project-with-mongodb-testcontainers-fixture.md) | release,automation |
 | 2026-08-23 | [chore: closed-PR orphan detection, CA2007 suppression, CONTRIBUTING fix](2026-08-23-pr-107-chore-closed-pr-orphan-detection-ca2007-suppression-contributing-fix.md) | release,automation |
 | 2026-08-23 | [fix: treat closed-unmerged PRs as immediate orphan-branch signal](2026-08-23-pr-105-fix-treat-closed-unmerged-prs-as-immediate-orphan-branch-signal.md) | release,automation |
