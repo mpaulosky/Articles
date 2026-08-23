@@ -1,5 +1,5 @@
 ---
-name: Squad PR Auto-Merge
+name: PR Auto-Merge
 
 "on":
   pull_request:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   enable-auto-merge:
-    name: Enable auto-merge for squad/* PRs
+    name: Enable auto-merge for same-repo PRs
     runs-on: ubuntu-latest
     steps:
       - name: Enable auto-merge (squash)
@@ -42,14 +42,13 @@ jobs:
                   pr.state === "open" &&
                   !pr.merged_at &&
                   !pr.draft &&
-                  pr.head?.repo?.full_name === `${owner}/${repo}` &&
-                  pr.head?.ref?.startsWith("squad/")
+                  pr.head?.repo?.full_name === `${owner}/${repo}`
                 );
               });
 
               if (!matching) {
                 core.info(
-                  `Skipping status update for ${statusPayload.sha}: no open squad PR is associated.`
+                  `Skipping status update for ${statusPayload.sha}: no open PR is associated.`
                 );
                 return;
               }
@@ -67,14 +66,13 @@ jobs:
                   pr.state === "open" &&
                   !pr.merged_at &&
                   !pr.draft &&
-                  pr.head?.repo?.full_name === `${owner}/${repo}` &&
-                  pr.head?.ref?.startsWith("squad/")
+                  pr.head?.repo?.full_name === `${owner}/${repo}`
                 );
               });
 
               if (!matching) {
                 core.info(
-                  `Skipping check suite update for ${checkSuitePayload.head_sha}: no open squad PR is associated.`
+                  `Skipping check suite update for ${checkSuitePayload.head_sha}: no open PR is associated.`
                 );
                 return;
               }
@@ -98,9 +96,9 @@ jobs:
               return;
             }
 
-            if (pull.draft || pull.head?.repo?.full_name !== `${owner}/${repo}` || !pull.head?.ref?.startsWith("squad/")) {
+            if (pull.draft || pull.head?.repo?.full_name !== `${owner}/${repo}`) {
               core.info(
-                `Skipping PR #${pullNumber}: not an eligible squad branch.`
+                `Skipping PR #${pullNumber}: draft or not a same-repo branch.`
               );
               return;
             }
