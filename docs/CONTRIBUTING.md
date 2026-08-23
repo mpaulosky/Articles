@@ -82,11 +82,11 @@ Most repository changes land in one of these areas:
 
 ### Creating a branch
 
-Start from `dev` and create a branch with a descriptive issue number and slug:
+Start from `main` and create a branch with a descriptive issue number and slug:
 
 ```bash
-git checkout dev
-git pull origin dev
+git checkout main
+git pull origin main
 git checkout -b squad/42-fix-login-validation
 ```
 
@@ -106,7 +106,9 @@ If the hook reports an issue, fix it and try again.
 
 ## Pull requests
 
-Create a pull request from your `squad/*` or `sprint/*` branch to `dev`.
+Create a pull request from your `squad/*`, `sprint/*`, `chore/*`, or
+`hotfix/*` branch to `main`. This repo does not use `dev`/`preview` staging
+branches — work branches PR directly to `main`.
 
 A good PR description should include:
 
