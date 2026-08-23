@@ -7,6 +7,8 @@
 // Project Name :  Web.Integration.Tests
 // =============================================
 
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
 namespace Web.Integration.Tests.Fixtures;
 
 /// <summary>
@@ -48,6 +50,10 @@ public sealed class MongoContainerFixture : IAsyncLifetime
 
 		var options = new DbContextOptionsBuilder<ArticlesMongoDbContext>()
 			.UseMongoDB(_container.GetConnectionString(), databaseName)
+			// Each unique database name (one per test method) builds its own internal EF Core
+			// service provider; this pattern is intentional test isolation, not a leak, so the
+			// "many service providers" warning is expected and not something to fail tests over.
+			.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning))
 			.Options;
 
 		return new ArticlesMongoDbContext(options);
