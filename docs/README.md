@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [test: add ArticleRepository integration tests against real MongoDB](docs/blogs/2026-08-23-pr-118-test-add-articlerepository-integration-tests-against-real-mongodb.md) | release,automation |
 | 2026-08-23 | [test: scaffold Web.Integration.Tests project with MongoDB TestContainers fixture](docs/blogs/2026-08-23-pr-116-test-scaffold-web-integration-tests-project-with-mongodb-testcontainers-fixture.md) | release,automation |
 | 2026-08-23 | [chore: closed-PR orphan detection, CA2007 suppression, CONTRIBUTING fix](docs/blogs/2026-08-23-pr-107-chore-closed-pr-orphan-detection-ca2007-suppression-contributing-fix.md) | release,automation |
 | 2026-08-23 | [fix: treat closed-unmerged PRs as immediate orphan-branch signal](docs/blogs/2026-08-23-pr-105-fix-treat-closed-unmerged-prs-as-immediate-orphan-branch-signal.md) | release,automation |
 | 2026-08-23 | [fix: enable PR auto-merge for all same-repo branches, not just squad/*](docs/blogs/2026-08-23-pr-103-fix-enable-pr-auto-merge-for-all-same-repo-branches-not-just-squad.md) | release,automation |
-| 2026-08-23 | [chore: add squad promote workflow and casting/identity scaffolding](docs/blogs/2026-08-23-pr-101-chore-add-squad-promote-workflow-and-casting-identity-scaffolding.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [test: add ArticleRepository integration tests against real MongoDB](docs/blogs/2026-08-23-pr-118-test-add-articlerepository-integration-tests-against-real-mongodb.md) | release,automation |
 | 2026-08-23 | [test: scaffold Web.Integration.Tests project with MongoDB TestContainers fixture](docs/blogs/2026-08-23-pr-116-test-scaffold-web-integration-tests-project-with-mongodb-testcontainers-fixture.md) | release,automation |
 | 2026-08-23 | [chore: closed-PR orphan detection, CA2007 suppression, CONTRIBUTING fix](docs/blogs/2026-08-23-pr-107-chore-closed-pr-orphan-detection-ca2007-suppression-contributing-fix.md) | release,automation |
 | 2026-08-23 | [fix: treat closed-unmerged PRs as immediate orphan-branch signal](docs/blogs/2026-08-23-pr-105-fix-treat-closed-unmerged-prs-as-immediate-orphan-branch-signal.md) | release,automation |
 | 2026-08-23 | [fix: enable PR auto-merge for all same-repo branches, not just squad/*](docs/blogs/2026-08-23-pr-103-fix-enable-pr-auto-merge-for-all-same-repo-branches-not-just-squad.md) | release,automation |
-| 2026-08-23 | [chore: add squad promote workflow and casting/identity scaffolding](docs/blogs/2026-08-23-pr-101-chore-add-squad-promote-workflow-and-casting-identity-scaffolding.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
