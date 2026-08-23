@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [test: add CategoryFeatureHandler integration tests against the real mediator pipeline](2026-08-23-pr-124-test-add-categoryfeaturehandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 | 2026-08-23 | [test: add ArticleFeatureHandler integration tests against the real mediator pipeline](2026-08-23-pr-122-test-add-articlefeaturehandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 | 2026-08-23 | [test: add CategoryRepository integration tests against real MongoDB](2026-08-23-pr-120-test-add-categoryrepository-integration-tests-against-real-mongodb.md) | release,automation |
 | 2026-08-23 | [test: add ArticleRepository integration tests against real MongoDB](2026-08-23-pr-118-test-add-articlerepository-integration-tests-against-real-mongodb.md) | release,automation |
