@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [fix: enable PR auto-merge for all same-repo branches, not just squad/*](2026-08-23-pr-103-fix-enable-pr-auto-merge-for-all-same-repo-branches-not-just-squad.md) | release,automation |
 | 2026-08-23 | [chore: add squad promote workflow and casting/identity scaffolding](2026-08-23-pr-101-chore-add-squad-promote-workflow-and-casting-identity-scaffolding.md) | release,automation |
 | 2026-08-23 | [Add Articles/UserManagement features, mediator wiring, and squad workflow updates](2026-08-23-pr-99-add-articles-usermanagement-features-mediator-wiring-and-squad-workflow-updates.md) | release,automation |
 | 2026-08-23 | [fix: add missing squad branch cleanup script, apply nightly automatically](2026-08-23-pr-97-fix-add-missing-squad-branch-cleanup-script-apply-nightly-automatically.md) | release,automation |
