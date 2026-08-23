@@ -11,6 +11,7 @@ using System.Net;
 
 using FluentAssertions;
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Web.Tests;
@@ -95,8 +96,34 @@ public class AccountEndpointsTests
 	private static WebApplicationFactory<Program> CreateFactory(string domain, string clientId, string clientSecret)
 	{
 		return new WebApplicationFactory<Program>().WithWebHostBuilder(builder => builder
+			.UseContentRoot(GetWebProjectContentRoot())
 			.UseSetting("Auth0:Domain", domain)
 			.UseSetting("Auth0:ClientId", clientId)
 			.UseSetting("Auth0:ClientSecret", clientSecret));
+	}
+
+	/// <summary>
+	///     Resolves the Web project's directory by walking up from the test assembly's location, rather than
+	///     relying on <see cref="WebApplicationFactory{TEntryPoint}" />'s auto-detected content root: that
+	///     detection falls back to combining the process's current directory with the entry assembly's simple
+	///     name when it can't resolve the marker it needs, which breaks when the tests run from a working
+	///     directory other than the one <c>dotnet test</c> uses (e.g. the built test assembly invoked directly).
+	/// </summary>
+	private static string GetWebProjectContentRoot()
+	{
+		var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+		while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Articles.slnx")))
+		{
+			directory = directory.Parent;
+		}
+
+		if (directory is null)
+		{
+			throw new InvalidOperationException(
+				"Could not locate the repository root (Articles.slnx) from the test assembly location.");
+		}
+
+		return Path.Combine(directory.FullName, "src", "Web");
 	}
 }
