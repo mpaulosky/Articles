@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [chore: add squad promote workflow and casting/identity scaffolding](docs/blogs/2026-08-23-pr-101-chore-add-squad-promote-workflow-and-casting-identity-scaffolding.md) | release,automation |
 | 2026-08-23 | [Add Articles/UserManagement features, mediator wiring, and squad workflow updates](docs/blogs/2026-08-23-pr-99-add-articles-usermanagement-features-mediator-wiring-and-squad-workflow-updates.md) | release,automation |
 | 2026-08-23 | [fix: add missing squad branch cleanup script, apply nightly automatically](docs/blogs/2026-08-23-pr-97-fix-add-missing-squad-branch-cleanup-script-apply-nightly-automatically.md) | release,automation |
 | 2026-08-22 | [test: add auth wiring coverage (closes #76)](docs/blogs/2026-08-22-pr-95-test-add-auth-wiring-coverage-closes-76.md) | release,automation |
 | 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](docs/blogs/2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
-| 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](docs/blogs/2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [chore: add squad promote workflow and casting/identity scaffolding](docs/blogs/2026-08-23-pr-101-chore-add-squad-promote-workflow-and-casting-identity-scaffolding.md) | release,automation |
 | 2026-08-23 | [Add Articles/UserManagement features, mediator wiring, and squad workflow updates](docs/blogs/2026-08-23-pr-99-add-articles-usermanagement-features-mediator-wiring-and-squad-workflow-updates.md) | release,automation |
 | 2026-08-23 | [fix: add missing squad branch cleanup script, apply nightly automatically](docs/blogs/2026-08-23-pr-97-fix-add-missing-squad-branch-cleanup-script-apply-nightly-automatically.md) | release,automation |
 | 2026-08-22 | [test: add auth wiring coverage (closes #76)](docs/blogs/2026-08-22-pr-95-test-add-auth-wiring-coverage-closes-76.md) | release,automation |
 | 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](docs/blogs/2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
-| 2026-08-22 | [test: add MyMediator.Unit coverage (closes #78)](docs/blogs/2026-08-22-pr-91-test-add-mymediator-unit-coverage-closes-78.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
