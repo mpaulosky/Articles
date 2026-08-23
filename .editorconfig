@@ -432,6 +432,8 @@ dotnet_diagnostic.CS0200.severity = none
 #   CA1861 - perf micro-optimization for arrays passed a handful of times per test run.
 # CA1707 is suppressed because MethodUnderTest_Scenario_ExpectedResult is this suite's established
 # test-naming convention.
+# CA2007 - ConfigureAwait(false) exists to avoid deadlocking a captured sync context; test runners
+#           don't have one, so it's noise here rather than a correctness safeguard.
 [tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1034.severity = none
@@ -443,3 +445,4 @@ dotnet_diagnostic.CA2000.severity = none
 dotnet_diagnostic.CA2012.severity = none
 dotnet_diagnostic.CA1849.severity = none
 dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA2007.severity = none

@@ -126,6 +126,14 @@ while IFS= read -r branch; do
 		continue
 	fi
 
+	# A closed-but-unmerged PR is a deliberate abandonment signal, so it
+	# doesn't need to wait out the age fallback below.
+	CLOSED_PR_COUNT="$(gh pr list --repo "$REPO" --head "$branch" --state closed --json number --jq 'length' 2>/dev/null || echo "0")"
+	if [[ "${CLOSED_PR_COUNT:-0}" != "0" ]]; then
+		ORPHAN_BRANCHES+=("$branch")
+		continue
+	fi
+
 	LAST_COMMIT_EPOCH="$(git log -1 --format=%ct "$branch" 2>/dev/null || echo "$NOW_EPOCH")"
 	AGE_SECONDS=$((NOW_EPOCH - LAST_COMMIT_EPOCH))
 	if ((AGE_SECONDS >= ORPHAN_SECONDS)); then
