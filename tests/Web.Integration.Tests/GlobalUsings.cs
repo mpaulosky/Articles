@@ -7,8 +7,10 @@
 // Project Name :  Web.Integration.Tests
 // =============================================
 
+global using Domain.Abstractions;
 global using FluentAssertions;
 global using Microsoft.EntityFrameworkCore;
 global using MongoDB.Bson;
 global using Testcontainers.MongoDb;
 global using Web.Data;
+global using Web.MyMediator;
