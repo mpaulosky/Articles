@@ -1,28 +1,23 @@
+using System.Collections.Concurrent;
+
 namespace Web.MyMediator;
 
 public sealed class PipelineMediator(IServiceProvider provider) : IMediator
 {
+	private static readonly ConcurrentDictionary<(Type RequestType, Type ResponseType), Type> WrapperTypeCache = new();
+
 	public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
 		var requestType = request.GetType();
-		var handlerType = typeof(IRequestHandler<,>).MakeGenericType(requestType, typeof(TResponse));
-		var behaviorType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, typeof(TResponse));
+		var wrapperType = WrapperTypeCache.GetOrAdd((requestType, typeof(TResponse)),
+			key => typeof(RequestHandlerWrapper<,>).MakeGenericType(key.RequestType, key.ResponseType));
 
-		dynamic handler = provider.GetRequiredService(handlerType);
-		var behaviors = provider.GetServices(behaviorType).Cast<object>().Reverse().ToList();
+		var wrapper = (RequestHandlerBase<TResponse>)(Activator.CreateInstance(wrapperType)
+			?? throw new InvalidOperationException($"Unable to create request handler wrapper for '{requestType}'."));
 
-		Func<IRequest<TResponse>, CancellationToken, Task<TResponse>> pipeline =
-			(req, ct) => handler.Handle((dynamic)req, ct);
-
-		foreach (dynamic behavior in behaviors)
-		{
-			var next = pipeline;
-			pipeline = (req, ct) => behavior.Handle((dynamic)req, next, ct);
-		}
-
-		return pipeline(request, cancellationToken);
+		return wrapper.Handle(request, provider, cancellationToken);
 	}
 
 	public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)

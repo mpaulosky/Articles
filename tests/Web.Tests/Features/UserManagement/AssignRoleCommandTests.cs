@@ -7,18 +7,12 @@
 // Project Name :  Web.Tests
 // =============================================
 
-using Domain.Abstractions;
-
 using FluentAssertions;
-
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 using NSubstitute;
 
 using Web.Components.Features.UserManagement.AddUserRoles;
+using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
 using Web.Components.Features.UserManagement.ManageRoles;
 
@@ -88,16 +82,11 @@ public class AssignRoleCommandTests
 	public async Task Handler_InvalidatesCache_AfterSuccessfulAssignment()
 	{
 		// Arrange
-		var configuration = Substitute.For<IConfiguration>();
-		configuration["Auth0:Management:Domain"].Returns("test.auth0.com");
-		configuration["Auth0:Management:ClientId"].Returns("test-client-id");
-		configuration["Auth0:Management:ClientSecret"].Returns("test-client-secret");
-
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
 		var cache = Substitute.For<IUserManagementCacheService>();
 		cache.InvalidateUsersAsync(Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
-		var handler = new UserManagementHandler(configuration, httpClientFactory, cache);
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
 		var command = new AssignRoleCommand("auth0|12345", "rol_abc123");
 
 		// Act

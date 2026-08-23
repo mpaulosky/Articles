@@ -11,13 +11,13 @@ using Domain.Abstractions;
 
 using FluentAssertions;
 
-using Microsoft.Extensions.Configuration;
-
 using NSubstitute;
 
+using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
 using Web.Components.Features.UserManagement.GetUserWithRoles;
 using Web.Components.Features.UserManagement.ManageRoles;
+using Web.Components.Features.UserManagement.Models;
 
 namespace Web.Tests.Features.UserManagement;
 
@@ -37,8 +37,7 @@ public class GetUsersWithRolesQueryTests
 	public async Task GetUsersWithRolesIncludesRolesForEachUser()
 	{
 		// Arrange
-		var configuration = Substitute.For<IConfiguration>();
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
 		var cache = Substitute.For<IUserManagementCacheService>();
 
 		var cachedUsers = new List<UserWithRolesDto>
@@ -50,7 +49,7 @@ public class GetUsersWithRolesQueryTests
 		cache.GetOrFetchUsersAsync(Arg.Any<Func<Task<IReadOnlyList<UserWithRolesDto>>>>(), Arg.Any<CancellationToken>())
 			.Returns(new ValueTask<IReadOnlyList<UserWithRolesDto>>(cachedUsers));
 
-		var handler = new UserManagementHandler(configuration, httpClientFactory, cache);
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
 		var query = new GetUsersWithRolesQuery();
 
 		// Act
@@ -73,8 +72,7 @@ public class GetUsersWithRolesQueryTests
 	public async Task GetUsersWithRolesCachesResults()
 	{
 		// Arrange
-		var configuration = Substitute.For<IConfiguration>();
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
 		var cache = Substitute.For<IUserManagementCacheService>();
 
 		var cachedUsers = new List<UserWithRolesDto> { new("auth0|123", "alice@example.com", "Alice", new[] { "Admin" }) }
@@ -88,7 +86,7 @@ public class GetUsersWithRolesQueryTests
 				return new ValueTask<IReadOnlyList<UserWithRolesDto>>(cachedUsers);
 			});
 
-		var handler = new UserManagementHandler(configuration, httpClientFactory, cache);
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
 		var query = new GetUsersWithRolesQuery();
 
 		// Act

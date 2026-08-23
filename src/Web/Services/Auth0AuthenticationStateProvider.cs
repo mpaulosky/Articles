@@ -46,7 +46,12 @@ internal partial class Auth0AuthenticationStateProvider(
 
 				foreach (string role in roles)
 				{
-					identity.AddClaim(new Claim(ClaimTypes.Role, role.Trim()));
+					string trimmedRole = role.Trim();
+
+					if (!identity.HasClaim(ClaimTypes.Role, trimmedRole))
+					{
+						identity.AddClaim(new Claim(ClaimTypes.Role, trimmedRole));
+					}
 				}
 			}
 

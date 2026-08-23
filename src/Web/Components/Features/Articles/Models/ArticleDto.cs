@@ -19,7 +19,7 @@ namespace Web.Components.Features.Articles.Models;
 public sealed record ArticleDto(
 	string Id,
 	string Title,
-  string Slug,
+	string Slug,
 	string Content,
 	AuthorDto Author,
 	CategoryDto Category,

@@ -7,23 +7,22 @@
 //Project Name :  Web
 //=======================================================
 
-using System.Text.Json.Serialization;
-
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Users;
 
 using Domain.Abstractions;
 
 using Web.Components.Features.UserManagement.AddUserRoles;
+using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
 using Web.Components.Features.UserManagement.GetUserRoles;
 using Web.Components.Features.UserManagement.GetUserWithRoles;
+using Web.Components.Features.UserManagement.Models;
 
 namespace Web.Components.Features.UserManagement.ManageRoles;
 
 internal sealed class UserManagementHandler(
-IConfiguration configuration,
-IHttpClientFactory httpClientFactory,
+IManagementApiClientFactory managementApiClientFactory,
 IUserManagementCacheService cache)
 : IRequestHandler<GetUsersWithRolesQuery, Result<IReadOnlyList<UserWithRolesDto>>>,
 IRequestHandler<AssignRoleCommand, Result>,
@@ -37,7 +36,7 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 		{
 			var users = await cache.GetOrFetchUsersAsync(async () =>
 			{
-				var client = await GetManagementClientAsync(cancellationToken).ConfigureAwait(false);
+				var client = await managementApiClientFactory.CreateAsync(cancellationToken).ConfigureAwait(false);
 				var usersPager = await client.Users.ListAsync(new ListUsersRequestParameters(), cancellationToken: cancellationToken).ConfigureAwait(false);
 				var result = new List<UserWithRolesDto>();
 				await foreach (var user in usersPager.ConfigureAwait(false))
@@ -83,7 +82,7 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 	{
 		try
 		{
-			var client = await GetManagementClientAsync(cancellationToken).ConfigureAwait(false);
+			var client = await managementApiClientFactory.CreateAsync(cancellationToken).ConfigureAwait(false);
 			await client.Users.Roles.AssignAsync(
 			request.UserId,
 			new AssignUserRolesRequestContent { Roles = [request.RoleId] },
@@ -115,7 +114,7 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 	{
 		try
 		{
-			var client = await GetManagementClientAsync(cancellationToken).ConfigureAwait(false);
+			var client = await managementApiClientFactory.CreateAsync(cancellationToken).ConfigureAwait(false);
 			await client.Users.Roles.DeleteAsync(
 			request.UserId,
 			new DeleteUserRolesRequestContent { Roles = [request.RoleId] },
@@ -149,7 +148,7 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 		{
 			var roles = await cache.GetOrFetchRolesAsync(async () =>
 			{
-				var client = await GetManagementClientAsync(cancellationToken).ConfigureAwait(false);
+				var client = await managementApiClientFactory.CreateAsync(cancellationToken).ConfigureAwait(false);
 				var rolesPager = await client.Roles.ListAsync(new ListRolesRequestParameters(), cancellationToken: cancellationToken).ConfigureAwait(false);
 				var result = new List<RoleDto>();
 				await foreach (var role in rolesPager.ConfigureAwait(false))
@@ -178,75 +177,5 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 			return Result.Fail<IReadOnlyList<RoleDto>>("An unexpected error occurred.");
 		}
 #pragma warning restore CA1031
-	}
-
-	private async Task<ManagementApiClient> GetManagementClientAsync(CancellationToken cancellationToken)
-	{
-		var domain = GetRequiredManagementSetting(
-			"Auth0:Management:Domain",
-			"Auth0:Management:Domain");
-		var clientId = GetRequiredManagementSetting(
-			"Auth0:Management:ClientId",
-			"Auth0:Management:ClientId");
-		var clientSecret = GetRequiredManagementSetting(
-			"Auth0:Management:ClientSecret",
-			"Auth0:Management:ClientSecret");
-		var audience = GetOptionalManagementSetting(
-			"Auth0:Management:Audience",
-			"Auth0:Management:Audience")
-				?? $"https://{domain}/api/v2/";
-
-		using var httpClient = httpClientFactory.CreateClient();
-		var tokenResponse = await httpClient.PostAsJsonAsync(
-		$"https://{domain}/oauth/token",
-		new
-		{
-			client_id = clientId,
-			client_secret = clientSecret,
-			audience,
-			grant_type = "client_credentials"
-		}, cancellationToken).ConfigureAwait(false);
-		tokenResponse.EnsureSuccessStatusCode();
-		var tokenData = await tokenResponse.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken).ConfigureAwait(false);
-		if (string.IsNullOrWhiteSpace(tokenData?.AccessToken))
-		{
-			throw new InvalidOperationException("Auth0 Management API token response did not contain a valid access_token.");
-		}
-
-		return new ManagementApiClient(
-		token: tokenData.AccessToken,
-		clientOptions: new ClientOptions { BaseUrl = $"https://{domain}/api/v2" });
-	}
-
-	private string GetRequiredManagementSetting(string primaryKey, string legacyKey, params string[] additionalKeys)
-	{
-		var keys = new string[additionalKeys.Length + 2];
-		keys[0] = primaryKey;
-		keys[1] = legacyKey;
-		additionalKeys.CopyTo(keys, 2);
-
-		return GetOptionalManagementSetting(keys)
-				?? throw new InvalidOperationException(
-					string.Join(" ", Array.ConvertAll(keys, key => $"{key} not configured.")));
-	}
-
-	private string? GetOptionalManagementSetting(params string[] keys)
-	{
-		foreach (var key in keys)
-		{
-			var value = configuration[key];
-			if (!string.IsNullOrWhiteSpace(value))
-			{
-				return value;
-			}
-		}
-
-		return null;
-	}
-
-	private sealed class TokenResponse
-	{
-		[JsonPropertyName("access_token")]
-		public string AccessToken { get; init; } = string.Empty;
 	}
 }

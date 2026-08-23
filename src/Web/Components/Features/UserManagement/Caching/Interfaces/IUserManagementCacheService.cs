@@ -10,8 +10,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 
-using Web.Components.Features.UserManagement.GetUserRoles;
-using Web.Components.Features.UserManagement.GetUserWithRoles;
+using Web.Components.Features.UserManagement.Models;
 
 namespace Web.Components.Features.UserManagement.Caching.Interfaces;
 
