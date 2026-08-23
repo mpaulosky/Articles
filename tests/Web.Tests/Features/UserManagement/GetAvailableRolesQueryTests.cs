@@ -11,13 +11,13 @@ using Domain.Abstractions;
 
 using FluentAssertions;
 
-using Microsoft.Extensions.Configuration;
-
 using NSubstitute;
 
+using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
 using Web.Components.Features.UserManagement.GetUserRoles;
 using Web.Components.Features.UserManagement.ManageRoles;
+using Web.Components.Features.UserManagement.Models;
 
 namespace Web.Tests.Features.UserManagement;
 
@@ -37,12 +37,7 @@ public class GetAvailableRolesQueryTests
 	public async Task GetAvailableRolesHandlesEmptyConfiguration()
 	{
 		// Arrange
-		var configuration = Substitute.For<IConfiguration>();
-		configuration["Auth0:Management:Domain"].Returns("test.auth0.com");
-		configuration["Auth0:Management:ClientId"].Returns("test-client-id");
-		configuration["Auth0:Management:ClientSecret"].Returns("test-client-secret");
-
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
 		var cache = Substitute.For<IUserManagementCacheService>();
 
 		// Setup cache to return empty list
@@ -53,7 +48,7 @@ public class GetAvailableRolesQueryTests
 				return new ValueTask<IReadOnlyList<RoleDto>>(Array.Empty<RoleDto>());
 			});
 
-		var handler = new UserManagementHandler(configuration, httpClientFactory, cache);
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
 		var query = new GetAvailableRolesQuery();
 
 		// Act
@@ -69,8 +64,7 @@ public class GetAvailableRolesQueryTests
 	public async Task GetAvailableRoles_UsesCachedResults_WhenAvailable()
 	{
 		// Arrange
-		var configuration = Substitute.For<IConfiguration>();
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
 		var cache = Substitute.For<IUserManagementCacheService>();
 
 		var cachedRoles = new List<RoleDto> { new("rol_123", "Admin"), new("rol_456", "Editor") }.AsReadOnly();
@@ -78,7 +72,7 @@ public class GetAvailableRolesQueryTests
 		cache.GetOrFetchRolesAsync(Arg.Any<Func<Task<IReadOnlyList<RoleDto>>>>(), Arg.Any<CancellationToken>())
 			.Returns(new ValueTask<IReadOnlyList<RoleDto>>(cachedRoles));
 
-		var handler = new UserManagementHandler(configuration, httpClientFactory, cache);
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
 		var query = new GetAvailableRolesQuery();
 
 		// Act

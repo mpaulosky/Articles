@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Web;
 using Web.Components;
+using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Extensions;
 using Web.Data;
 using Web.Security;
@@ -48,6 +49,7 @@ builder.Services.AddAuthenticationAndAuthorization(configuration);
 
 builder.Services.AddMemoryCache();
 builder.Services.AddUserManagementCaching();
+builder.Services.AddAuth0ManagementApiClient();
 builder.Services.AddMyMediator(typeof(Program).Assembly);
 
 // Cross-cutting request/response logging via the mediator pipeline.
@@ -130,8 +132,17 @@ app.MapGet("/Account/Logout", async httpContext =>
 		.WithRedirectUri("/")
 		.Build();
 
-	await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties).ConfigureAwait(false);
-	await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
+	var isAuth0Enabled = Auth0ConfigurationHelper.IsAuthenticationEnabled(
+		app.Configuration["Auth0:Domain"],
+		app.Configuration["Auth0:ClientId"],
+		app.Configuration["Auth0:ClientSecret"]);
+
+	if (isAuth0Enabled)
+	{
+		await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties).ConfigureAwait(false);
+	}
+
+	await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme, authenticationProperties).ConfigureAwait(false);
 });
 
 app.Run();

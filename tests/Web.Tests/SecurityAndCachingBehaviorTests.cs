@@ -16,8 +16,7 @@ using NSubstitute;
 using Web.Components.Features.UserManagement.Caching.Converters;
 using Web.Components.Features.UserManagement.Caching.Extensions;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
-using Web.Components.Features.UserManagement.GetUserRoles;
-using Web.Components.Features.UserManagement.GetUserWithRoles;
+using Web.Components.Features.UserManagement.Models;
 using Web.Infrastructure.Caching;
 using Web.Security;
 

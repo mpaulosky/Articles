@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.Testing"/>
 		<PackageReference Include="FluentAssertions"/>
 		<PackageReference Include="FluentValidation"/>
 		<PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage"/>

@@ -1,0 +1,91 @@
+@using System.Security.Claims
+@using Web.Components.Features.Articles.Authorization
+@using Web.Components.Features.Articles.Models
+
+@{
+	var canEdit = ArticleAuthorizationService.CanEditArticle(CurrentUser, Article);
+	var canArchive = ArticleAuthorizationService.CanArchiveArticle(CurrentUser, Article);
+	const string btnShape = "w-24 rounded-full border px-2 py-1 text-center text-xs font-medium";
+	const string baseBtn = $"{btnShape} border-slate-400 text-slate-600 dark:border-slate-600 dark:text-slate-300";
+	const string neutralHover = "hover:bg-slate-100 dark:hover:bg-slate-800";
+	const string skyHover = "hover:border-sky-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30";
+	const string emeraldHover = "hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30";
+	const string amberHover = "hover:border-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30";
+	const string disabledClass = $"{btnShape} cursor-not-allowed border-slate-300 text-slate-400 opacity-60 dark:border-slate-700 dark:text-slate-600";
+}
+<div class="flex flex-nowrap items-center justify-center gap-1.5 whitespace-nowrap">
+	<a href="@($"/articles/{Article.Slug}")" class="@baseBtn @neutralHover">
+		View
+	</a>
+
+	@if (canEdit)
+	{
+		<a href="@($"/articles/{Article.Slug}/edit")" class="@baseBtn @skyHover">
+			Edit
+		</a>
+	}
+	else
+	{
+		<span aria-disabled="true" title="You don't have permission to edit this article" class="@disabledClass">
+			Edit
+		</span>
+	}
+
+	@if (Article.IsPublished)
+	{
+		<button type="button" disabled="@(!canEdit)"
+						title="@(canEdit ? null : "You don't have permission to edit this article")"
+						class="@(canEdit ? $"{baseBtn} {neutralHover}" : disabledClass)"
+						@onclick="() => OnUnpublish.InvokeAsync(Article.Id)">
+			Unpublish
+		</button>
+	}
+	else
+	{
+		<button type="button" disabled="@(!canEdit)"
+						title="@(canEdit ? null : "You don't have permission to edit this article")"
+						class="@(canEdit ? $"{baseBtn} {emeraldHover}" : disabledClass)"
+						@onclick="() => OnPublish.InvokeAsync(Article.Id)">
+			Publish
+		</button>
+	}
+
+	@if (Article.IsArchived)
+	{
+		<button type="button" disabled="@(!canArchive)"
+						title="@(canArchive ? null : "Only administrators can archive articles")"
+						class="@(canArchive ? $"{baseBtn} {emeraldHover}" : disabledClass)"
+						@onclick="() => OnUnarchive.InvokeAsync(Article.Id)">
+			Unarchive
+		</button>
+	}
+	else
+	{
+		<button type="button" disabled="@(!canArchive)"
+						title="@(canArchive ? null : "Only administrators can archive articles")"
+						class="@(canArchive ? $"{baseBtn} {amberHover}" : disabledClass)"
+						@onclick="() => OnArchiveRequested.InvokeAsync(Article.Id)">
+			Archive
+		</button>
+	}
+</div>
+
+@code {
+	[Parameter, EditorRequired]
+	public ArticleDto Article { get; set; } = default!;
+
+	[Parameter]
+	public ClaimsPrincipal? CurrentUser { get; set; }
+
+	[Parameter]
+	public EventCallback<string> OnPublish { get; set; }
+
+	[Parameter]
+	public EventCallback<string> OnUnpublish { get; set; }
+
+	[Parameter]
+	public EventCallback<string> OnArchiveRequested { get; set; }
+
+	[Parameter]
+	public EventCallback<string> OnUnarchive { get; set; }
+}

@@ -7,15 +7,12 @@
 // Project Name :  Web.Tests
 // =============================================
 
-using Domain.Abstractions;
-
 using FluentAssertions;
-
-using Microsoft.Extensions.Configuration;
 
 using NSubstitute;
 
 using Web.Components.Features.UserManagement;
+using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
 using Web.Components.Features.UserManagement.ManageRoles;
 
@@ -72,16 +69,11 @@ public class RemoveRoleCommandTests
 	public async Task Handler_InvalidatesCache_AfterSuccessfulRemoval()
 	{
 		// Arrange
-		var configuration = Substitute.For<IConfiguration>();
-		configuration["Auth0:Management:Domain"].Returns("test.auth0.com");
-		configuration["Auth0:Management:ClientId"].Returns("test-client-id");
-		configuration["Auth0:Management:ClientSecret"].Returns("test-client-secret");
-
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
 		var cache = Substitute.For<IUserManagementCacheService>();
 		cache.InvalidateUsersAsync(Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
-		var handler = new UserManagementHandler(configuration, httpClientFactory, cache);
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
 		var command = new RemoveRoleCommand("auth0|12345", "rol_abc123");
 
 		// Act
