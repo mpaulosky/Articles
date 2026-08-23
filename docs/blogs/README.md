@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-23 | [Add Articles/UserManagement features, mediator wiring, and squad workflow updates](2026-08-23-pr-99-add-articles-usermanagement-features-mediator-wiring-and-squad-workflow-updates.md) | release,automation |
 | 2026-08-23 | [fix: add missing squad branch cleanup script, apply nightly automatically](2026-08-23-pr-97-fix-add-missing-squad-branch-cleanup-script-apply-nightly-automatically.md) | release,automation |
 | 2026-08-22 | [test: add auth wiring coverage (closes #76)](2026-08-22-pr-95-test-add-auth-wiring-coverage-closes-76.md) | release,automation |
 | 2026-08-22 | [test: add UserManagementCacheService coverage (closes #77)](2026-08-22-pr-93-test-add-usermanagementcacheservice-coverage-closes-77.md) | release,automation |
