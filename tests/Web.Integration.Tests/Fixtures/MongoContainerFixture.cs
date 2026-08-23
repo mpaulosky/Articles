@@ -24,6 +24,12 @@ public sealed class MongoContainerFixture : IAsyncLifetime
 	private readonly MongoDbContainer _container = new MongoDbBuilder(MongoImageTag)
 		.Build();
 
+	/// <summary>
+	///     The connection string for the shared container, for callers that need to build their own
+	///     <see cref="DbContextOptions{TContext}" /> or DI registrations rather than a single context.
+	/// </summary>
+	public string ConnectionString => _container.GetConnectionString();
+
 	/// <inheritdoc />
 	public async ValueTask InitializeAsync()
 	{
