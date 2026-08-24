@@ -12,6 +12,7 @@ using FluentAssertions;
 using MongoDB.Bson;
 
 using Web.Components.Features.Articles.Entities;
+using Web.Components.Features.Articles.Models;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Entities;
 using Web.Components.Features.Categories.Models;
@@ -456,5 +457,35 @@ public class ArticleBehaviorTests
 		afterAssignmentTime.Should().NotBeNull();
 		afterPublishTime.Should().BeAfter(afterAssignmentTime ?? DateTime.MinValue);
 		afterRemovalTime.Should().BeAfter(afterPublishTime ?? DateTime.MinValue);
+	}
+
+	[Fact]
+	public void BackfillArticleImagesPopulatesImagesFromContentWhenArrayIsEmpty()
+	{
+		// Arrange
+		var article = Article.Create("Post", "![alt text](https://example.com/uploads/a1b2.jpg)",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+		typeof(Article).GetProperty(nameof(Article.ArticleImages))!.SetValue(article, new List<ArticleImage>());
+
+		// Act
+		article.BackfillArticleImages();
+
+		// Assert
+		article.ArticleImages.Should().ContainSingle(image => image.FileName == "a1b2.jpg");
+	}
+
+	[Fact]
+	public void BackfillArticleImagesDoesNotUpdateTimestamp()
+	{
+		// Arrange
+		var article = Article.Create("Post", "![alt text](https://example.com/uploads/a1b2.jpg)",
+			new AuthorDto("author-1", "Ada", "ada@example.com"));
+		typeof(Article).GetProperty(nameof(Article.ArticleImages))!.SetValue(article, new List<ArticleImage>());
+
+		// Act
+		article.BackfillArticleImages();
+
+		// Assert
+		article.UpdatedAt.Should().BeNull();
 	}
 }

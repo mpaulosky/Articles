@@ -69,6 +69,7 @@ builder.Services.AddSingleton<IImageOptimizer, ImageOptimizer>();
 builder.Services.AddScoped<IFileStorage, FileStorage>();
 builder.Services.AddScoped<ArticleRepository>();
 builder.Services.AddScoped<CategoryRepository>();
+builder.Services.AddHostedService<ArticleImageBackfillHostedService>();
 
 // Output Cache
 builder.Services.AddOutputCache();

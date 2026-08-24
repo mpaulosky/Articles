@@ -252,6 +252,16 @@ public sealed class Article
 		Touch();
 	}
 
+	/// <summary>
+	///     Recomputes <see cref="ArticleImages" /> from the current <see cref="Content" />, without
+	///     otherwise modifying the article. Used by <see cref="Web.Data.ArticleImageBackfillMigration" />
+	///     to populate the array for articles persisted before it existed. See ADR-0003.
+	/// </summary>
+	public void BackfillArticleImages()
+	{
+		ArticleImages = ArticleImageParser.Parse(Content, ArticleImages);
+	}
+
 	private void Touch()
 	{
 		UpdatedAt = DateTime.UtcNow;
