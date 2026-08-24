@@ -86,7 +86,7 @@
 		{
 			_content = value;
 			if (_awaitingContentSyncAfterUpload && _pendingUploadFileName is not null
-				&& UploadedImageReferences.ExtractFileNames(value).Contains(_pendingUploadFileName))
+				&& ArticleImageParser.ExtractFileNames(value).Contains(_pendingUploadFileName))
 			{
 				_awaitingContentSyncAfterUpload = false;
 				_pendingUploadFileName = null;
@@ -134,7 +134,7 @@
 			return;
 		}
 
-		var stillReferenced = UploadedImageReferences.ExtractFileNames(content);
+		var stillReferenced = ArticleImageParser.ExtractFileNames(content);
 		var noLongerReferenced = _unconfirmedUploads.Where(fileName => !stillReferenced.Contains(fileName)).ToList();
 		foreach (var fileName in noLongerReferenced)
 		{

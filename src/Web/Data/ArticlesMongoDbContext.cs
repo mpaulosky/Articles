@@ -48,7 +48,7 @@ public sealed class ArticlesMongoDbContext : DbContext
 		modelBuilder.Entity<Article>().ToCollection("articles");
 		modelBuilder.Entity<Article>().OwnsOne(article => article.Author);
 		modelBuilder.Entity<Article>().OwnsOne(article => article.Category);
-		modelBuilder.Entity<Article>().OwnsMany(article => article.ArticleImages);
+		modelBuilder.Entity<Article>().OwnsMany(article => article.ArticleImages, image => image.HasKey(articleImage => articleImage.FileName));
 		modelBuilder.Entity<Category>().ToCollection("categories");
 
 		base.OnModelCreating(modelBuilder);
