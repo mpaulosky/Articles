@@ -14,4 +14,7 @@
         <Project Path="tests/Web.E2E.Tests/Web.E2E.Tests.csproj" />
         <Project Path="tests/Web.Integration.Tests/Web.Integration.Tests.csproj" />
     </Folder>
+    <Folder Name="/testutils/">
+        <Project Path="testutils/Web.TestData/Web.TestData.csproj" />
+    </Folder>
 </Solution>

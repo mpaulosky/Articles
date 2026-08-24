@@ -10,9 +10,9 @@ using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Handlers;
 using Web.Components.Features.Articles.Queries;
 using Web.Components.Features.Articles.Validators;
-using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 using Web.Data;
+using Web.TestData;
 
 namespace Web.Tests.Features.Articles.Handlers;
 
@@ -24,20 +24,13 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Technology",
-			Slug = "technology",
-			CreatedOn = DateTime.UtcNow,
-			IsArchived = false
-		};
-		var command = new CreateArticleCommand(
-			"My first article",
-			"my-first-article",
-			"This is the article body.",
-			new AuthorDto("user-42", "Ada Lovelace", "ada@example.com"),
-			category);
+		var category = CategoryTestData.Dto(categoryName: "Technology", slug: "technology");
+		var command = ArticleTestData.CreateCommand(
+			title: "My first article",
+			slug: "my-first-article",
+			content: "This is the article body.",
+			author: AuthorTestData.Create(userId: "user-42", name: "Ada Lovelace", email: "ada@example.com"),
+			category: category);
 
 		// Act
 		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
@@ -57,24 +50,18 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var first = new CreateArticleCommand(
-			"First article",
-			"first-article",
-			"Body one",
-			new AuthorDto("user-10", "First Author", "one@example.com"),
-			new CategoryDto
-			{
-				Id = ObjectId.GenerateNewId(), CategoryName = "General", Slug = "general", CreatedOn = DateTime.UtcNow
-			});
-		var second = new CreateArticleCommand(
-			"Second article",
-			"second-article",
-			"Body two",
-			new AuthorDto("user-20", "Second Author", "two@example.com"),
-			new CategoryDto
-			{
-				Id = ObjectId.GenerateNewId(), CategoryName = "News", Slug = "news", CreatedOn = DateTime.UtcNow
-			});
+		var first = ArticleTestData.CreateCommand(
+			title: "First article",
+			slug: "first-article",
+			content: "Body one",
+			author: AuthorTestData.Create(userId: "user-10", name: "First Author", email: "one@example.com"),
+			category: CategoryTestData.Dto(categoryName: "General", slug: "general"));
+		var second = ArticleTestData.CreateCommand(
+			title: "Second article",
+			slug: "second-article",
+			content: "Body two",
+			author: AuthorTestData.Create(userId: "user-20", name: "Second Author", email: "two@example.com"),
+			category: CategoryTestData.Dto(categoryName: "News", slug: "news"));
 		await handler.Handle(first, TestContext.Current.CancellationToken);
 		await handler.Handle(second, TestContext.Current.CancellationToken);
 
@@ -142,11 +129,11 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Existing Article",
-			"existing-article",
-			"Existing Content",
-			new AuthorDto("author-1", "Author One", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "Existing Article",
+			slug: "existing-article",
+			content: "Existing Content",
+			author: AuthorTestData.Create(userId: "author-1", name: "Author One", email: "author@example.com"));
 		var createdResult = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 		var articleId = createdResult.Value!.Id;
 
@@ -183,11 +170,11 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Existing Article",
-			"existing-article",
-			"Existing Content",
-			new AuthorDto("author-1", "Author One", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "Existing Article",
+			slug: "existing-article",
+			content: "Existing Content",
+			author: AuthorTestData.Create(userId: "author-1", name: "Author One", email: "author@example.com"));
 		var createdResult = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 		var articleId = createdResult.Value!.Id;
 
@@ -208,7 +195,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context), updateValidator: new UpdateArticleCommandValidator());
-		var command = new UpdateArticleCommand(ObjectId.GenerateNewId().ToString(), "", "test-slug", "short");
+		var command = ArticleTestData.UpdateCommand(ObjectId.GenerateNewId().ToString(), title: "", slug: "test-slug", content: "short");
 
 		// Act
 		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
@@ -224,7 +211,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var command = new UpdateArticleCommand("invalid-id", "Valid Title", "valid-title", "Valid Content here");
+		var command = ArticleTestData.UpdateCommand("invalid-id", title: "Valid Title", slug: "valid-title", content: "Valid Content here");
 
 		// Act
 		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
@@ -241,7 +228,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var command = new UpdateArticleCommand(ObjectId.GenerateNewId().ToString(), "Valid Title", "valid-title", "Valid Content here");
+		var command = ArticleTestData.UpdateCommand(ObjectId.GenerateNewId().ToString(), title: "Valid Title", slug: "valid-title", content: "Valid Content here");
 
 		// Act
 		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
@@ -258,37 +245,22 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var category1 = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Cat1",
-			Slug = "cat1",
-			CreatedOn = DateTime.UtcNow,
-			IsArchived = false
-		};
-		var category2 = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Cat2",
-			Slug = "cat2",
-			CreatedOn = DateTime.UtcNow,
-			IsArchived = false
-		};
+		var category1 = CategoryTestData.Dto(categoryName: "Cat1", slug: "cat1");
+		var category2 = CategoryTestData.Dto(categoryName: "Cat2", slug: "cat2");
 
-		var createCommand = new CreateArticleCommand(
-			"Initial Title",
-			"initial-title",
-			"Initial Content",
-			new AuthorDto("user-1", "Author", "author@example.com"),
-			category1);
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "Initial Title",
+			slug: "initial-title",
+			content: "Initial Content",
+			category: category1);
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 
-		var updateCommand = new UpdateArticleCommand(
+		var updateCommand = ArticleTestData.UpdateCommand(
 			created.Value!.Id,
-			"Updated Title",
-			"updated-title",
-			"Updated Content",
-			category2);
+			title: "Updated Title",
+			slug: "updated-title",
+			content: "Updated Content",
+			category: category2);
 
 		// Act
 		var updateResult = await handler.Handle(updateCommand, TestContext.Current.CancellationToken);
@@ -306,30 +278,22 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var category = new CategoryDto
-		{
-			Id = ObjectId.GenerateNewId(),
-			CategoryName = "Cat1",
-			Slug = "cat1",
-			CreatedOn = DateTime.UtcNow,
-			IsArchived = false
-		};
+		var category = CategoryTestData.Dto(categoryName: "Cat1", slug: "cat1");
 
-		var createCommand = new CreateArticleCommand(
-			"Initial Title",
-			"initial-title",
-			"Initial Content",
-			new AuthorDto("user-1", "Author", "author@example.com"),
-			category);
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "Initial Title",
+			slug: "initial-title",
+			content: "Initial Content",
+			category: category);
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 
-		var updateCommand = new UpdateArticleCommand(
+		var updateCommand = ArticleTestData.UpdateCommand(
 			created.Value!.Id,
-			"Updated Title",
-			"updated-title",
-			"Updated Content",
-			Category: null,
-			ClearCategory: true);
+			title: "Updated Title",
+			slug: "updated-title",
+			content: "Updated Content",
+			category: null,
+			clearCategory: true);
 
 		// Act
 		var updateResult = await handler.Handle(updateCommand, TestContext.Current.CancellationToken);
@@ -379,11 +343,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"To Delete",
-			"to-delete",
-			"Content to delete",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "To Delete", slug: "to-delete", content: "Content to delete");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 
 		var command = new DeleteArticleCommand(created.Value!.Id);
@@ -404,11 +364,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Draft Article",
-			"draft-article",
-			"Draft content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Draft Article", slug: "draft-article", content: "Draft content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 
 		var command = new PublishArticleCommand(created.Value!.Id);
@@ -460,11 +416,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Live Article",
-			"live-article",
-			"Live content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Live Article", slug: "live-article", content: "Live content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 		await handler.Handle(new PublishArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
 
@@ -517,11 +469,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Article To Archive",
-			"article-to-archive",
-			"Content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Article To Archive", slug: "article-to-archive", content: "Content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 
 		var command = new ArchiveArticleCommand(created.Value!.Id);
@@ -540,11 +488,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Live Archived Article",
-			"live-archived-article",
-			"Content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Live Archived Article", slug: "live-archived-article", content: "Content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 		await handler.Handle(new PublishArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
 
@@ -565,11 +509,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Already Archived Article",
-			"already-archived-article",
-			"Content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Already Archived Article", slug: "already-archived-article", content: "Content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 		await handler.Handle(new ArchiveArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
 
@@ -621,11 +561,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Article To Unarchive",
-			"article-to-unarchive",
-			"Content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Article To Unarchive", slug: "article-to-unarchive", content: "Content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 		await handler.Handle(new ArchiveArticleCommand(created.Value!.Id), TestContext.Current.CancellationToken);
 
@@ -645,11 +581,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var context = CreateContext();
 		var handler = new ArticleFeatureHandler(new ArticleRepository(context));
-		var createCommand = new CreateArticleCommand(
-			"Already Unarchived Article",
-			"already-unarchived-article",
-			"Content",
-			new AuthorDto("user-1", "Author", "author@example.com"));
+		var createCommand = ArticleTestData.CreateCommand(title: "Already Unarchived Article", slug: "already-unarchived-article", content: "Content");
 		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
 
 		var command = new UnarchiveArticleCommand(created.Value!.Id);

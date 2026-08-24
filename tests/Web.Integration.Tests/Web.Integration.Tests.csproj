@@ -25,6 +25,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../../src/Web/Web.csproj"/>
+		<ProjectReference Include="../../testutils/Web.TestData/Web.TestData.csproj"/>
 	</ItemGroup>
 
 </Project>
