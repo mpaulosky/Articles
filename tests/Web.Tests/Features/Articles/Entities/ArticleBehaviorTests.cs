@@ -41,6 +41,7 @@ public class ArticleBehaviorTests
 		article.PublishedOn.Should().BeNull();
 		article.IsArchived.Should().BeFalse();
 		article.Category.Should().BeEquivalentTo(CategoryDto.Empty);
+		article.ArticleImages.Should().BeEmpty();
 	}
 
 	[Fact]
