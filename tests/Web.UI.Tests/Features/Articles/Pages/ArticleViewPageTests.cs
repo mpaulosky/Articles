@@ -55,6 +55,23 @@ public class ArticleViewPageTests : BunitContext
 	}
 
 	[Fact]
+	public void RendersContent_AsMarkdownHtml()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "author1", isPublished: true,
+			content: "# Heading\n\nSome **bold** text.");
+		SetupAuthState(CreateAdminUser());
+		SetupArticle(article);
+
+		// Act
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
+
+		// Assert
+		cut.Markup.Should().Contain("<h1 id=\"heading\">Heading</h1>");
+		cut.Markup.Should().Contain("<strong>bold</strong>");
+	}
+
+	[Fact]
 	public void ShowsDraftStatus_WhenArticleIsNotPublished()
 	{
 		// Arrange

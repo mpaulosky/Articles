@@ -2,14 +2,17 @@
 @using PSC.Blazor.Components.MarkdownEditor.Enums
 @using PSC.Blazor.Components.MarkdownEditor.EventsArgs
 @using PSC.Blazor.Components.MarkdownEditor.Models
-@using Web.Services
+@using Web.Components.Features.Articles.Services
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 @inject IFileStorage FileStorage
+@inject ILogger<TextEditor> Logger
 
 
 <MarkdownEditor @bind-Value="@MyContent" CustomImageUpload="@HandleImageUpload" UploadImage="true"
-								CustomButtonClicked="@OnCustomButtonClicked" @ref="@_textEditor">
+								ImageUploadStarted="@OnImageUploadStarted" ImageUploadEnded="@OnImageUploadEnded"
+								CustomButtonClicked="@OnCustomButtonClicked" @ref="@_textEditor"
+								MinHeight="@MinHeight">
 	<Toolbar>
 		<MarkdownToolbarButton Action="MarkdownAction.Bold" Name="Bold" Icon="fa fa-bold" Title="Bold" />
 		<MarkdownToolbarButton Action="MarkdownAction.Italic" Name="Italic" Icon="fa fa-italic" Title="Italic" />
@@ -52,14 +55,37 @@
 	[Parameter, EditorRequired]
 	public bool AlignmentOptionsEnabled { get; set; }
 
+	[Parameter]
+	public string MinHeight { get; set; } = "500px";
+
 	private string _content = string.Empty;
+
+	// An image upload round-trips through JS (save the file, then insert markdown pointing at
+	// it back on the client) and only the *insertion* raises MyContent's setter. If the form is
+	// submitted after the upload finishes but before that insertion lands, the saved article ends
+	// up missing the image even though the file itself was written to disk. Block submission for
+	// that window rather than just the upload's own network round-trip.
+	private bool _awaitingContentSyncAfterUpload;
+
+	// Files uploaded via this editor instance that haven't been confirmed as saved yet (see
+	// TrackAsSaved). Only ever populated from HandleImageUpload - never from pre-existing content -
+	// so it's safe to delete anything that drops off this set the moment it's no longer referenced:
+	// nothing already-persisted could depend on a file that was never part of a saved article.
+	private readonly HashSet<string> _unconfirmedUploads = new(StringComparer.OrdinalIgnoreCase);
+
 	public string MyContent
 	{
 		get => _content;
 		set
 		{
 			_content = value;
+			if (_awaitingContentSyncAfterUpload)
+			{
+				_awaitingContentSyncAfterUpload = false;
+				UploadingChanged.InvokeAsync(false);
+			}
 			ContentChanged.InvokeAsync(value);
+			_ = DeleteUploadsNoLongerReferencedAsync(value);
 		}
 	}
 
@@ -69,18 +95,65 @@
 	[Parameter]
 	public EventCallback<string> ContentChanged { get; set; }
 
+	[Parameter]
+	public EventCallback<bool> UploadingChanged { get; set; }
+
 	public async Task<FileEntry> HandleImageUpload(MarkdownEditor editor, FileEntry file)
 	{
-		Console.WriteLine($"Image: {file.Name} Size: {file.Size}");
-
 		// Convert the base64 string to a byte array and load it into a memory stream
 		var bytes = Convert.FromBase64String(file.ContentBase64);
 		var stream = new MemoryStream(bytes);
 
 		// Assign fileName from a storage operation
 		var fileName = await FileStorage.AddFile(new FileData(stream, new FileMetaData(file.Name, "", file.LastModified)));
-		file.UploadUrl = new Uri(new Uri(NavigationManager.BaseUri), $"/api/files/{fileName}").ToString();
+		_unconfirmedUploads.Add(fileName);
+		file.UploadUrl = new Uri(new Uri(NavigationManager.BaseUri), $"/uploads/{fileName}").ToString();
 		return file;
+	}
+
+	/// <summary>
+	///     Deletes any uploads from this session that <paramref name="content" /> no longer
+	///     references - the user inserted an image, then removed or replaced it before saving.
+	/// </summary>
+	private async Task DeleteUploadsNoLongerReferencedAsync(string content)
+	{
+		if (_unconfirmedUploads.Count == 0)
+		{
+			return;
+		}
+
+		var stillReferenced = UploadedImageReferences.ExtractFileNames(content);
+		var noLongerReferenced = _unconfirmedUploads.Where(fileName => !stillReferenced.Contains(fileName)).ToList();
+		foreach (var fileName in noLongerReferenced)
+		{
+			_unconfirmedUploads.Remove(fileName);
+			try
+			{
+				await FileStorage.DeleteFile(fileName);
+			}
+			catch (Exception ex)
+			{
+				Logger.LogWarning(ex, "Failed to delete unused upload {FileName}", fileName);
+			}
+		}
+	}
+
+	private Task OnImageUploadStarted(FileStartedEventArgs args)
+	{
+		_awaitingContentSyncAfterUpload = true;
+		return UploadingChanged.InvokeAsync(true);
+	}
+
+	private Task OnImageUploadEnded(FileEndedEventArgs args)
+	{
+		if (args.Success)
+		{
+			// Wait for the markdown insertion to reach MyContent instead of clearing here.
+			return Task.CompletedTask;
+		}
+
+		_awaitingContentSyncAfterUpload = false;
+		return UploadingChanged.InvokeAsync(false);
 	}
 
 	public async Task OnCustomButtonClicked(MarkdownButtonEventArgs args)

@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 
 using NSubstitute;
 
-using Web.Services;
+using Web.Components.Features.Articles.Services;
 
-namespace Web.Tests.Services;
+namespace Web.Tests.Features.Articles.Services;
 
 public sealed class FileStorageTests : IDisposable
 {
@@ -125,12 +125,56 @@ public sealed class FileStorageTests : IDisposable
 		firstFileName.Should().NotBe(secondFileName);
 	}
 
+	[Fact]
+	public async Task DeleteFileRemovesAPreviouslySavedFile()
+	{
+		// Arrange
+		var storage = CreateStorage(_webRootPath);
+		var savedFileName = await storage.AddFile(CreatePngFileData("photo.png"));
+
+		// Act
+		await storage.DeleteFile(savedFileName);
+
+		// Assert
+		File.Exists(Path.Combine(_webRootPath, "uploads", savedFileName)).Should().BeFalse();
+	}
+
+	[Fact]
+	public async Task DeleteFileIsANoOpWhenTheFileDoesNotExist()
+	{
+		// Arrange
+		var storage = CreateStorage(_webRootPath);
+
+		// Act
+		Func<Task> act = async () => await storage.DeleteFile("missing.png").ConfigureAwait(false);
+
+		// Assert
+		await act.Should().NotThrowAsync();
+	}
+
+	[Fact]
+	public async Task DeleteFileIgnoresDirectoryTraversalInTheFileName()
+	{
+		// Arrange: a file that legitimately lives outside the uploads/ directory.
+		var storage = CreateStorage(_webRootPath);
+		var outsideFile = Path.Combine(_webRootPath, "sentinel.txt");
+		await File.WriteAllTextAsync(outsideFile, "do not delete me", TestContext.Current.CancellationToken);
+
+		// Act: a crafted name trying to escape the uploads/ folder.
+		await storage.DeleteFile("../sentinel.txt");
+
+		// Assert: Path.GetFileName strips the traversal segment down to "sentinel.txt", so this
+		// only ever looks inside uploads/ - which has no such file - leaving the real one alone.
+		File.Exists(outsideFile).Should().BeTrue();
+	}
+
 	private static FileStorage CreateStorage(string webRootPath)
 	{
 		var environment = Substitute.For<IWebHostEnvironment>();
 		environment.WebRootPath.Returns(webRootPath);
 		var logger = Substitute.For<ILogger<FileStorage>>();
-		return new FileStorage(environment, logger);
+		var imageOptimizer = new ImageOptimizer(Substitute.For<ILogger<ImageOptimizer>>());
+		return new FileStorage(environment, logger, imageOptimizer);
 	}
 
 	private static FileData CreatePngFileData(string fileName)
@@ -149,6 +193,16 @@ public sealed class FileStorageTests : IDisposable
 
 	private sealed class ThrowingStream : MemoryStream
 	{
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException("Simulated unexpected failure");
+		}
+
+		public override void CopyTo(Stream destination, int bufferSize)
+		{
+			throw new NotSupportedException("Simulated unexpected failure");
+		}
+
 		public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
 		{
 			throw new NotSupportedException("Simulated unexpected failure");

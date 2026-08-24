@@ -7,6 +7,8 @@
 	<base href="/"/>
 	<link rel="stylesheet" href="@Assets["app.css"]"/>
 	<link rel="stylesheet" href="@Assets["Web.styles.css"]"/>
+	<link rel="stylesheet" href="_content/PSC.Blazor.Components.MarkdownEditor/css/markdowneditor.css"/>
+	<link rel="stylesheet" href="_content/PSC.Blazor.Components.MarkdownEditor/css/easymde.min.css"/>
 	<ImportMap/>
 	<link rel="icon" type="image/png" href="favicon.png"/>
 	<HeadOutlet/>
@@ -39,8 +41,18 @@
 			applyTheme(getPreferredTheme());
 			window.applyTheme = applyTheme;
 			window.getTheme = () => document.documentElement.dataset.theme || "light";
+
+			window.getSelectedText = (selector) => {
+				const el = document.querySelector(selector);
+				if (!el || typeof el.selectionStart !== "number" || typeof el.selectionEnd !== "number") {
+					return "";
+				}
+				return el.value.substring(el.selectionStart, el.selectionEnd);
+			};
 		})();
 	</script>
+	<script src="_content/PSC.Blazor.Components.MarkdownEditor/js/easymde.min.js"></script>
+	<script src="_content/PSC.Blazor.Components.MarkdownEditor/js/markdownEditor.js"></script>
 	<script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 

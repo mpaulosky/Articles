@@ -10,6 +10,7 @@ using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Handlers;
 using Web.Components.Features.Articles.Queries;
 using Web.Components.Features.Articles.Validators;
+using Web.Components.Features.Articles.Services;
 using Web.Components.Features.Categories.Models;
 using Web.Data;
 using Web.TestData;
@@ -626,6 +627,83 @@ public class ArticleFeatureHandlerTests
 		result.ErrorCode.Should().Be(ResultErrorCode.Validation);
 	}
 
+	[Fact]
+	public async Task UpdateArticleCommandDeletesImagesRemovedFromContentAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var fileStorage = new RecordingFileStorage();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context), fileStorage: fileStorage);
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "Initial Title",
+			slug: "initial-title",
+			content: "Before ![](https://example.com/uploads/kept.jpg) and ![](https://example.com/uploads/removed.jpg) after");
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+
+		var updateCommand = ArticleTestData.UpdateCommand(
+			created.Value!.Id,
+			title: "Updated Title",
+			slug: "updated-title",
+			content: "Before ![](https://example.com/uploads/kept.jpg) after");
+
+		// Act
+		var updateResult = await handler.Handle(updateCommand, TestContext.Current.CancellationToken);
+
+		// Assert
+		updateResult.Success.Should().BeTrue();
+		fileStorage.DeletedFileNames.Should().Equal("removed.jpg");
+	}
+
+	[Fact]
+	public async Task UpdateArticleCommandDeletesNothingWhenNoImagesAreRemovedAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var fileStorage = new RecordingFileStorage();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context), fileStorage: fileStorage);
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "Initial Title",
+			slug: "initial-title",
+			content: "Has ![](https://example.com/uploads/kept.jpg) image");
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+
+		var updateCommand = ArticleTestData.UpdateCommand(
+			created.Value!.Id,
+			title: "Updated Title",
+			slug: "updated-title",
+			content: "Has ![](https://example.com/uploads/kept.jpg) image, still");
+
+		// Act
+		var updateResult = await handler.Handle(updateCommand, TestContext.Current.CancellationToken);
+
+		// Assert
+		updateResult.Success.Should().BeTrue();
+		fileStorage.DeletedFileNames.Should().BeEmpty();
+	}
+
+	[Fact]
+	public async Task DeleteArticleCommandDeletesAllOfTheArticlesImagesAsync()
+	{
+		// Arrange
+		await using var context = CreateContext();
+		var fileStorage = new RecordingFileStorage();
+		var handler = new ArticleFeatureHandler(new ArticleRepository(context), fileStorage: fileStorage);
+		var createCommand = ArticleTestData.CreateCommand(
+			title: "To Delete",
+			slug: "to-delete",
+			content: "Has ![](https://example.com/uploads/first.jpg) and ![](https://example.com/uploads/second.jpg)");
+		var created = await handler.Handle(createCommand, TestContext.Current.CancellationToken);
+
+		var command = new DeleteArticleCommand(created.Value!.Id);
+
+		// Act
+		var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		fileStorage.DeletedFileNames.Should().BeEquivalentTo(["first.jpg", "second.jpg"]);
+	}
+
 	private static ArticlesMongoDbContext CreateContext()
 	{
 		var options = new DbContextOptionsBuilder<ArticlesMongoDbContext>()
@@ -633,5 +711,18 @@ public class ArticleFeatureHandlerTests
 			.Options;
 
 		return new ArticlesMongoDbContext(options);
+	}
+
+	private sealed class RecordingFileStorage : IFileStorage
+	{
+		public List<string> DeletedFileNames { get; } = [];
+
+		public Task<string> AddFile(FileData fileData) => Task.FromResult(Guid.NewGuid().ToString());
+
+		public Task DeleteFile(string fileName)
+		{
+			DeletedFileNames.Add(fileName);
+			return Task.CompletedTask;
+		}
 	}
 }

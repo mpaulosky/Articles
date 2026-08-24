@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Web;
 using Web.Components;
+using Web.Components.Features.Articles.Services;
 using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Extensions;
 using Web.Data;
@@ -64,6 +65,8 @@ builder.Services.AddDbContextFactory<ArticlesMongoDbContext>(options =>
 {
 	options.UseMongoDB(mongoConnectionString, mongoDatabaseName);
 });
+builder.Services.AddSingleton<IImageOptimizer, ImageOptimizer>();
+builder.Services.AddScoped<IFileStorage, FileStorage>();
 builder.Services.AddScoped<ArticleRepository>();
 builder.Services.AddScoped<CategoryRepository>();
 
