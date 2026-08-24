@@ -80,6 +80,13 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
+await using (var migrationScope = app.Services.CreateAsyncScope())
+{
+	var contextFactory = migrationScope.ServiceProvider.GetRequiredService<IDbContextFactory<ArticlesMongoDbContext>>();
+	await using var migrationContext = await contextFactory.CreateDbContextAsync();
+	await ArticleImageBackfillMigration.RunAsync(migrationContext);
+}
+
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error", createScopeForErrors: true);
