@@ -9,9 +9,9 @@
 
 using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Queries;
-using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Categories.Models;
 using Web.Integration.Tests.Fixtures;
+using Web.TestData;
 
 namespace Web.Integration.Tests.Features.Articles.Handlers;
 
@@ -38,12 +38,10 @@ public class ArticleFeatureHandlerTests
 	{
 		// Arrange
 		await using var host = CreateHost();
-		var command = new CreateArticleCommand(
-			"First Article",
-			"first-article",
-			"This is the article body.",
-			new AuthorDto("user-1", "Author", "author@example.com"),
-			CategoryDto.Empty);
+		var command = ArticleTestData.CreateCommand(
+			title: "First Article",
+			slug: "first-article",
+			category: CategoryDto.Empty);
 
 		// Act
 		var result = await host.Mediator.Send(command, TestContext.Current.CancellationToken);
@@ -58,12 +56,10 @@ public class ArticleFeatureHandlerTests
 	{
 		// Arrange
 		await using var host = CreateHost();
-		var command = new CreateArticleCommand(
-			string.Empty,
-			"first-article",
-			"This is the article body.",
-			new AuthorDto("user-1", "Author", "author@example.com"),
-			CategoryDto.Empty);
+		var command = ArticleTestData.CreateCommand(
+			title: string.Empty,
+			slug: "first-article",
+			category: CategoryDto.Empty);
 
 		// Act
 		var result = await host.Mediator.Send(command, TestContext.Current.CancellationToken);
@@ -145,7 +141,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var host = CreateHost();
 		var created = await host.Mediator.Send(CreateCommand("first-article"), TestContext.Current.CancellationToken);
-		var command = new UpdateArticleCommand(created.Value!.Id, "Updated Title", "first-article", "Updated content.");
+		var command = ArticleTestData.UpdateCommand(created.Value!.Id, title: "Updated Title", slug: "first-article", content: "Updated content.");
 
 		// Act
 		var result = await host.Mediator.Send(command, TestContext.Current.CancellationToken);
@@ -161,7 +157,7 @@ public class ArticleFeatureHandlerTests
 		// Arrange
 		await using var host = CreateHost();
 		var created = await host.Mediator.Send(CreateCommand("first-article"), TestContext.Current.CancellationToken);
-		var command = new UpdateArticleCommand(created.Value!.Id, string.Empty, "first-article", "Updated content.");
+		var command = ArticleTestData.UpdateCommand(created.Value!.Id, title: string.Empty, slug: "first-article", content: "Updated content.");
 
 		// Act
 		var result = await host.Mediator.Send(command, TestContext.Current.CancellationToken);
@@ -265,12 +261,7 @@ public class ArticleFeatureHandlerTests
 
 	private static CreateArticleCommand CreateCommand(string slug)
 	{
-		return new CreateArticleCommand(
-			"First Article",
-			slug,
-			"This is the article body.",
-			new AuthorDto("user-1", "Author", "author@example.com"),
-			CategoryDto.Empty);
+		return ArticleTestData.CreateCommand(title: "First Article", slug: slug, category: CategoryDto.Empty);
 	}
 
 	private MediatorTestHost CreateHost()
