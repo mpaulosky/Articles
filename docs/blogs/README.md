@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-24 | [Parse Content into ArticleImage array on save, replace regex orphan detection](2026-08-24-pr-142-parse-content-into-articleimage-array-on-save-replace-regex-orphan-detection.md) | release,automation |
 | 2026-08-24 | [feat: add ArticleImage array field to Article with Mongo OwnsMany mapping](2026-08-24-pr-140-feat-add-articleimage-array-field-to-article-with-mongo-ownsmany-mapping.md) | release,automation |
 | 2026-08-24 | [docs: record ArticleImage array decision (ADR-0003)](2026-08-24-pr-138-docs-record-articleimage-array-decision-adr-0003.md) | release,automation |
 | 2026-08-24 | [feat: add a dedicated article create page with image upload, optimization, and cleanup](2026-08-24-pr-132-feat-add-a-dedicated-article-create-page-with-image-upload-optimization-and-cleanup.md) | release,automation |

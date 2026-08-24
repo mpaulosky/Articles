@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-24 | [Parse Content into ArticleImage array on save, replace regex orphan detection](docs/blogs/2026-08-24-pr-142-parse-content-into-articleimage-array-on-save-replace-regex-orphan-detection.md) | release,automation |
 | 2026-08-24 | [feat: add ArticleImage array field to Article with Mongo OwnsMany mapping](docs/blogs/2026-08-24-pr-140-feat-add-articleimage-array-field-to-article-with-mongo-ownsmany-mapping.md) | release,automation |
 | 2026-08-24 | [docs: record ArticleImage array decision (ADR-0003)](docs/blogs/2026-08-24-pr-138-docs-record-articleimage-array-decision-adr-0003.md) | release,automation |
 | 2026-08-24 | [feat: add a dedicated article create page with image upload, optimization, and cleanup](docs/blogs/2026-08-24-pr-132-feat-add-a-dedicated-article-create-page-with-image-upload-optimization-and-cleanup.md) | release,automation |
 | 2026-08-24 | [test: add shared Web.TestData builders for Article/Category/Author test data](docs/blogs/2026-08-24-pr-130-test-add-shared-web-testdata-builders-for-article-category-author-test-data.md) | release,automation |
-| 2026-08-23 | [test: add UserManagementHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-126-test-add-usermanagementhandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-24 | [Parse Content into ArticleImage array on save, replace regex orphan detection](docs/blogs/2026-08-24-pr-142-parse-content-into-articleimage-array-on-save-replace-regex-orphan-detection.md) | release,automation |
 | 2026-08-24 | [feat: add ArticleImage array field to Article with Mongo OwnsMany mapping](docs/blogs/2026-08-24-pr-140-feat-add-articleimage-array-field-to-article-with-mongo-ownsmany-mapping.md) | release,automation |
 | 2026-08-24 | [docs: record ArticleImage array decision (ADR-0003)](docs/blogs/2026-08-24-pr-138-docs-record-articleimage-array-decision-adr-0003.md) | release,automation |
 | 2026-08-24 | [feat: add a dedicated article create page with image upload, optimization, and cleanup](docs/blogs/2026-08-24-pr-132-feat-add-a-dedicated-article-create-page-with-image-upload-optimization-and-cleanup.md) | release,automation |
 | 2026-08-24 | [test: add shared Web.TestData builders for Article/Category/Author test data](docs/blogs/2026-08-24-pr-130-test-add-shared-web-testdata-builders-for-article-category-author-test-data.md) | release,automation |
-| 2026-08-23 | [test: add UserManagementHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-126-test-add-usermanagementhandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
