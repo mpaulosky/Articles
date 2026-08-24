@@ -133,10 +133,10 @@ internal sealed class ArticleFeatureHandler(
 
 		try
 		{
-			var previousContent = article.Content;
+			var previousImages = article.ArticleImages;
 			article.Update(request.Title, request.Content, request.Category, request.ClearCategory, request.Slug);
 			var updated = await repository.UpdateAsync(article, cancellationToken).ConfigureAwait(false);
-			await DeleteOrphanedImagesAsync(previousContent, updated.Content).ConfigureAwait(false);
+			await DeleteOrphanedImagesAsync(previousImages, updated.ArticleImages).ConfigureAwait(false);
 			return Result.Ok(ArticleDto.FromEntity(updated));
 		}
 		catch (ArgumentException ex)
@@ -161,22 +161,24 @@ internal sealed class ArticleFeatureHandler(
 			return Result.Fail("Article not found.", ResultErrorCode.NotFound);
 		}
 
-		await DeleteOrphanedImagesAsync(article?.Content, newContent: null).ConfigureAwait(false);
+		await DeleteOrphanedImagesAsync(article?.ArticleImages ?? [], []).ConfigureAwait(false);
 		return Result.Ok();
 	}
 
 	/// <summary>
-	///     Removes uploaded images that <paramref name="previousContent" /> referenced but
-	///     <paramref name="newContent" /> no longer does, once that change is actually persisted.
+	///     Removes uploaded images that <paramref name="previousImages" /> referenced but
+	///     <paramref name="updatedImages" /> no longer does, once that change is actually persisted.
 	/// </summary>
-	private async Task DeleteOrphanedImagesAsync(string? previousContent, string? newContent)
+	private async Task DeleteOrphanedImagesAsync(
+		IReadOnlyList<ArticleImage> previousImages,
+		IReadOnlyList<ArticleImage> updatedImages)
 	{
 		if (fileStorage is null)
 		{
 			return;
 		}
 
-		foreach (var fileName in UploadedImageReferences.FindRemoved(previousContent, newContent))
+		foreach (var fileName in ArticleImageParser.FindRemoved(previousImages, updatedImages))
 		{
 			await fileStorage.DeleteFile(fileName).ConfigureAwait(false);
 		}

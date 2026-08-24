@@ -12,6 +12,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using static Domain.Helpers.DomainHelpers;
 using Web.Components.Features.AuthInfo.Entities;
 using Web.Components.Features.Articles.Models;
+using Web.Components.Features.Articles.Services;
 using Web.Components.Features.Categories.Models;
 
 namespace Web.Components.Features.Articles.Entities;
@@ -124,14 +125,17 @@ public sealed class Article
 		ArgumentNullException.ThrowIfNull(author);
 		ArgumentException.ThrowIfNullOrWhiteSpace(author.Name);
 
+		var trimmedContent = content.Trim();
+
 		return new Article
 		{
 			Id = ObjectId.GenerateNewId(),
 			Title = title.Trim(),
 			Slug = string.IsNullOrWhiteSpace(slug) ? title.GenerateSlug() : slug.Trim(),
-			Content = content.Trim(),
+			Content = trimmedContent,
 			Author = author,
-			CreatedAt = DateTime.UtcNow
+			CreatedAt = DateTime.UtcNow,
+			ArticleImages = ArticleImageParser.Parse(trimmedContent, [])
 		};
 	}
 
@@ -214,6 +218,7 @@ public sealed class Article
 		Title = title.Trim();
 		Slug = string.IsNullOrWhiteSpace(slug) ? title.GenerateSlug() : slug.Trim();
 		Content = content.Trim();
+		ArticleImages = ArticleImageParser.Parse(Content, ArticleImages);
 
 		if (clearCategory)
 		{
