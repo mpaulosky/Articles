@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-24 | [feat: add a dedicated article create page with image upload, optimization, and cleanup](docs/blogs/2026-08-24-pr-132-feat-add-a-dedicated-article-create-page-with-image-upload-optimization-and-cleanup.md) | release,automation |
 | 2026-08-24 | [test: add shared Web.TestData builders for Article/Category/Author test data](docs/blogs/2026-08-24-pr-130-test-add-shared-web-testdata-builders-for-article-category-author-test-data.md) | release,automation |
 | 2026-08-23 | [test: add UserManagementHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-126-test-add-usermanagementhandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 | 2026-08-23 | [test: add CategoryFeatureHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-124-test-add-categoryfeaturehandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 | 2026-08-23 | [test: add ArticleFeatureHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-122-test-add-articlefeaturehandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
-| 2026-08-23 | [test: add CategoryRepository integration tests against real MongoDB](docs/blogs/2026-08-23-pr-120-test-add-categoryrepository-integration-tests-against-real-mongodb.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-24 | [feat: add a dedicated article create page with image upload, optimization, and cleanup](docs/blogs/2026-08-24-pr-132-feat-add-a-dedicated-article-create-page-with-image-upload-optimization-and-cleanup.md) | release,automation |
 | 2026-08-24 | [test: add shared Web.TestData builders for Article/Category/Author test data](docs/blogs/2026-08-24-pr-130-test-add-shared-web-testdata-builders-for-article-category-author-test-data.md) | release,automation |
 | 2026-08-23 | [test: add UserManagementHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-126-test-add-usermanagementhandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 | 2026-08-23 | [test: add CategoryFeatureHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-124-test-add-categoryfeaturehandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
 | 2026-08-23 | [test: add ArticleFeatureHandler integration tests against the real mediator pipeline](docs/blogs/2026-08-23-pr-122-test-add-articlefeaturehandler-integration-tests-against-the-real-mediator-pipeline.md) | release,automation |
-| 2026-08-23 | [test: add CategoryRepository integration tests against real MongoDB](docs/blogs/2026-08-23-pr-120-test-add-categoryrepository-integration-tests-against-real-mongodb.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
