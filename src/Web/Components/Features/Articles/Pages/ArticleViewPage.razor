@@ -1,6 +1,8 @@
 @page "/articles/{Slug}"
 @rendermode InteractiveServer
 @using System.Security.Claims
+@using Ganss.Xss
+@using Markdig
 @using Web.Components.Features.Articles.Authorization
 @using Web.Components.Features.Articles.Models
 @using Web.Components.Features.Articles.Queries
@@ -57,13 +59,26 @@
 					}
 				</p>
 
-				<p class="whitespace-pre-line text-slate-700 dark:text-slate-200">@_article.Content</p>
+				<div class="app-markdown-content">@((MarkupString)RenderContentHtml(_article.Content))</div>
 			</div>
 		}
 	</section>
 </section>
 
 @code {
+	private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder()
+		.UseAdvancedExtensions()
+		.Build();
+
+	private static readonly HtmlSanitizer Sanitizer = CreateSanitizer();
+
+	private static HtmlSanitizer CreateSanitizer()
+	{
+		var sanitizer = new HtmlSanitizer();
+		sanitizer.AllowedAttributes.Add("id");
+		return sanitizer;
+	}
+
 	[Parameter]
 	public string Slug { get; set; } = string.Empty;
 
@@ -107,5 +122,11 @@
 	private void Cancel()
 	{
 		Navigation.NavigateTo("/articles");
+	}
+
+	private static string RenderContentHtml(string content)
+	{
+		var html = Markdown.ToHtml(content, MarkdownPipeline);
+		return Sanitizer.Sanitize(html);
 	}
 }

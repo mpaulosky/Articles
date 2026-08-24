@@ -55,6 +55,23 @@ public class ArticleViewPageTests : BunitContext
 	}
 
 	[Fact]
+	public void RendersContent_AsMarkdownHtml()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "author1", isPublished: true,
+			content: "# Heading\n\nSome **bold** text.");
+		SetupAuthState(CreateAdminUser());
+		SetupArticle(article);
+
+		// Act
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
+
+		// Assert
+		cut.Markup.Should().Contain("<h1 id=\"heading\">Heading</h1>");
+		cut.Markup.Should().Contain("<strong>bold</strong>");
+	}
+
+	[Fact]
 	public void ShowsDraftStatus_WhenArticleIsNotPublished()
 	{
 		// Arrange
@@ -68,6 +85,40 @@ public class ArticleViewPageTests : BunitContext
 		// Assert
 		cut.Markup.Should().Contain("Draft Article");
 		cut.Markup.Should().Contain("Draft");
+	}
+
+	[Fact]
+	public void SanitizesContent_StrippingScriptTags()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "author1", isPublished: true,
+			content: "Some text.\n\n<script>alert('xss')</script>");
+		SetupAuthState(CreateAdminUser());
+		SetupArticle(article);
+
+		// Act
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
+
+		// Assert
+		cut.Markup.Should().NotContain("<script>");
+		cut.Markup.Should().NotContain("alert(");
+	}
+
+	[Fact]
+	public void RetainsAllowedContent_TextAlignDiv()
+	{
+		// Arrange
+		var article = CreateArticle("Test Article", "author1", isPublished: true,
+			content: "<div style='text-align:center'>Centered text</div>");
+		SetupAuthState(CreateAdminUser());
+		SetupArticle(article);
+
+		// Act
+		var cut = Render<ArticleViewPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
+
+		// Assert
+		cut.Markup.Should().Contain("Centered text");
+		cut.Markup.Should().Contain("text-align");
 	}
 
 	[Fact]

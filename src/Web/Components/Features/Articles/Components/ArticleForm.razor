@@ -13,9 +13,13 @@
 		</div>
 
 		<div>
-			<label class="block text-sm font-medium text-(--app-text)">Body</label>
-			<InputTextArea @bind-Value="Model.Content"
-										 class="mt-1 min-h-32 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
+			<label class="block text-sm font-medium text-(--app-text)">Content</label>
+			<TextEditor @bind-Content="Model.Content" AlignmentOptionsEnabled="true"
+									UploadingChanged="@(uploading => _uploadingImage = uploading)" />
+			@if (_uploadingImage)
+			{
+				<p class="mt-1 text-sm text-(--app-text-muted)">Uploading image...</p>
+			}
 		</div>
 
 		<div>
@@ -33,7 +37,7 @@
 		<div class="flex items-center gap-2">
 			<button type="submit"
 							class="app-button app-button-primary"
-							disabled="@Saving">
+							disabled="@(Saving || _uploadingImage)">
 				@(Saving ? "Saving..." : SubmitLabel)
 			</button>
 			@FooterActions
@@ -59,6 +63,8 @@
 
 	[Parameter]
 	public RenderFragment? FooterActions { get; set; }
+
+	private bool _uploadingImage;
 
 	private Task HandleValidSubmit() => OnValidSubmit.InvokeAsync();
 }

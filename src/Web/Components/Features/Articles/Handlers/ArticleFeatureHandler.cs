@@ -17,6 +17,7 @@ using Web.Components.Features.Articles.Commands;
 using Web.Components.Features.Articles.Entities;
 using Web.Components.Features.Articles.Models;
 using Web.Components.Features.Articles.Queries;
+using Web.Components.Features.Articles.Services;
 using Web.Data;
 
 namespace Web.Components.Features.Articles.Handlers;
@@ -27,7 +28,8 @@ namespace Web.Components.Features.Articles.Handlers;
 internal sealed class ArticleFeatureHandler(
 	ArticleRepository repository,
 	IValidator<CreateArticleCommand>? createValidator = null,
-	IValidator<UpdateArticleCommand>? updateValidator = null)
+	IValidator<UpdateArticleCommand>? updateValidator = null,
+	IFileStorage? fileStorage = null)
 	: IRequestHandler<CreateArticleCommand, Result<ArticleDto>>,
 		IRequestHandler<GetArticlesQuery, Result<IReadOnlyList<ArticleDto>>>,
 		IRequestHandler<GetArticleByIdQuery, Result<ArticleDto>>,
@@ -131,8 +133,10 @@ internal sealed class ArticleFeatureHandler(
 
 		try
 		{
+			var previousContent = article.Content;
 			article.Update(request.Title, request.Content, request.Category, request.ClearCategory, request.Slug);
 			var updated = await repository.UpdateAsync(article, cancellationToken).ConfigureAwait(false);
+			await DeleteOrphanedImagesAsync(previousContent, updated.Content).ConfigureAwait(false);
 			return Result.Ok(ArticleDto.FromEntity(updated));
 		}
 		catch (ArgumentException ex)
@@ -149,13 +153,33 @@ internal sealed class ArticleFeatureHandler(
 			return Result.Fail("The article id is not valid.", ResultErrorCode.Validation);
 		}
 
+		var article = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+
 		var deleted = await repository.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
 		if (!deleted)
 		{
 			return Result.Fail("Article not found.", ResultErrorCode.NotFound);
 		}
 
+		await DeleteOrphanedImagesAsync(article?.Content, newContent: null).ConfigureAwait(false);
 		return Result.Ok();
+	}
+
+	/// <summary>
+	///     Removes uploaded images that <paramref name="previousContent" /> referenced but
+	///     <paramref name="newContent" /> no longer does, once that change is actually persisted.
+	/// </summary>
+	private async Task DeleteOrphanedImagesAsync(string? previousContent, string? newContent)
+	{
+		if (fileStorage is null)
+		{
+			return;
+		}
+
+		foreach (var fileName in UploadedImageReferences.FindRemoved(previousContent, newContent))
+		{
+			await fileStorage.DeleteFile(fileName).ConfigureAwait(false);
+		}
 	}
 
 	/// <inheritdoc />

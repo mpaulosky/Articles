@@ -27,6 +27,8 @@
 		<PackageReference Include="MongoDB.Driver" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" />
 		<PackageReference Include="PSC.Blazor.Components.MarkdownEditor" />
+		<PackageReference Include="SkiaSharp" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux" />
 		<PackageReference Include="Snappier" />
 		<PackageReference Include="WaffleGenerator.Bogus" />
 	</ItemGroup>

@@ -2,17 +2,15 @@
 @rendermode InteractiveServer
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using static Domain.Helpers.DomainHelpers
 @using Web.Components.Features.Articles.Authorization
 @using Web.Components.Features.Articles.Commands
-@using Web.Components.Features.Articles.Components
 @using Web.Components.Features.Articles.Models
 @using Web.Components.Features.Articles.Queries
-@using Web.Components.Features.AuthInfo.Entities
 @using Web.Components.Features.Categories.Models
 @using Web.Components.Features.Categories.Queries
 @inject IMediator Sender
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Articles</PageTitle>
 
@@ -40,33 +38,13 @@
 
 				@if (_canCreateArticle)
 				{
-					<button type="button" class="app-button app-button-primary" @onclick="OpenCreatePanel">
+					<button type="button" class="app-button app-button-primary" @onclick="GoToCreatePage">
 						Create New Article
 					</button>
 				}
 			</div>
 		</div>
 	</div>
-
-	@if (_showCreatePanel)
-	{
-		<section class="app-panel-card">
-			<div class="app-section-header">
-				<h2 class="app-section-title">Create article</h2>
-				<button type="button" class="app-button app-button-secondary" @onclick="CloseCreatePanel">
-					Cancel
-				</button>
-			</div>
-
-			@if (!string.IsNullOrWhiteSpace(_error))
-			{
-				<div class="alert-error" role="alert">@_error</div>
-			}
-
-			<ArticleForm Model="_form" Categories="_categories" Saving="_saving" SubmitLabel="Create article"
-									 OnValidSubmit="CreateArticleAsync" />
-		</section>
-	}
 
 	<section class="app-panel-card">
 		<div class="app-section-header flex-wrap gap-3">
@@ -260,13 +238,10 @@
 }
 
 @code {
-	private readonly ArticleFormModel _form = new();
 	private readonly List<ArticleDto> _articles = [];
 	private readonly List<CategoryDto> _categories = [];
 	private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
 	private bool _loading;
-	private bool _saving;
-	private bool _showCreatePanel;
 	private bool _showMyArticlesOnly;
 	private bool _includeArchived;
 	private string _searchText = string.Empty;
@@ -346,16 +321,9 @@
 		};
 	}
 
-	private void OpenCreatePanel()
+	private void GoToCreatePage()
 	{
-		_showCreatePanel = true;
-	}
-
-	private void CloseCreatePanel()
-	{
-		_showCreatePanel = false;
-		_error = null;
-		_form.Reset();
+		Navigation.NavigateTo("/articles/create");
 	}
 
 	private void RequestArchive(string id)
@@ -399,34 +367,6 @@
 		}
 
 		_loading = false;
-	}
-
-	private async Task CreateArticleAsync()
-	{
-		_saving = true;
-		_error = null;
-
-		var title = _form.Title.Trim();
-		var category = _categories.FirstOrDefault(c => c.Id.ToString() == _form.CategoryId);
-		var result = await Sender.Send(new CreateArticleCommand(
-			title,
-			title.GenerateSlug(),
-			_form.Content.Trim(),
-			AuthorDto.FromClaimsPrincipal(_currentUser),
-			category));
-
-		if (result.Success)
-		{
-			_form.Reset();
-			_showCreatePanel = false;
-			await LoadAsync();
-		}
-		else
-		{
-			_error = result.Error;
-		}
-
-		_saving = false;
 	}
 
 	private async Task PublishArticleAsync(string id)

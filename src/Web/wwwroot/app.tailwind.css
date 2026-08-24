@@ -228,6 +228,78 @@ body {
 		@apply mt-4 max-w-xl text-base text-(--app-text-muted);
 	}
 
+	.app-markdown-content {
+		@apply max-w-none text-base leading-relaxed text-(--app-text);
+
+		:where(h1, h2, h3, h4, h5, h6) {
+			@apply mt-6 mb-3 font-bold text-(--app-text) first:mt-0;
+		}
+
+		:where(h1) {
+			@apply text-3xl;
+		}
+
+		:where(h2) {
+			@apply text-2xl;
+		}
+
+		:where(h3) {
+			@apply text-xl;
+		}
+
+		:where(p) {
+			@apply mb-4;
+		}
+
+		:where(ul, ol) {
+			@apply mb-4 ml-6 list-outside space-y-1;
+		}
+
+		:where(ul) {
+			@apply list-disc;
+		}
+
+		:where(ol) {
+			@apply list-decimal;
+		}
+
+		:where(a) {
+			@apply text-sky-600 underline hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300;
+		}
+
+		:where(blockquote) {
+			@apply mb-4 border-l-4 border-(--app-border) pl-4 text-(--app-text-muted) italic;
+		}
+
+		:where(code) {
+			@apply rounded bg-(--app-surface-muted) px-1.5 py-0.5 text-sm;
+		}
+
+		:where(pre) {
+			@apply mb-4 overflow-x-auto rounded-xl bg-(--app-surface-muted) p-4;
+		}
+
+		:where(pre code) {
+			@apply bg-transparent p-0;
+		}
+
+		:where(img) {
+			@apply mb-4 max-w-full rounded-xl;
+		}
+
+		:where(table) {
+			@apply mb-4 w-full border-collapse;
+		}
+
+		:where(th, td) {
+			@apply border border-(--app-border) px-3 py-2 text-left;
+		}
+
+		:where(hr) {
+			@apply my-6 border-(--app-border);
+		}
+	}
+
 	.app-stat-grid {
 		@apply grid grid-cols-2 gap-3 sm:grid-cols-3;
 	}

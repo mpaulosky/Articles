@@ -344,78 +344,19 @@ public class ArticlesPageTests : BunitContext
 	}
 
 	[Fact]
-	public void CreatePanel_IsHiddenByDefault_AndOpensOnButtonClick()
+	public void ClickingCreateNewArticle_NavigatesToCreatePage()
 	{
 		// Arrange
 		SetupAuthState(CreateAdminUser());
 		SetupEmptyArticles();
 		var cut = Render<ArticlesPage>();
-
-		cut.Markup.Should().NotContain("Create article");
+		var navigation = Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>();
 
 		// Act
 		cut.FindAll("button").First(b => b.TextContent.Trim() == "Create New Article").Click();
 
 		// Assert
-		cut.Markup.Should().Contain("Create article");
-		cut.Find("form").Should().NotBeNull();
-	}
-
-	[Fact]
-	public void CreateArticleAsync_SendsCreateArticleCommand_WithAuthorFromLoggedInUser_AndCollapsesPanel()
-	{
-		// Arrange
-		var user = CreateAdminUser();
-		SetupAuthState(user);
-		SetupEmptyArticles();
-
-		_mediator.Send(Arg.Any<CreateArticleCommand>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Ok(CreateArticle("New Article", "admin1", isPublished: false)));
-
-		var cut = Render<ArticlesPage>();
-		cut.FindAll("button").First(b => b.TextContent.Trim() == "Create New Article").Click();
-
-		cut.Find("input.rounded-lg").Change("New Article");
-		cut.Find("textarea.rounded-lg").Change("New article content");
-		cut.Find("select.rounded-lg").Change(_category.Id.ToString());
-
-		// Act
-		cut.Find("form").Submit();
-
-		// Assert
-		_mediator.Received(1).Send(
-			Arg.Is<CreateArticleCommand>(command =>
-				command.Author.UserId == "admin1"
-				&& command.Author.Name == "Admin User"),
-			Arg.Any<CancellationToken>());
-
-		cut.Markup.Should().NotContain("Create article");
-	}
-
-	[Fact]
-	public void CreateArticleAsync_KeepsPanelOpen_WhenSaveFails()
-	{
-		// Arrange
-		var user = CreateAdminUser();
-		SetupAuthState(user);
-		SetupEmptyArticles();
-
-		_mediator.Send(Arg.Any<CreateArticleCommand>(), Arg.Any<CancellationToken>())
-			.Returns(Result.Fail<ArticleDto>("Title is too short."));
-
-		var cut = Render<ArticlesPage>();
-		cut.FindAll("button").First(b => b.TextContent.Trim() == "Create New Article").Click();
-
-		cut.Find("input.rounded-lg").Change("Up");
-		cut.Find("textarea.rounded-lg").Change("New article content");
-
-		// Act
-		cut.Find("form").Submit();
-
-		// Assert
-		cut.Markup.Should().Contain("Title is too short.");
-		cut.Markup.Should().Contain("Create article");
-		cut.Find("input.rounded-lg").GetAttribute("value").Should().Be("Up");
+		navigation.Uri.Should().EndWith("/articles/create");
 	}
 
 	[Fact]

@@ -20,6 +20,8 @@ using Web.Components.Features.Articles.Models;
 using Web.Components.Features.Articles.Pages;
 using Web.Components.Features.Articles.Queries;
 using Web.Components.Features.AuthInfo.Entities;
+using Web.Components.Features.Articles.Components;
+using Web.Components.Features.Articles.Services;
 using Web.Components.Features.Categories.Models;
 using Web.Components.Features.Categories.Queries;
 
@@ -33,6 +35,8 @@ public class ArticleEditPageTests : BunitContext
 
 	public ArticleEditPageTests()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+
 		_mediator = Substitute.For<IMediator>();
 		_authStateProvider = Substitute.For<AuthenticationStateProvider>();
 		_category = new CategoryDto
@@ -46,6 +50,7 @@ public class ArticleEditPageTests : BunitContext
 
 		Services.AddSingleton(_mediator);
 		Services.AddSingleton(_authStateProvider);
+		Services.AddSingleton(Substitute.For<IFileStorage>());
 	}
 
 	[Fact]
@@ -61,7 +66,7 @@ public class ArticleEditPageTests : BunitContext
 
 		// Assert
 		cut.Find("input.rounded-lg").GetAttribute("value").Should().Be("Original Title");
-		cut.Find("textarea.rounded-lg").GetAttribute("value").Should().Be("Original content");
+		cut.FindComponent<TextEditor>().Instance.Content.Should().Be("Original content");
 	}
 
 	[Fact]
@@ -141,7 +146,7 @@ public class ArticleEditPageTests : BunitContext
 
 		var cut = Render<ArticleEditPage>(parameters => parameters.Add(p => p.Slug, article.Slug));
 		cut.Find("input.rounded-lg").Change("Updated Title");
-		cut.Find("textarea.rounded-lg").Change("Updated content");
+		cut.InvokeAsync(() => cut.FindComponent<TextEditor>().Instance.MyContent = "Updated content");
 
 		// Act
 		cut.Find("form").Submit();

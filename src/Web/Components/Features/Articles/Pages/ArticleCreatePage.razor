@@ -1,0 +1,109 @@
+@page "/articles/create"
+@rendermode InteractiveServer
+@using System.Security.Claims
+@using static Domain.Helpers.DomainHelpers
+@using Web.Components.Features.Articles.Authorization
+@using Web.Components.Features.Articles.Commands
+@using Web.Components.Features.Articles.Components
+@using Web.Components.Features.Articles.Models
+@using Web.Components.Features.AuthInfo.Entities
+@using Web.Components.Features.Categories.Models
+@using Web.Components.Features.Categories.Queries
+@inject IMediator Sender
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Create article</PageTitle>
+
+<section class="app-page-stack">
+	<div class="app-page-card">
+		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+			<div>
+				<h2 class="app-h2">Create Article</h2>
+			</div>
+			<div>
+				<p class="app-pill">Publishing</p>
+			</div>
+			<div class="flex flex-wrap items-center gap-4">
+				<button type="button" class="app-button app-button-secondary" @onclick="Cancel">
+					Cancel
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<section class="app-panel-card">
+		@if (!_canCreateArticle)
+		{
+			<div class="alert-error" role="alert">You don't have permission to create articles.</div>
+		}
+		else
+		{
+			@if (!string.IsNullOrWhiteSpace(_error))
+			{
+				<div class="alert-error" role="alert">@_error</div>
+			}
+
+			<ArticleForm Model="_form" Categories="_categories" Saving="_saving" SubmitLabel="Create article"
+									 OnValidSubmit="CreateArticleAsync" />
+		}
+	</section>
+</section>
+
+@code {
+	private readonly ArticleFormModel _form = new();
+	private readonly List<CategoryDto> _categories = [];
+	private bool _saving;
+	private bool _canCreateArticle;
+	private string? _error;
+	private ClaimsPrincipal? _currentUser;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		_currentUser = authState.User;
+		_canCreateArticle = ArticleAuthorizationService.CanCreateArticle(_currentUser);
+		await LoadCategoriesAsync();
+	}
+
+	private async Task LoadCategoriesAsync()
+	{
+		var result = await Sender.Send(new GetCategoriesQuery());
+		if (result.Success)
+		{
+			_categories.Clear();
+			_categories.AddRange(result.Value ?? []);
+		}
+	}
+
+	private async Task CreateArticleAsync()
+	{
+		_saving = true;
+		_error = null;
+
+		var title = _form.Title.Trim();
+		var category = _categories.FirstOrDefault(c => c.Id.ToString() == _form.CategoryId);
+		var result = await Sender.Send(new CreateArticleCommand(
+			title,
+			title.GenerateSlug(),
+			_form.Content.Trim(),
+			AuthorDto.FromClaimsPrincipal(_currentUser),
+			category));
+
+		if (result.Success)
+		{
+			Navigation.NavigateTo($"/articles/{result.Value!.Slug}");
+		}
+		else
+		{
+			_error = result.Error;
+		}
+
+		_saving = false;
+	}
+
+	private void Cancel()
+	{
+		Navigation.NavigateTo("/articles");
+	}
+}
