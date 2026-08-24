@@ -69,6 +69,7 @@ builder.Services.AddSingleton<IImageOptimizer, ImageOptimizer>();
 builder.Services.AddScoped<IFileStorage, FileStorage>();
 builder.Services.AddScoped<ArticleRepository>();
 builder.Services.AddScoped<CategoryRepository>();
+builder.Services.AddHostedService<ArticleImageBackfillHostedService>();
 
 // Output Cache
 builder.Services.AddOutputCache();
@@ -79,13 +80,6 @@ builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
 
 var app = builder.Build();
-
-await using (var migrationScope = app.Services.CreateAsyncScope())
-{
-	var contextFactory = migrationScope.ServiceProvider.GetRequiredService<IDbContextFactory<ArticlesMongoDbContext>>();
-	await using var migrationContext = await contextFactory.CreateDbContextAsync();
-	await ArticleImageBackfillMigration.RunAsync(migrationContext);
-}
 
 if (!app.Environment.IsDevelopment())
 {
