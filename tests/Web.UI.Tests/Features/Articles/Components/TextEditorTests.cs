@@ -159,10 +159,9 @@ public class TextEditorTests : BunitContext
 		cut.Instance.MyContent = "![](/uploads/stored.png)";
 		await Task.Delay(50, Xunit.TestContext.Current.CancellationToken);
 		cut.Instance.MyContent = string.Empty;
-		await Task.Delay(50, Xunit.TestContext.Current.CancellationToken);
 
 		// Assert
-		fakeStorage.DeletedFileNames.Should().Equal("stored.png");
+		cut.WaitForAssertion(() => fakeStorage.DeletedFileNames.Should().Equal("stored.png"));
 	}
 
 	[Fact]
@@ -182,10 +181,9 @@ public class TextEditorTests : BunitContext
 		await Task.Delay(50, Xunit.TestContext.Current.CancellationToken);
 		await cut.Instance.HandleImageUpload(null!, file);
 		cut.Instance.MyContent = "![](/uploads/second.png)";
-		await Task.Delay(50, Xunit.TestContext.Current.CancellationToken);
 
 		// Assert: the replaced image is gone, the current one is untouched.
-		fakeStorage.DeletedFileNames.Should().Equal("first.png");
+		cut.WaitForAssertion(() => fakeStorage.DeletedFileNames.Should().Equal("first.png"));
 	}
 
 	[Fact]
