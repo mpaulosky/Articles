@@ -104,11 +104,12 @@ public class TextEditorTests : BunitContext
 			.Add(p => p.Content, string.Empty)
 			.Add(p => p.UploadingChanged, EventCallback.Factory.Create<bool>(this, v => uploadingStates.Add(v))));
 		var markdownEditor = cut.FindComponent<MarkdownEditor>().Instance;
-		var file = new FileEntry { Name = "upload.png" };
+		var file = new FileEntry { Name = "upload.png", ContentBase64 = Convert.ToBase64String([1, 2, 3, 4]) };
 
 		// Act: upload starts (server writes the file, MarkdownEditor's own internal state is
 		// still stale) - the caller must not be able to submit yet.
 		await markdownEditor.ImageUploadStarted!.Invoke(new FileStartedEventArgs(file));
+		await cut.Instance.HandleImageUpload(null!, file);
 
 		// Assert: still marked uploading even after the vendor's "ended" callback fires, because
 		// that fires *before* the image markdown is actually inserted into the editor content.

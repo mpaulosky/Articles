@@ -67,11 +67,17 @@
 	// that window rather than just the upload's own network round-trip.
 	private bool _awaitingContentSyncAfterUpload;
 
-	// Files uploaded via this editor instance that haven't been confirmed as saved yet (see
-	// TrackAsSaved). Only ever populated from HandleImageUpload - never from pre-existing content -
-	// so it's safe to delete anything that drops off this set the moment it's no longer referenced:
-	// nothing already-persisted could depend on a file that was never part of a saved article.
+	// Files uploaded via this editor instance that haven't been confirmed as saved yet. Only ever
+	// populated from HandleImageUpload - never from pre-existing content - so it's safe to delete
+	// anything that drops off this set the moment it's no longer referenced: nothing already-persisted
+	// could depend on a file that was never part of a saved article.
 	private readonly HashSet<string> _unconfirmedUploads = new(StringComparer.OrdinalIgnoreCase);
+
+	// The file name of the upload currently awaited by _awaitingContentSyncAfterUpload. MyContent can
+	// change for unrelated reasons (typing) while an insertion is still in flight, so the awaiting flag
+	// is only cleared once this specific file's reference actually lands in content - not on the next
+	// MyContent change regardless of cause.
+	private string? _pendingUploadFileName;
 
 	public string MyContent
 	{
@@ -79,9 +85,11 @@
 		set
 		{
 			_content = value;
-			if (_awaitingContentSyncAfterUpload)
+			if (_awaitingContentSyncAfterUpload && _pendingUploadFileName is not null
+				&& UploadedImageReferences.ExtractFileNames(value).Contains(_pendingUploadFileName))
 			{
 				_awaitingContentSyncAfterUpload = false;
+				_pendingUploadFileName = null;
 				UploadingChanged.InvokeAsync(false);
 			}
 			ContentChanged.InvokeAsync(value);
@@ -102,11 +110,15 @@
 	{
 		// Convert the base64 string to a byte array and load it into a memory stream
 		var bytes = Convert.FromBase64String(file.ContentBase64);
-		var stream = new MemoryStream(bytes);
+		string fileName;
+		await using (var stream = new MemoryStream(bytes))
+		{
+			// Assign fileName from a storage operation
+			fileName = await FileStorage.AddFile(new FileData(stream, new FileMetaData(file.Name, "", file.LastModified)));
+		}
 
-		// Assign fileName from a storage operation
-		var fileName = await FileStorage.AddFile(new FileData(stream, new FileMetaData(file.Name, "", file.LastModified)));
 		_unconfirmedUploads.Add(fileName);
+		_pendingUploadFileName = fileName;
 		file.UploadUrl = new Uri(new Uri(NavigationManager.BaseUri), $"/uploads/{fileName}").ToString();
 		return file;
 	}
@@ -153,6 +165,7 @@
 		}
 
 		_awaitingContentSyncAfterUpload = false;
+		_pendingUploadFileName = null;
 		return UploadingChanged.InvokeAsync(false);
 	}
 
