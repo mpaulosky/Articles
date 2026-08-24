@@ -11,6 +11,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using static Domain.Helpers.DomainHelpers;
 using Web.Components.Features.AuthInfo.Entities;
+using Web.Components.Features.Articles.Models;
 using Web.Components.Features.Categories.Models;
 
 namespace Web.Components.Features.Articles.Entities;
@@ -97,6 +98,12 @@ public sealed class Article
 	[BsonElement("isArchived")]
 	[BsonRepresentation(BsonType.Boolean)]
 	public bool IsArchived { get; private set; }
+
+	/// <summary>
+	///     Gets the structured record of images referenced inside <see cref="Content" />. See ADR-0003.
+	/// </summary>
+	[BsonElement("articleImages")]
+	public List<ArticleImage> ArticleImages { get; private set; } = [];
 
 	private Article()
 	{
