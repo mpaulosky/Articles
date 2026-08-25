@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-25 | [fix: harden Auth0 missing-config test against real env vars leaking through](docs/blogs/2026-08-25-pr-171-fix-harden-auth0-missing-config-test-against-real-env-vars-leaking-through.md) | release,automation |
 | 2026-08-25 | [ci: wire Auth0 role test-user secrets into squad-ci.yml](docs/blogs/2026-08-25-pr-169-ci-wire-auth0-role-test-user-secrets-into-squad-ci-yml.md) | release,automation |
 | 2026-08-25 | [docs: research Auth0 bot-detection risk for scripted E2E logins](docs/blogs/2026-08-25-pr-166-docs-research-auth0-bot-detection-risk-for-scripted-e2e-logins.md) | release,automation |
 | 2026-08-25 | [feat: raise article Content max length to 50000 and add dev chronicle doc](docs/blogs/2026-08-25-pr-154-feat-raise-article-content-max-length-to-50000-and-add-dev-chronicle-doc.md) | release,automation |
 | 2026-08-25 | [docs: add ManageRoles cache + background-refresh implementation plan](docs/blogs/2026-08-25-pr-152-docs-add-manageroles-cache-background-refresh-implementation-plan.md) | release,automation |
-| 2026-08-25 | [fix: image-upload content race and SignalR message size limit](docs/blogs/2026-08-25-pr-146-fix-image-upload-content-race-and-signalr-message-size-limit.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-25 | [fix: harden Auth0 missing-config test against real env vars leaking through](docs/blogs/2026-08-25-pr-171-fix-harden-auth0-missing-config-test-against-real-env-vars-leaking-through.md) | release,automation |
 | 2026-08-25 | [ci: wire Auth0 role test-user secrets into squad-ci.yml](docs/blogs/2026-08-25-pr-169-ci-wire-auth0-role-test-user-secrets-into-squad-ci-yml.md) | release,automation |
 | 2026-08-25 | [docs: research Auth0 bot-detection risk for scripted E2E logins](docs/blogs/2026-08-25-pr-166-docs-research-auth0-bot-detection-risk-for-scripted-e2e-logins.md) | release,automation |
 | 2026-08-25 | [feat: raise article Content max length to 50000 and add dev chronicle doc](docs/blogs/2026-08-25-pr-154-feat-raise-article-content-max-length-to-50000-and-add-dev-chronicle-doc.md) | release,automation |
 | 2026-08-25 | [docs: add ManageRoles cache + background-refresh implementation plan](docs/blogs/2026-08-25-pr-152-docs-add-manageroles-cache-background-refresh-implementation-plan.md) | release,automation |
-| 2026-08-25 | [fix: image-upload content race and SignalR message size limit](docs/blogs/2026-08-25-pr-146-fix-image-upload-content-race-and-signalr-message-size-limit.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
