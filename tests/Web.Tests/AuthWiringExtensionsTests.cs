@@ -51,7 +51,14 @@ public class AuthWiringExtensionsTests
 	{
 		// Arrange
 		var builder = CreateTestWebApplicationBuilder(environmentName: "Production");
-		builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>());
+
+		// Explicitly null out these 3 keys rather than relying on an empty collection to mean
+		// "unset" — WebApplicationBuilder also loads real process environment variables, and CI
+		// sets Auth0__Domain/ClientId/ClientSecret globally, which would otherwise leak through.
+		builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+		{
+			["Auth0:Domain"] = null, ["Auth0:ClientId"] = null, ["Auth0:ClientSecret"] = null
+		});
 
 		// Act
 		var act = () => builder.AddAuth0Authentication();
