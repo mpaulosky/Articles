@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-25 | [Prototype authenticated Admin E2E login (wayfinder #159)](2026-08-25-pr-176-prototype-authenticated-admin-e2e-login-wayfinder-159.md) | release,automation |
 | 2026-08-25 | [chore: add UserSecretsId to Web.E2E.Tests](2026-08-25-pr-174-chore-add-usersecretsid-to-web-e2e-tests.md) | release,automation |
 | 2026-08-25 | [fix: harden Auth0 missing-config test against real env vars leaking through](2026-08-25-pr-171-fix-harden-auth0-missing-config-test-against-real-env-vars-leaking-through.md) | release,automation |
 | 2026-08-25 | [ci: wire Auth0 role test-user secrets into squad-ci.yml](2026-08-25-pr-169-ci-wire-auth0-role-test-user-secrets-into-squad-ci-yml.md) | release,automation |
