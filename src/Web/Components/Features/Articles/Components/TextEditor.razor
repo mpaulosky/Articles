@@ -85,6 +85,14 @@
 		set
 		{
 			_content = value;
+
+			// ContentChanged must run before UploadingChanged: UploadingChanged(false) can cause
+			// ArticleForm to re-render and pass its (parameter-bound) Content straight back down to
+			// this component's Content setter. If that happens before Model.Content has picked up
+			// this value, the re-render overwrites _content with the stale pre-upload content and
+			// the just-inserted image is silently lost.
+			ContentChanged.InvokeAsync(value);
+
 			if (_awaitingContentSyncAfterUpload && _pendingUploadFileName is not null
 				&& ArticleImageParser.ExtractFileNames(value).Contains(_pendingUploadFileName))
 			{
@@ -92,7 +100,6 @@
 				_pendingUploadFileName = null;
 				UploadingChanged.InvokeAsync(false);
 			}
-			ContentChanged.InvokeAsync(value);
 			_ = DeleteUploadsNoLongerReferencedAsync(value);
 		}
 	}
