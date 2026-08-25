@@ -34,8 +34,8 @@ internal sealed class CreateArticleCommandValidator : AbstractValidator<CreateAr
 		RuleFor(command => command.Content)
 			.NotEmpty()
 			.WithMessage("Content is required")
-			.MaximumLength(10000)
-			.WithMessage("Content cannot exceed 10000 characters");
+			.MaximumLength(50000)
+			.WithMessage("Content cannot exceed 50000 characters");
 
 		RuleFor(command => command.Slug)
 			.NotEmpty()
@@ -76,6 +76,7 @@ internal sealed class UpdateArticleCommandValidator : AbstractValidator<UpdateAr
 
 		RuleFor(command => command.Content)
 			.NotEmpty()
-			.MinimumLength(10);
+			.MinimumLength(10)
+			.MaximumLength(50000);
 	}
 }
