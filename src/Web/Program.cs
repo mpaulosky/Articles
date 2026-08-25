@@ -77,7 +77,12 @@ builder.Services.AddOutputCache();
 builder.Services.AddHttpClient();
 
 builder.Services.AddRazorComponents()
-	.AddInteractiveServerComponents();
+	.AddInteractiveServerComponents()
+	// SignalR's default 32 KB message limit is far below what a base64-encoded image upload
+	// needs (FileStorage.AddFile allows up to 10 MB, and base64 inflates that by ~33%); without
+	// this the circuit silently disconnects and reconnects mid-upload, leaving the editor stuck
+	// showing "Uploading image..." forever.
+	.AddHubOptions(options => options.MaximumReceiveMessageSize = 15 * 1024 * 1024);
 
 var app = builder.Build();
 
