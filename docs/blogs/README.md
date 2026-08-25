@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-25 | [ci: wire Auth0 role test-user secrets into squad-ci.yml](2026-08-25-pr-169-ci-wire-auth0-role-test-user-secrets-into-squad-ci-yml.md) | release,automation |
 | 2026-08-25 | [docs: research Auth0 bot-detection risk for scripted E2E logins](2026-08-25-pr-166-docs-research-auth0-bot-detection-risk-for-scripted-e2e-logins.md) | release,automation |
 | 2026-08-25 | [feat: raise article Content max length to 50000 and add dev chronicle doc](2026-08-25-pr-154-feat-raise-article-content-max-length-to-50000-and-add-dev-chronicle-doc.md) | release,automation |
 | 2026-08-25 | [docs: add ManageRoles cache + background-refresh implementation plan](2026-08-25-pr-152-docs-add-manageroles-cache-background-refresh-implementation-plan.md) | release,automation |
