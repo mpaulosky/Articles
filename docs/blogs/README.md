@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-25 | [feat: raise article Content max length to 50000 and add dev chronicle doc](2026-08-25-pr-154-feat-raise-article-content-max-length-to-50000-and-add-dev-chronicle-doc.md) | release,automation |
 | 2026-08-25 | [docs: add ManageRoles cache + background-refresh implementation plan](2026-08-25-pr-152-docs-add-manageroles-cache-background-refresh-implementation-plan.md) | release,automation |
 | 2026-08-25 | [fix: image-upload content race and SignalR message size limit](2026-08-25-pr-146-fix-image-upload-content-race-and-signalr-message-size-limit.md) | release,automation |
 | 2026-08-24 | [Backfill migration: populate ArticleImage for existing articles](2026-08-24-pr-144-backfill-migration-populate-articleimage-for-existing-articles.md) | release,automation |
