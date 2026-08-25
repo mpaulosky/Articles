@@ -125,7 +125,7 @@ public class Auth0ConfigurationHelperTests
 public class RoleClaimNormalizerTests
 {
 	[Theory]
-	[InlineData("https://articles/roles", "[\"Admin\",\"Editor\"]", "Admin", "Editor")]
+	[InlineData("https://articlesite.com/roles", "[\"Admin\",\"Editor\"]", "Admin", "Editor")]
 	[InlineData("roles", "Admin,Editor", "Admin", "Editor")]
 	[InlineData("role", "Support", "Support")]
 	public async Task TransformAsync_NormalizesSupportedClaimTypesAndRoleFormats(string claimType, string claimValue,

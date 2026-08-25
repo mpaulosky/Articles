@@ -9,7 +9,8 @@
 
 namespace Web.E2E.Tests;
 
-public class HomePageTests(PlaywrightAppFixture fixture) : IClassFixture<PlaywrightAppFixture>
+[Collection(E2ETestCollectionDefinition.Name)]
+public class HomePageTests(PlaywrightAppFixture fixture)
 {
 	[Fact]
 	public async Task HomePage_Loads_WithExpectedTitleAndFooterBrand()
