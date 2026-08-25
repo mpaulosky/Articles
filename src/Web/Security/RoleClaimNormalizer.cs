@@ -15,7 +15,7 @@ namespace Web.Security;
 
 public sealed class RoleClaimNormalizer : IClaimsTransformation
 {
-	private const string Auth0RoleClaimType = "https://articles/roles";
+	private const string Auth0RoleClaimType = "https://articlesite.com/roles";
 
 	private static readonly string[] SupportedRoleClaimTypes =
 	[

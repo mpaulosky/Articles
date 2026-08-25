@@ -8,3 +8,7 @@
 // =============================================
 
 [assembly: System.CLSCompliant(false)]
+
+// Boots the app host once per assembly run rather than once per collection; collection fixtures
+// (e.g. AdminAuthFixture) can then depend on it via constructor injection.
+[assembly: AssemblyFixture(typeof(Web.E2E.Tests.PlaywrightAppFixture))]
