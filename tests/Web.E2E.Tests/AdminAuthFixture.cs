@@ -10,12 +10,12 @@
 namespace Web.E2E.Tests;
 
 /// <summary>
-/// PROTOTYPE (wayfinder #159): proves the per-role authenticated-fixture mechanism from #158 for
-/// the Admin test user only. Drives one real Auth0 Universal Login through the shared browser and
-/// caches the resulting storage state in memory, so tests can spin up authenticated pages without
-/// repeating the login. Reads <c>Auth0:E2E:Admin:Username</c>/<c>Password</c> from Web.E2E.Tests'
-/// user secrets locally, or <c>Auth0__E2E__Admin__Username</c>/<c>Password</c> env vars in CI; when
-/// absent, sets <see cref="SkipReason"/> instead of touching the network.
+/// Authenticates as the Admin test user per the fixture design on wayfinder #158. Drives one real
+/// Auth0 Universal Login through the shared browser and caches the resulting storage state in
+/// memory, so tests can spin up authenticated pages without repeating the login. Reads
+/// <c>Auth0:E2E:Admin:Username</c>/<c>Password</c> from Web.E2E.Tests' user secrets locally, or
+/// <c>Auth0__E2E__Admin__Username</c>/<c>Password</c> env vars in CI; when absent, sets
+/// <see cref="SkipReason"/> instead of touching the network.
 /// </summary>
 public sealed class AdminAuthFixture(PlaywrightAppFixture app) : IAsyncLifetime
 {
