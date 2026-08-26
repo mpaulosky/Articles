@@ -23,6 +23,16 @@ public sealed class PlaywrightAppFixture : WebApplicationFactory<Program>, IAsyn
 	// config below instead.
 	public const string BaseUrl = "https://localhost:7122";
 
+	// Matches the tag AppHost pins for local development (src/AppHost/DatabaseService.cs) and
+	// Web.Integration.Tests' own MongoContainerFixture. Without this, the app falls back to
+	// Program.cs's hardcoded "mongodb://localhost:27017", depending on whatever ambient MongoDB
+	// happens to be on the CI runner - which has been observed going unreachable partway through
+	// the run under memory pressure (see #191). A dedicated container removes that dependency
+	// entirely: this run gets its own isolated MongoDB regardless of what else is on the runner.
+	private const string MongoImageTag = "mongo:8.2.12";
+
+	private readonly MongoDbContainer _mongoContainer = new MongoDbBuilder(MongoImageTag).Build();
+
 	private IPlaywright? _playwright;
 
 	private IBrowser? _browser;
@@ -31,6 +41,17 @@ public sealed class PlaywrightAppFixture : WebApplicationFactory<Program>, IAsyn
 
 	public async ValueTask InitializeAsync()
 	{
+		await _mongoContainer.StartAsync().ConfigureAwait(false);
+
+		// Program.cs is a minimal-hosting top-level-statement app: it reads and captures the Mongo
+		// connection string into a local variable as part of its own top-level code, which
+		// WebApplicationFactory executes in full before invoking ConfigureWebHost's
+		// ConfigureAppConfiguration callback - too late for that callback to change what Program.cs
+		// already read. Setting the environment variable here, before CreateClient() ever builds the
+		// host, means WebApplicationBuilder's own AddEnvironmentVariables() (which runs as part of
+		// Program.cs's WebApplication.CreateBuilder(args) call) picks it up in time instead.
+		Environment.SetEnvironmentVariable("ConnectionStrings__articlesdb", _mongoContainer.GetConnectionString());
+
 		// Must be called before the factory is initialized.
 		UseKestrel(options => options.ListenLocalhost(7122, listenOptions => listenOptions.UseHttps()));
 
@@ -59,6 +80,8 @@ public sealed class PlaywrightAppFixture : WebApplicationFactory<Program>, IAsyn
 		_playwright?.Dispose();
 
 		await base.DisposeAsync().ConfigureAwait(false);
+
+		await _mongoContainer.DisposeAsync().ConfigureAwait(false);
 	}
 
 }

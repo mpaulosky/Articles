@@ -18,3 +18,5 @@ global using Microsoft.Extensions.Configuration;
 
 global using Microsoft.Playwright;
 global using static Microsoft.Playwright.Assertions;
+
+global using Testcontainers.MongoDb;
