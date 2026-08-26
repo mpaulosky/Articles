@@ -26,7 +26,8 @@ internal interface IManagementApiClientFactory
 	/// <remarks>
 	///     The access token is exchanged lazily, on the client's first actual API call, and then cached and
 	///     auto-refreshed by the underlying token provider — not eagerly during this call. Only the presence
-	///     of the required configuration settings is validated eagerly here.
+	///     of the required configuration settings is validated eagerly here. Safe to call concurrently; the
+	///     token provider is created exactly once.
 	/// </remarks>
 	/// <exception cref="InvalidOperationException">A required setting is missing.</exception>
 	Task<IManagementApiClient> CreateAsync(CancellationToken cancellationToken);
