@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [fix: compare GraphQL mergeable as string enum in auto-merge workflow](2026-08-26-pr-181-fix-compare-graphql-mergeable-as-string-enum-in-auto-merge-workflow.md) | release,automation |
 | 2026-08-26 | [docs: document local Auth0 test-user setup for E2E tests](2026-08-26-pr-178-docs-document-local-auth0-test-user-setup-for-e2e-tests.md) | release,automation |
 | 2026-08-25 | [Prototype authenticated Admin E2E login (wayfinder #159)](2026-08-25-pr-176-prototype-authenticated-admin-e2e-login-wayfinder-159.md) | release,automation |
 | 2026-08-25 | [chore: add UserSecretsId to Web.E2E.Tests](2026-08-25-pr-174-chore-add-usersecretsid-to-web-e2e-tests.md) | release,automation |
