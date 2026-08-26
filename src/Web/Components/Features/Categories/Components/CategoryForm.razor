@@ -7,13 +7,13 @@
 	<div class="space-y-4">
 		<div>
 			<label class="block text-sm font-medium text-(--app-text)">Name</label>
-			<InputText @bind-Value="Model.Name"
+			<InputText id="@($"{IdPrefix}category-name")" @bind-Value="Model.Name"
 								 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
 		</div>
 
 		<div>
 			<label class="block text-sm font-medium text-(--app-text)">Description</label>
-			<InputTextArea @bind-Value="Model.Description"
+			<InputTextArea id="@($"{IdPrefix}category-description")" @bind-Value="Model.Description"
 										 class="mt-1 min-h-28 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
 		</div>
 
@@ -31,6 +31,13 @@
 @code {
 	[Parameter, EditorRequired]
 	public CategoryFormModel Model { get; set; } = default!;
+
+	/// <summary>
+	/// Prepended to this form's field <c>id</c>s so two instances rendered at once (create panel +
+	/// edit modal) don't collide on the same id.
+	/// </summary>
+	[Parameter]
+	public string IdPrefix { get; set; } = string.Empty;
 
 	[Parameter]
 	public bool Saving { get; set; }

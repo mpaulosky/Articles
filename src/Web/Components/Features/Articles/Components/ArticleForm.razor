@@ -8,7 +8,7 @@
 	<div class="space-y-4">
 		<div>
 			<label class="block text-sm font-medium text-(--app-text)">Title</label>
-			<InputText @bind-Value="Model.Title"
+			<InputText id="article-title" @bind-Value="Model.Title"
 								 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
 		</div>
 
@@ -24,7 +24,7 @@
 
 		<div>
 			<label class="block text-sm font-medium text-(--app-text)">Category</label>
-			<InputSelect @bind-Value="Model.CategoryId"
+			<InputSelect id="article-category" @bind-Value="Model.CategoryId"
 									 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
 				<option value="">Select a category</option>
 				@foreach (var category in Categories)
