@@ -27,6 +27,7 @@ public class AdminRoleTests(AdminAuthFixture auth)
 		Assert.SkipWhen(auth.SkipReason is not null, auth.SkipReason ?? "");
 
 		var page = await auth.CreateAuthenticatedPageAsync();
+		await using var _ = new AsyncDisposeAction(() => page.Context.CloseAsync());
 
 		await GotoAndWaitForCircuitAsync(page, "/");
 
@@ -40,6 +41,7 @@ public class AdminRoleTests(AdminAuthFixture auth)
 		Assert.SkipWhen(auth.SkipReason is not null, auth.SkipReason ?? "");
 
 		var page = await auth.CreateAuthenticatedPageAsync();
+		await using var _ = new AsyncDisposeAction(() => page.Context.CloseAsync());
 
 		await GotoAndWaitForCircuitAsync(page, "/admin/users");
 
@@ -54,6 +56,8 @@ public class AdminRoleTests(AdminAuthFixture auth)
 		Assert.SkipWhen(auth.SkipReason is not null, auth.SkipReason ?? "");
 
 		var page = await auth.CreateAuthenticatedPageAsync();
+		await using var _ = new AsyncDisposeAction(() => page.Context.CloseAsync());
+
 		var runId = Guid.NewGuid().ToString("N");
 		var categoryName = await CreateCategoryAsync(page, runId);
 		var articleTitle = await CreateArticleAsync(page, runId, categoryName);
@@ -68,6 +72,17 @@ public class AdminRoleTests(AdminAuthFixture auth)
 
 		await page.GetByLabel("Include Archived").CheckAsync();
 		await Expect(row.Locator(".app-badge", new LocatorLocatorOptions { HasText = "Archived" })).ToBeVisibleAsync();
+	}
+
+	/// <summary>
+	/// Runs an async cleanup action on <c>await using</c> disposal - here, closing the browser
+	/// context each test opens via <see cref="AdminAuthFixture.CreateAuthenticatedPageAsync" /> so
+	/// its Blazor Server circuit doesn't stay open (and consuming CI runner resources) for the rest
+	/// of the assembly run.
+	/// </summary>
+	private sealed class AsyncDisposeAction(Func<Task> action) : IAsyncDisposable
+	{
+		public ValueTask DisposeAsync() => new(action());
 	}
 
 	/// <summary>
