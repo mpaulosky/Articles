@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [refactor: consolidate UserManagement request records into ManageRoles module](2026-08-26-pr-209-refactor-consolidate-usermanagement-request-records-into-manageroles-module.md) | release,automation |
 | 2026-08-26 | [refactor: extract concurrency-bounded Auth0 role fan-out into its own module](2026-08-26-pr-207-refactor-extract-concurrency-bounded-auth0-role-fan-out-into-its-own-module.md) | release,automation |
 | 2026-08-26 | [fix: UserManagement caching invalidation gap and N+1 Auth0 role calls](2026-08-26-pr-205-fix-usermanagement-caching-invalidation-gap-and-n-1-auth0-role-calls.md) | release,automation |
 | 2026-08-26 | [docs: reconcile conflicting testing directive docs](2026-08-26-pr-203-docs-reconcile-conflicting-testing-directive-docs.md) | release,automation |
