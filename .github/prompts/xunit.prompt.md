@@ -74,7 +74,7 @@ public class ArticleTests
 
 ## Project Setup
 
-- Use a separate test project with naming convention `[ProjectName].Tests.Unit`
+- Use a separate test project with naming convention `[ProjectName].Tests` for unit tests (e.g. `Web.Tests`), `[ProjectName].Integration.Tests` for integration tests, and `[ProjectName].E2E.Tests` for end-to-end tests — matching this repo's actual test projects (`Web.Tests`, `Web.Integration.Tests`, `Web.E2E.Tests`)
 - Use the .NET SDK-style project format
 - Target the same framework as your main project (e.g., `net9.0`, `net10.0`)
 - Reference the same NuGet packages as your main project
