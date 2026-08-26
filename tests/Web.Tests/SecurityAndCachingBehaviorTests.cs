@@ -415,7 +415,7 @@ public class UserManagementCacheServiceTests
 	}
 
 	[Fact]
-	public async Task GetOrFetchRolesAsync_WhenL1AndL2CacheAreUsed_AndInvalidateRolesRemovesBothTiers()
+	public async Task GetOrFetchRolesAsync_WhenL1AndL2CacheAreUsed_ReturnsCachedValueFromEachTier()
 	{
 		// Arrange
 		using var localCache = new MemoryCache(new MemoryCacheOptions());
@@ -453,13 +453,5 @@ public class UserManagementCacheServiceTests
 		l2Result.Should().BeEquivalentTo(cachedRoles);
 		localCache.TryGetValue(UserManagementCacheKeys.AllRoles, out List<RoleDto>? localHit).Should().BeTrue();
 		localHit.Should().BeEquivalentTo(cachedRoles);
-
-		// Act
-		await service.InvalidateRolesAsync(TestContext.Current.CancellationToken);
-
-		// Assert
-		localCache.TryGetValue(UserManagementCacheKeys.AllRoles, out _).Should().BeFalse();
-		await distributedCache.Received(1)
-			.RemoveAsync(UserManagementCacheKeys.AllRoles, TestContext.Current.CancellationToken);
 	}
 }

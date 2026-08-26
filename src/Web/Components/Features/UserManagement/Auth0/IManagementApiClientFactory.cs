@@ -21,12 +21,13 @@ namespace Web.Components.Features.UserManagement.Auth0;
 internal interface IManagementApiClientFactory
 {
 	/// <summary>
-	///     Exchanges the configured Auth0 Management API credentials for an access token and returns a client
-	///     scoped to that token.
+	///     Returns a client authenticated against the configured Auth0 Management API credentials.
 	/// </summary>
-	/// <exception cref="InvalidOperationException">
-	///     A required setting is missing, or the token endpoint responded without a usable access token.
-	/// </exception>
-	/// <exception cref="HttpRequestException">The token request failed or returned a non-success status code.</exception>
+	/// <remarks>
+	///     The access token is exchanged lazily, on the client's first actual API call, and then cached and
+	///     auto-refreshed by the underlying token provider — not eagerly during this call. Only the presence
+	///     of the required configuration settings is validated eagerly here.
+	/// </remarks>
+	/// <exception cref="InvalidOperationException">A required setting is missing.</exception>
 	Task<IManagementApiClient> CreateAsync(CancellationToken cancellationToken);
 }

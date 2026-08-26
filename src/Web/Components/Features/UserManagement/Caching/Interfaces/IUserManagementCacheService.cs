@@ -57,13 +57,4 @@ internal interface IUserManagementCacheService
 	/// already been applied and invalidation must complete regardless of caller cancellation.
 	/// </remarks>
 	Task InvalidateUsersAsync(CancellationToken ct = default);
-
-	/// <summary>
-	/// Removes the available-roles entry from both cache tiers.
-	/// </summary>
-	/// <remarks>
-	/// Redis removal uses <see cref="CancellationToken.None"/>: the Auth0 mutation has
-	/// already been applied and invalidation must complete regardless of caller cancellation.
-	/// </remarks>
-	Task InvalidateRolesAsync(CancellationToken ct = default);
 }
