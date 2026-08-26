@@ -67,6 +67,15 @@ public class TestAppFactory : WebApplicationFactory<Program>
 }
 ````
 
+### Two tiers: handler-level vs full-stack
+
+Not every integration test needs the real HTTP pipeline. This project distinguishes two tiers:
+
+- **Handler-level integration tests** (e.g. `Web.Integration.Tests`) dispatch through the real mediator pipeline against a real database (via Testcontainers), but skip `WebApplicationFactory`/`TestServer` and the HTTP pipeline (middleware, auth, routing) entirely. A lightweight, hand-wired DI container that mirrors `Program.cs`'s mediator wiring (see `Fixtures/MediatorTestHost.cs`, `Fixtures/UserManagementTestHost.cs`) is the sanctioned approach here — `WebApplicationFactory` is not required for this tier, since these tests aren't exercising the HTTP layer.
+- **Full-stack integration/E2E tests** (e.g. `Web.E2E.Tests`) exercise the real HTTP pipeline end-to-end, typically driven by Playwright. These tests should use `WebApplicationFactory<TEntryPoint>` (or `TestServer`) to host the app in-process, as described below.
+
+Pick the tier that matches what the test needs to prove: reach for a hand-wired DI host when you're verifying handler/mediator behavior against real data, and reach for `WebApplicationFactory` when the HTTP pipeline itself — middleware, auth, routing — is part of what's under test.
+
 ## Database Strategies (Testcontainers-first)
 
 - Use real database instances running in containers for full fidelity and fewer surprises between test and production
