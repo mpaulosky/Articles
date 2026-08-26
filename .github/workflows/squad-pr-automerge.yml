@@ -144,7 +144,7 @@ jobs:
             }
 
             const isReadyForAutoMerge =
-              currentPr.mergeable === true && currentPr.mergeStateStatus === "CLEAN";
+              currentPr.mergeable === "MERGEABLE" && currentPr.mergeStateStatus === "CLEAN";
 
             if (!isReadyForAutoMerge) {
               core.info(
