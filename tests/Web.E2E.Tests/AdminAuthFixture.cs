@@ -76,6 +76,11 @@ public sealed class AdminAuthFixture(PlaywrightAppFixture app) : IAsyncLifetime
 			})
 			.ConfigureAwait(false);
 
+		// CI runners are noticeably slower than local dev machines for a real Blazor Server + MongoDB
+		// round trip; the 30s Playwright default has been observed to time out navigation there.
+		context.SetDefaultTimeout(60_000);
+		context.SetDefaultNavigationTimeout(60_000);
+
 		return await context.NewPageAsync().ConfigureAwait(false);
 	}
 

@@ -93,9 +93,9 @@ public class AdminRoleTests(AdminAuthFixture auth)
 		await GotoAndWaitForCircuitAsync(page, "/categories");
 		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Create Category" }).ClickAsync();
 
-		await Expect(page.Locator("#category-name")).ToBeVisibleAsync();
-		await page.FillAsync("#category-name", categoryName);
-		await page.FillAsync("#category-description", $"Created by the Admin role E2E test run {runId}.");
+		await Expect(page.Locator("#create-category-name")).ToBeVisibleAsync();
+		await page.FillAsync("#create-category-name", categoryName);
+		await page.FillAsync("#create-category-description", $"Created by the Admin role E2E test run {runId}.");
 		await page.Locator("button[type=submit]", new PageLocatorOptions { HasText = "Create category" }).ClickAsync();
 
 		await Expect(page.Locator("table tbody tr", new PageLocatorOptions { HasText = categoryName }))

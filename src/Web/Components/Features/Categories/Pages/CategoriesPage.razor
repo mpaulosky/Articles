@@ -53,7 +53,7 @@
 				<div class="alert-error" role="alert">@_createError</div>
 			}
 
-			<CategoryForm Model="_form" Saving="_saving" SubmitLabel="Create category"
+			<CategoryForm Model="_form" Saving="_saving" SubmitLabel="Create category" IdPrefix="create-"
 										OnValidSubmit="CreateCategoryAsync" />
 		</section>
 	}
@@ -153,7 +153,7 @@
 				<div class="alert-error" role="alert">@_editError</div>
 			}
 
-			<CategoryForm Model="_editForm" Saving="_saving" SubmitLabel="Save changes"
+			<CategoryForm Model="_editForm" Saving="_saving" SubmitLabel="Save changes" IdPrefix="edit-"
 										OnValidSubmit="UpdateCategoryAsync" />
 		</div>
 	</div>
