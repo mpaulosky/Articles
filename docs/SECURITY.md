@@ -116,6 +116,32 @@ When contributing to Articles, please follow these security guidelines:
 - Never commit `appsettings.Production.json` with secrets
 - Add sensitive files to `.gitignore`
 
+### Auth0 test-user credentials for E2E tests
+
+`Web.E2E.Tests` drives real Auth0 hosted-login flows for the 3 role-based test users
+(Admin, Author, plain authenticated User) so Playwright can exercise real
+browser-and-Auth0 sessions against the app's authorization gates. To run these tests
+locally, set each user's credentials in the project's user secrets
+(`UserSecretsId` is already configured on `Web.E2E.Tests.csproj`):
+
+```bash
+cd tests/Web.E2E.Tests
+dotnet user-secrets set "Auth0:E2E:Admin:Username" "admin-test-user@example.com"
+dotnet user-secrets set "Auth0:E2E:Admin:Password" "..."
+dotnet user-secrets set "Auth0:E2E:Author:Username" "author-test-user@example.com"
+dotnet user-secrets set "Auth0:E2E:Author:Password" "..."
+dotnet user-secrets set "Auth0:E2E:User:Username" "user-test-user@example.com"
+dotnet user-secrets set "Auth0:E2E:User:Password" "..."
+```
+
+In CI, the equivalent values are supplied as environment variables using the
+double-underscore convention (`Auth0__E2E__Admin__Username`, etc.), wired in
+`squad-ci.yml` from the `AUTH0_ADMIN/AUTHOR/USER_USERNAME`/`PASSWORD` repository secrets.
+
+If credentials are not configured — locally or in CI — the affected tests **skip**
+with a clear message rather than failing, so the suite stays green for contributors
+who haven't set up Auth0 test-user access.
+
 ### Data Validation
 
 - Validate all user input in CQRS handlers
