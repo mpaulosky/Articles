@@ -53,15 +53,8 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 					auth0Users.Add(user);
 				}
 
-				var result = new UserWithRolesDto[auth0Users.Count];
-				var parallelOptions = new ParallelOptions
+				return await RolesFetchFanOut.RunAsync(auth0Users, async (user, ct) =>
 				{
-					MaxDegreeOfParallelism = GetRolesFetchConcurrency(),
-					CancellationToken = cancellationToken
-				};
-				await Parallel.ForEachAsync(Enumerable.Range(0, auth0Users.Count), parallelOptions, async (index, ct) =>
-				{
-					var user = auth0Users[index];
 					var rolesPager = await client.Users.Roles.ListAsync(
 					user.UserId ?? string.Empty, new ListUserRolesRequestParameters(), cancellationToken: ct).ConfigureAwait(false);
 					var roles = new List<string>();
@@ -69,13 +62,12 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 					{
 						roles.Add(role.Name ?? string.Empty);
 					}
-					result[index] = new UserWithRolesDto(
+					return new UserWithRolesDto(
 					user.UserId ?? string.Empty,
 					user.Email ?? string.Empty,
 					user.Name ?? user.Email ?? string.Empty,
 					roles);
-				}).ConfigureAwait(false);
-				return result;
+				}, GetRolesFetchConcurrency(configuration), cancellationToken).ConfigureAwait(false);
 			}, cancellationToken).ConfigureAwait(false);
 			return Result.Ok(users);
 		}
@@ -200,7 +192,7 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 #pragma warning restore CA1031
 	}
 
-	private int GetRolesFetchConcurrency()
+	internal static int GetRolesFetchConcurrency(IConfiguration? configuration)
 	{
 		var configured = configuration?["Auth0:Management:RolesFetchConcurrency"];
 		return int.TryParse(configured, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0
