@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [fix: UserManagement caching invalidation gap and N+1 Auth0 role calls](docs/blogs/2026-08-26-pr-205-fix-usermanagement-caching-invalidation-gap-and-n-1-auth0-role-calls.md) | release,automation |
 | 2026-08-26 | [docs: reconcile conflicting testing directive docs](docs/blogs/2026-08-26-pr-203-docs-reconcile-conflicting-testing-directive-docs.md) | release,automation |
 | 2026-08-26 | [feat: implement User role E2E smoke tests](docs/blogs/2026-08-26-pr-192-feat-implement-user-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [feat: implement Author role E2E smoke tests](docs/blogs/2026-08-26-pr-190-feat-implement-author-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [fix: close each E2E test's browser context to stop CI flake](docs/blogs/2026-08-26-pr-188-fix-close-each-e2e-test-s-browser-context-to-stop-ci-flake.md) | release,automation |
-| 2026-08-26 | [feat: implement Admin role E2E smoke tests](docs/blogs/2026-08-26-pr-186-feat-implement-admin-role-e2e-smoke-tests.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [fix: UserManagement caching invalidation gap and N+1 Auth0 role calls](docs/blogs/2026-08-26-pr-205-fix-usermanagement-caching-invalidation-gap-and-n-1-auth0-role-calls.md) | release,automation |
 | 2026-08-26 | [docs: reconcile conflicting testing directive docs](docs/blogs/2026-08-26-pr-203-docs-reconcile-conflicting-testing-directive-docs.md) | release,automation |
 | 2026-08-26 | [feat: implement User role E2E smoke tests](docs/blogs/2026-08-26-pr-192-feat-implement-user-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [feat: implement Author role E2E smoke tests](docs/blogs/2026-08-26-pr-190-feat-implement-author-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [fix: close each E2E test's browser context to stop CI flake](docs/blogs/2026-08-26-pr-188-fix-close-each-e2e-test-s-browser-context-to-stop-ci-flake.md) | release,automation |
-| 2026-08-26 | [feat: implement Admin role E2E smoke tests](docs/blogs/2026-08-26-pr-186-feat-implement-admin-role-e2e-smoke-tests.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
