@@ -136,7 +136,10 @@ public class AdminRoleTests(AdminAuthFixture auth)
 		await page.SelectOptionAsync("#article-category", new SelectOptionValue { Label = categoryName });
 		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Create article" }).ClickAsync();
 
-		await Expect(page).ToHaveURLAsync(new Regex("/articles/[a-z0-9-]+$"));
+		// Excludes "create" itself: "/articles/[a-z0-9-]+$" also matches the still-on-the-create-page
+		// URL "/articles/create" (a valid match for the character class), so without this exclusion
+		// the assertion can pass before the redirect to the new article actually happens.
+		await Expect(page).ToHaveURLAsync(new Regex("/articles/(?!create(?:/|$))[a-z0-9-]+$"));
 
 		return articleTitle;
 	}

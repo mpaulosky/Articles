@@ -16,7 +16,7 @@ namespace Web.E2E.Tests;
 /// each other.
 /// </summary>
 [CollectionDefinition(Name)]
-public sealed class E2ETestCollectionDefinition : ICollectionFixture<AdminAuthFixture>
+public sealed class E2ETestCollectionDefinition : ICollectionFixture<AdminAuthFixture>, ICollectionFixture<AuthorAuthFixture>
 {
 	public const string Name = "E2E";
 }
