@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [feat: implement Admin role E2E smoke tests](2026-08-26-pr-186-feat-implement-admin-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [Add routed NotAuthorized/RedirectToLogin pages](2026-08-26-pr-184-add-routed-notauthorized-redirecttologin-pages.md) | release,automation |
 | 2026-08-26 | [fix: compare GraphQL mergeable as string enum in auto-merge workflow](2026-08-26-pr-181-fix-compare-graphql-mergeable-as-string-enum-in-auto-merge-workflow.md) | release,automation |
 | 2026-08-26 | [docs: document local Auth0 test-user setup for E2E tests](2026-08-26-pr-178-docs-document-local-auth0-test-user-setup-for-e2e-tests.md) | release,automation |

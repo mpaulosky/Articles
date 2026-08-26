@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [feat: implement Admin role E2E smoke tests](docs/blogs/2026-08-26-pr-186-feat-implement-admin-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [Add routed NotAuthorized/RedirectToLogin pages](docs/blogs/2026-08-26-pr-184-add-routed-notauthorized-redirecttologin-pages.md) | release,automation |
 | 2026-08-26 | [fix: compare GraphQL mergeable as string enum in auto-merge workflow](docs/blogs/2026-08-26-pr-181-fix-compare-graphql-mergeable-as-string-enum-in-auto-merge-workflow.md) | release,automation |
 | 2026-08-26 | [docs: document local Auth0 test-user setup for E2E tests](docs/blogs/2026-08-26-pr-178-docs-document-local-auth0-test-user-setup-for-e2e-tests.md) | release,automation |
 | 2026-08-25 | [Prototype authenticated Admin E2E login (wayfinder #159)](docs/blogs/2026-08-25-pr-176-prototype-authenticated-admin-e2e-login-wayfinder-159.md) | release,automation |
-| 2026-08-25 | [chore: add UserSecretsId to Web.E2E.Tests](docs/blogs/2026-08-25-pr-174-chore-add-usersecretsid-to-web-e2e-tests.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-08-26 | [feat: implement Admin role E2E smoke tests](docs/blogs/2026-08-26-pr-186-feat-implement-admin-role-e2e-smoke-tests.md) | release,automation |
 | 2026-08-26 | [Add routed NotAuthorized/RedirectToLogin pages](docs/blogs/2026-08-26-pr-184-add-routed-notauthorized-redirecttologin-pages.md) | release,automation |
 | 2026-08-26 | [fix: compare GraphQL mergeable as string enum in auto-merge workflow](docs/blogs/2026-08-26-pr-181-fix-compare-graphql-mergeable-as-string-enum-in-auto-merge-workflow.md) | release,automation |
 | 2026-08-26 | [docs: document local Auth0 test-user setup for E2E tests](docs/blogs/2026-08-26-pr-178-docs-document-local-auth0-test-user-setup-for-e2e-tests.md) | release,automation |
 | 2026-08-25 | [Prototype authenticated Admin E2E login (wayfinder #159)](docs/blogs/2026-08-25-pr-176-prototype-authenticated-admin-e2e-login-wayfinder-159.md) | release,automation |
-| 2026-08-25 | [chore: add UserSecretsId to Web.E2E.Tests](docs/blogs/2026-08-25-pr-174-chore-add-usersecretsid-to-web-e2e-tests.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
