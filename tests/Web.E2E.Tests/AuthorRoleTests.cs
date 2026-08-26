@@ -59,11 +59,20 @@ public class AuthorRoleTests(AuthorAuthFixture authorAuth, AdminAuthFixture admi
 
 		var runId = Guid.NewGuid().ToString("N");
 
-		var adminPage = await adminAuth.CreateAuthenticatedPageAsync();
-		await using var adminDispose = new AsyncDisposeAction(() => adminPage.Context.CloseAsync());
+		// Admin's setup work (category + the article Author doesn't own) closes its browser context
+		// before Author's page opens, so only one authenticated Blazor Server circuit is ever live at
+		// once - the same resource-conscious shape every other role test already follows, and needed
+		// here since CI runners have observed MongoDB connection failures under concurrent-circuit
+		// pressure (see #163's follow-up / PR #188).
+		string categoryName;
+		ArticleRef othersArticle;
+		{
+			var adminPage = await adminAuth.CreateAuthenticatedPageAsync();
+			await using var adminDispose = new AsyncDisposeAction(() => adminPage.Context.CloseAsync());
 
-		var categoryName = await CreateCategoryAsync(adminPage, runId);
-		var othersArticle = await CreateArticleAsync(adminPage, $"E2E Author-Others {runId}", categoryName);
+			categoryName = await CreateCategoryAsync(adminPage, runId);
+			othersArticle = await CreateArticleAsync(adminPage, $"E2E Author-Others {runId}", categoryName);
+		}
 
 		var authorPage = await authorAuth.CreateAuthenticatedPageAsync();
 		await using var authorDispose = new AsyncDisposeAction(() => authorPage.Context.CloseAsync());
