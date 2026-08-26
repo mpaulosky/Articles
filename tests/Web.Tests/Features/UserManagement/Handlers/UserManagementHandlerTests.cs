@@ -17,12 +17,8 @@ using Microsoft.Extensions.Configuration;
 
 using NSubstitute;
 
-using Web.Components.Features.UserManagement;
-using Web.Components.Features.UserManagement.AddUserRoles;
 using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
-using Web.Components.Features.UserManagement.GetUserRoles;
-using Web.Components.Features.UserManagement.GetUserWithRoles;
 using Web.Components.Features.UserManagement.ManageRoles;
 using Web.Components.Features.UserManagement.Models;
 
