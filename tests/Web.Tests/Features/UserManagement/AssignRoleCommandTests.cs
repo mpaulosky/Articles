@@ -11,7 +11,6 @@ using FluentAssertions;
 
 using NSubstitute;
 
-using Web.Components.Features.UserManagement.AddUserRoles;
 using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
 using Web.Components.Features.UserManagement.ManageRoles;

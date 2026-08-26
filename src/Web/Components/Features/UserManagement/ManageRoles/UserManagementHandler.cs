@@ -16,11 +16,8 @@ using Domain.Abstractions;
 
 using Microsoft.Extensions.Configuration;
 
-using Web.Components.Features.UserManagement.AddUserRoles;
 using Web.Components.Features.UserManagement.Auth0;
 using Web.Components.Features.UserManagement.Caching.Interfaces;
-using Web.Components.Features.UserManagement.GetUserRoles;
-using Web.Components.Features.UserManagement.GetUserWithRoles;
 using Web.Components.Features.UserManagement.Models;
 
 namespace Web.Components.Features.UserManagement.ManageRoles;
