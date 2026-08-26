@@ -30,35 +30,33 @@ public class RoutesTests : BunitContext
 	}
 
 	[Fact]
-	public void ShowsLoginLink_WhenUserIsNotAuthenticatedAndRouteRequiresAuthorization()
+	public void RedirectsToLogin_WhenUserIsNotAuthenticatedAndRouteRequiresAuthorization()
 	{
 		// Arrange
 		AddAuthorization().SetNotAuthorized();
-		Services.GetRequiredService<BunitNavigationManager>().NavigateTo("/categories");
+		var nav = Services.GetRequiredService<BunitNavigationManager>();
+		nav.NavigateTo("/categories");
 
 		// Act
-		var cut = Render<Routes>();
+		Render<Routes>();
 
 		// Assert
-		var loginLink = cut.Find("a[aria-label='Login']");
-		loginLink.GetAttribute("href").Should().Be("/Account/Login");
-		cut.FindAll("p[role='alert']").Should().BeEmpty();
+		nav.Uri.Should().Contain("Account/Login");
 	}
 
 	[Fact]
-	public void ShowsNotAuthorizedAlert_WhenUserIsAuthenticatedButLacksRequiredRole()
+	public void RedirectsToNotAuthorized_WhenUserIsAuthenticatedButLacksRequiredRole()
 	{
 		// Arrange
 		AddAuthorization().SetAuthorized("regular-user");
-		Services.GetRequiredService<BunitNavigationManager>().NavigateTo("/categories");
+		var nav = Services.GetRequiredService<BunitNavigationManager>();
+		nav.NavigateTo("/categories");
 
 		// Act
-		var cut = Render<Routes>();
+		Render<Routes>();
 
 		// Assert
-		var alert = cut.Find("p[role='alert']");
-		alert.TextContent.Should().Be("You are not authorized to access this resource.");
-		cut.FindAll("a[aria-label='Login']").Should().BeEmpty();
+		nav.Uri.Should().Contain("not-authorized");
 	}
 
 	private sealed class StubHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> handler)
