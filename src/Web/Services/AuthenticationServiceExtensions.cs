@@ -67,6 +67,15 @@ internal static class AuthenticationServiceExtensions
 			options.Scope = "openid profile email";
 		});
 
+		// AddAuth0WebAppAuthentication registers its own cookie scheme with the ASP.NET Core
+		// default AccessDeniedPath ("/Account/AccessDenied", a route this app never defined), which
+		// wins the redirect for a full page load of an [Authorize]-attributed component before
+		// Blazor's own AuthorizeRouteView/NotAuthorized branch ever runs. Point it at the app's real
+		// not-authorized page instead.
+		services.Configure<CookieAuthenticationOptions>(
+			CookieAuthenticationDefaults.AuthenticationScheme,
+			options => options.AccessDeniedPath = "/not-authorized");
+
 		services.AddScoped<AuthenticationStateProvider, Auth0AuthenticationStateProvider>();
 		services.AddCascadingAuthenticationState();
 		services.AddScoped<IClaimsTransformation, RoleClaimNormalizer>();
