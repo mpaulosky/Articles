@@ -115,10 +115,4 @@ internal sealed class UserManagementCacheService(
 		localCache.Remove(UserManagementCacheKeys.AllUsers);
 		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllUsers, ct).ConfigureAwait(false);
 	}
-
-	public async Task InvalidateRolesAsync(CancellationToken ct = default)
-	{
-		localCache.Remove(UserManagementCacheKeys.AllRoles);
-		await distributedCache.RemoveAsync(UserManagementCacheKeys.AllRoles, ct).ConfigureAwait(false);
-	}
 }

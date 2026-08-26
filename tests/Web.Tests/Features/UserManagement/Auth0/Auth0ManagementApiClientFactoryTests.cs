@@ -7,9 +7,6 @@
 // Project Name :  Web.Tests
 // =============================================
 
-using System.Net;
-using System.Text;
-
 using FluentAssertions;
 
 using Microsoft.Extensions.Configuration;
@@ -31,8 +28,8 @@ public class Auth0ManagementApiClientFactoryTests
 	{
 		// Arrange
 		var configuration = CreateConfiguration(hasDomain, hasClientId, hasClientSecret);
-		var httpClientFactory = Substitute.For<IHttpClientFactory>();
-		var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
+		var httpClientFactory = CreateHttpClientFactory();
+		using var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
 
 		// Act
 		var act = () => factory.CreateAsync(CancellationToken.None);
@@ -43,70 +40,38 @@ public class Auth0ManagementApiClientFactoryTests
 	}
 
 	[Fact]
-	public async Task CreateAsync_WhenTokenEndpointReturnsErrorStatus_ThrowsHttpRequestException()
+	public async Task CreateAsync_WhenSettingsArePresent_ReturnsClientWithoutContactingAuth0()
 	{
-		// Arrange
+		// Arrange: the access token is now exchanged lazily on the client's first API call, not
+		// during CreateAsync, so no HTTP call should happen here at all.
 		var configuration = CreateConfiguration();
-		var httpClientFactory = CreateHttpClientFactory(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
-		var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
-
-		// Act
-		var act = () => factory.CreateAsync(CancellationToken.None);
-
-		// Assert
-		await act.Should().ThrowAsync<HttpRequestException>();
-	}
-
-	[Fact]
-	public async Task CreateAsync_WhenTokenResponseHasNoAccessToken_ThrowsWithTokenErrorMessage()
-	{
-		// Arrange
-		var configuration = CreateConfiguration();
-		var httpClientFactory = CreateHttpClientFactory(_ => new HttpResponseMessage(HttpStatusCode.OK)
-		{
-			Content = new StringContent("{}", Encoding.UTF8, "application/json")
-		});
-		var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
-
-		// Act
-		var act = () => factory.CreateAsync(CancellationToken.None);
-
-		// Assert
-		var exception = await act.Should().ThrowAsync<InvalidOperationException>();
-		exception.Which.Message.Should().Be("Auth0 Management API token response did not contain a valid access_token.");
-	}
-
-	[Fact]
-	public async Task CreateAsync_WhenTokenRequestIsCanceled_PropagatesOperationCanceledException()
-	{
-		// Arrange
-		var configuration = CreateConfiguration();
-		var httpClientFactory = CreateHttpClientFactory(_ => throw new TaskCanceledException("Request timed out."));
-		var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
-
-		// Act
-		var act = () => factory.CreateAsync(CancellationToken.None);
-
-		// Assert
-		await act.Should().ThrowAsync<OperationCanceledException>();
-	}
-
-	[Fact]
-	public async Task CreateAsync_WhenTokenResponseHasAccessToken_ReturnsClient()
-	{
-		// Arrange
-		var configuration = CreateConfiguration();
-		var httpClientFactory = CreateHttpClientFactory(_ => new HttpResponseMessage(HttpStatusCode.OK)
-		{
-			Content = new StringContent("""{"access_token":"a-valid-token"}""", Encoding.UTF8, "application/json")
-		});
-		var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
+		var httpClientFactory = CreateHttpClientFactory();
+		using var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
 
 		// Act
 		var client = await factory.CreateAsync(CancellationToken.None);
 
 		// Assert
 		client.Should().NotBeNull();
+	}
+
+	[Fact]
+	public async Task CreateAsync_WhenCalledMultipleTimes_ReusesTheSameTokenProvider()
+	{
+		// Arrange: httpClientFactory.CreateClient() is called once to back the cached token
+		// provider, plus once per CreateAsync call for the returned client's own HttpClient.
+		// A fresh token provider per call (defeating the caching fix) would show up as an extra
+		// CreateClient() call per invocation instead.
+		var configuration = CreateConfiguration();
+		var httpClientFactory = CreateHttpClientFactory();
+		using var factory = new Auth0ManagementApiClientFactory(configuration, httpClientFactory);
+
+		// Act
+		await factory.CreateAsync(CancellationToken.None);
+		await factory.CreateAsync(CancellationToken.None);
+
+		// Assert
+		httpClientFactory.Received(3).CreateClient();
 	}
 
 	private static IConfiguration CreateConfiguration(bool hasDomain = true, bool hasClientId = true,
@@ -131,29 +96,10 @@ public class Auth0ManagementApiClientFactoryTests
 		return configuration;
 	}
 
-	private static IHttpClientFactory CreateHttpClientFactory(Func<HttpRequestMessage, HttpResponseMessage> handler)
+	private static IHttpClientFactory CreateHttpClientFactory()
 	{
 		var httpClientFactory = Substitute.For<IHttpClientFactory>();
-		httpClientFactory.CreateClient().Returns(new HttpClient(new StubHttpMessageHandler(handler)));
+		httpClientFactory.CreateClient().Returns(_ => new HttpClient());
 		return httpClientFactory;
-	}
-
-	private sealed class StubHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> handler)
-		: HttpMessageHandler
-	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-			CancellationToken cancellationToken)
-		{
-			try
-			{
-				return Task.FromResult(handler(request));
-			}
-#pragma warning disable CA1031 // Intentional: forwards any stub-configured exception into the returned Task
-			catch (Exception ex)
-			{
-				return Task.FromException<HttpResponseMessage>(ex);
-			}
-#pragma warning restore CA1031
-		}
 	}
 }

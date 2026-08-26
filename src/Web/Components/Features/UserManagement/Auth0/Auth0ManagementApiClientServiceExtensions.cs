@@ -15,9 +15,13 @@ internal static class Auth0ManagementApiClientServiceExtensions
 	///     Registers <see cref="IManagementApiClientFactory" /> for building authenticated Auth0 Management API
 	///     clients on demand.
 	/// </summary>
+	/// <remarks>
+	///     Registered as a singleton so the factory's cached <c>ClientCredentialsTokenProvider</c> (and the
+	///     Auth0 access token it holds) is reused across requests instead of being re-exchanged on every scope.
+	/// </remarks>
 	public static IServiceCollection AddAuth0ManagementApiClient(this IServiceCollection services)
 	{
-		services.AddScoped<IManagementApiClientFactory, Auth0ManagementApiClientFactory>();
+		services.AddSingleton<IManagementApiClientFactory, Auth0ManagementApiClientFactory>();
 		return services;
 	}
 }

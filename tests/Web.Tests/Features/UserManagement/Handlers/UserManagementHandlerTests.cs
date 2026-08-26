@@ -13,6 +13,8 @@ using Auth0.ManagementApi.Users;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.Configuration;
+
 using NSubstitute;
 
 using Web.Components.Features.UserManagement;
@@ -77,6 +79,91 @@ public class UserManagementHandlerTests
 		var bobDto = result.Value!.Single(u => u.UserId == "auth0|bob");
 		bobDto.Name.Should().Be("bob@example.com", "the handler falls back to email when the user has no display name");
 		bobDto.Roles.Should().Equal("Editor", "Viewer");
+	}
+
+	[Fact]
+	public async Task Handle_GetUsersWithRolesQuery_RespectsConfiguredRolesFetchConcurrency()
+	{
+		// Arrange
+		const int userCount = 20;
+		const int configuredConcurrency = 3;
+
+		var users = Enumerable.Range(0, userCount)
+			.Select(i => new UserResponseSchema { UserId = $"auth0|user{i}", Email = $"user{i}@example.com", Name = $"User {i}" })
+			.ToList();
+
+		var usersClient = Substitute.For<IUsersClient>();
+		usersClient.ListAsync(Arg.Any<ListUsersRequestParameters>(), Arg.Any<RequestOptions>(), Arg.Any<CancellationToken>())
+			.Returns(Task.FromResult<Pager<UserResponseSchema>>(new FakePager<UserResponseSchema>(users)));
+
+		var tracker = new ConcurrencyTracker();
+		var userRolesClient = Substitute.For<UserRolesClient>();
+		userRolesClient.ListAsync(Arg.Any<string>(), Arg.Any<ListUserRolesRequestParameters>(), Arg.Any<RequestOptions>(),
+				Arg.Any<CancellationToken>())
+			.Returns(_ => TrackedListRolesAsync(tracker));
+		usersClient.Roles.Returns(userRolesClient);
+
+		var managementClient = Substitute.For<IManagementApiClient>();
+		managementClient.Users.Returns(usersClient);
+
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
+		managementApiClientFactory.CreateAsync(Arg.Any<CancellationToken>()).Returns(managementClient);
+
+		var configuration = Substitute.For<IConfiguration>();
+		configuration["Auth0:Management:RolesFetchConcurrency"]
+			.Returns(configuredConcurrency.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+		var cache = CreatePassThroughUsersCache();
+		var handler = new UserManagementHandler(managementApiClientFactory, cache, configuration);
+
+		// Act
+		var result = await handler.Handle(new GetUsersWithRolesQuery(), CancellationToken.None);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value.Should().HaveCount(userCount);
+		tracker.MaxObserved.Should().BeLessThanOrEqualTo(configuredConcurrency);
+		tracker.MaxObserved.Should().BeGreaterThan(1, "the fetch should fan out concurrently instead of staying fully sequential");
+	}
+
+	[Fact]
+	public async Task Handle_GetUsersWithRolesQuery_WhenConcurrencyIsNotConfigured_FallsBackToDefaultCap()
+	{
+		// Arrange
+		const int userCount = 20;
+		const int defaultConcurrencyCap = 5;
+
+		var users = Enumerable.Range(0, userCount)
+			.Select(i => new UserResponseSchema { UserId = $"auth0|user{i}", Email = $"user{i}@example.com", Name = $"User {i}" })
+			.ToList();
+
+		var usersClient = Substitute.For<IUsersClient>();
+		usersClient.ListAsync(Arg.Any<ListUsersRequestParameters>(), Arg.Any<RequestOptions>(), Arg.Any<CancellationToken>())
+			.Returns(Task.FromResult<Pager<UserResponseSchema>>(new FakePager<UserResponseSchema>(users)));
+
+		var tracker = new ConcurrencyTracker();
+		var userRolesClient = Substitute.For<UserRolesClient>();
+		userRolesClient.ListAsync(Arg.Any<string>(), Arg.Any<ListUserRolesRequestParameters>(), Arg.Any<RequestOptions>(),
+				Arg.Any<CancellationToken>())
+			.Returns(_ => TrackedListRolesAsync(tracker));
+		usersClient.Roles.Returns(userRolesClient);
+
+		var managementClient = Substitute.For<IManagementApiClient>();
+		managementClient.Users.Returns(usersClient);
+
+		var managementApiClientFactory = Substitute.For<IManagementApiClientFactory>();
+		managementApiClientFactory.CreateAsync(Arg.Any<CancellationToken>()).Returns(managementClient);
+
+		var cache = CreatePassThroughUsersCache();
+		var handler = new UserManagementHandler(managementApiClientFactory, cache);
+
+		// Act
+		var result = await handler.Handle(new GetUsersWithRolesQuery(), CancellationToken.None);
+
+		// Assert
+		result.Success.Should().BeTrue();
+		result.Value.Should().HaveCount(userCount);
+		tracker.MaxObserved.Should().BeLessThanOrEqualTo(defaultConcurrencyCap);
 	}
 
 	[Fact]
@@ -525,6 +612,54 @@ public class UserManagementHandlerTests
 			{
 				yield return item;
 			}
+		}
+	}
+
+	private static async Task<Pager<Role>> TrackedListRolesAsync(ConcurrencyTracker tracker)
+	{
+		tracker.Enter();
+		try
+		{
+			await Task.Delay(TimeSpan.FromMilliseconds(30));
+			return new FakePager<Role>([new Role { Id = "rol_1", Name = "Admin" }]);
+		}
+		finally
+		{
+			tracker.Exit();
+		}
+	}
+
+	/// <summary>
+	///     Tracks the peak number of concurrently in-flight calls, so tests can assert the
+	///     roles-fetch fan-out actually stays within its configured bound.
+	/// </summary>
+	private sealed class ConcurrencyTracker
+	{
+		private int current;
+
+		private int maxObserved;
+
+		public int MaxObserved => maxObserved;
+
+		public void Enter()
+		{
+			var value = Interlocked.Increment(ref current);
+			InterlockedMax(ref maxObserved, value);
+		}
+
+		public void Exit() => Interlocked.Decrement(ref current);
+
+		private static void InterlockedMax(ref int target, int candidate)
+		{
+			int initial;
+			do
+			{
+				initial = target;
+				if (candidate <= initial)
+				{
+					return;
+				}
+			} while (Interlocked.CompareExchange(ref target, candidate, initial) != initial);
 		}
 	}
 }

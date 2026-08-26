@@ -7,10 +7,14 @@
 //Project Name :  Web
 //=======================================================
 
+using System.Globalization;
+
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Users;
 
 using Domain.Abstractions;
+
+using Microsoft.Extensions.Configuration;
 
 using Web.Components.Features.UserManagement.AddUserRoles;
 using Web.Components.Features.UserManagement.Auth0;
@@ -23,12 +27,17 @@ namespace Web.Components.Features.UserManagement.ManageRoles;
 
 internal sealed class UserManagementHandler(
 IManagementApiClientFactory managementApiClientFactory,
-IUserManagementCacheService cache)
+IUserManagementCacheService cache,
+IConfiguration? configuration = null)
 : IRequestHandler<GetUsersWithRolesQuery, Result<IReadOnlyList<UserWithRolesDto>>>,
 IRequestHandler<AssignRoleCommand, Result>,
 IRequestHandler<RemoveRoleCommand, Result>,
 IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 {
+	// Auth0's Management API rate limits are as low as 2 req/s sustained on Free/non-production
+	// tenants, so this stays small by default; override via "Auth0:Management:RolesFetchConcurrency".
+	private const int DefaultRolesFetchConcurrency = 5;
+
 	public async Task<Result<IReadOnlyList<UserWithRolesDto>>> Handle(
 	GetUsersWithRolesQuery request, CancellationToken cancellationToken)
 	{
@@ -38,22 +47,34 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 			{
 				var client = await managementApiClientFactory.CreateAsync(cancellationToken).ConfigureAwait(false);
 				var usersPager = await client.Users.ListAsync(new ListUsersRequestParameters(), cancellationToken: cancellationToken).ConfigureAwait(false);
-				var result = new List<UserWithRolesDto>();
+				var auth0Users = new List<UserResponseSchema>();
 				await foreach (var user in usersPager.ConfigureAwait(false))
 				{
+					auth0Users.Add(user);
+				}
+
+				var result = new UserWithRolesDto[auth0Users.Count];
+				var parallelOptions = new ParallelOptions
+				{
+					MaxDegreeOfParallelism = GetRolesFetchConcurrency(),
+					CancellationToken = cancellationToken
+				};
+				await Parallel.ForEachAsync(Enumerable.Range(0, auth0Users.Count), parallelOptions, async (index, ct) =>
+				{
+					var user = auth0Users[index];
 					var rolesPager = await client.Users.Roles.ListAsync(
-					user.UserId ?? string.Empty, new ListUserRolesRequestParameters(), cancellationToken: cancellationToken).ConfigureAwait(false);
+					user.UserId ?? string.Empty, new ListUserRolesRequestParameters(), cancellationToken: ct).ConfigureAwait(false);
 					var roles = new List<string>();
 					await foreach (var role in rolesPager.ConfigureAwait(false))
 					{
 						roles.Add(role.Name ?? string.Empty);
 					}
-					result.Add(new UserWithRolesDto(
+					result[index] = new UserWithRolesDto(
 					user.UserId ?? string.Empty,
 					user.Email ?? string.Empty,
 					user.Name ?? user.Email ?? string.Empty,
-					roles));
-				}
+					roles);
+				}).ConfigureAwait(false);
 				return result;
 			}, cancellationToken).ConfigureAwait(false);
 			return Result.Ok(users);
@@ -177,5 +198,13 @@ IRequestHandler<GetAvailableRolesQuery, Result<IReadOnlyList<RoleDto>>>
 			return Result.Fail<IReadOnlyList<RoleDto>>("An unexpected error occurred.");
 		}
 #pragma warning restore CA1031
+	}
+
+	private int GetRolesFetchConcurrency()
+	{
+		var configured = configuration?["Auth0:Management:RolesFetchConcurrency"];
+		return int.TryParse(configured, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value > 0
+			? value
+			: DefaultRolesFetchConcurrency;
 	}
 }
