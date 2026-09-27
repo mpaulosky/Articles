@@ -1,88 +1,76 @@
-# Contributing to Squad Workflow Standard
+# Contributing to Articles
 
-Thank you for your interest in contributing to this repository. This project is a
-workflow-standard distribution repo, so most changes affect canonical assets,
-validation scripts, or the C# CLI that syncs those assets into downstream repos.
+Thank you for your interest in contributing. Articles is a .NET 10 Blazor web
+application, orchestrated with .NET Aspire, that lets authors create, edit, and
+publish articles. This guide covers how to set up the repo, where things live,
+and how a change travels from an issue to `main`.
 
 ## Initial setup
 
-### 1. Clone and restore
+### 1. Prerequisites
+
+- .NET 10 SDK (the exact version is pinned in [global.json](../global.json))
+- `git` and the GitHub CLI (`gh`)
+- Docker, for the integration and E2E tests (TestContainers) and for running the
+  AppHost
+- Node.js with `npx`, for Markdown lint
+- Optional: `yamllint` (the pre-push hook falls back to Docker when it's missing)
+
+### 2. Clone, restore, and enable the hooks
 
 ```bash
 git clone https://github.com/mpaulosky/Articles.git
 cd Articles
+git config core.hooksPath .github/hooks
 dotnet restore Articles.slnx
 ```
 
-### 2. Prerequisites
+After the first checkout, the `post-checkout` hook keeps `core.hooksPath` set
+and makes sure the hooks are executable.
 
-- .NET 10 SDK
-- A working `git` installation
-- Optional but recommended: `yamllint` and `npx` for local lint checks
+### 3. Run the app
 
-## What the local pre-push gate does
-
-The repository’s pre-push hook runs before `git push` and currently enforces:
-
-- branch naming validation,
-- YAML lint for changed workflow files,
-- Markdown lint for changed Markdown files,
-- tests for every `.slnx` solution discovered recursively under the repository
-  root.
-
-Tag-only pushes skip these gates. The hook also reports the specific solution
-when a solution's tests fail.
-
-It does not currently run `dotnet format` or an explicit Release build step.
-
-## Branch naming
-
-Work should be done on a branch that matches one of these patterns:
+Always start the app through the Aspire AppHost. The Web project doesn't serve
+correctly on its own because the AppHost provides its dependencies.
 
 ```bash
-git checkout -b squad/42-fix-login-validation
-git checkout -b sprint/3-release-automation
-git checkout -b chore/update-documentation
+dotnet run --project src/AppHost
 ```
 
-The hook rejects pushes from `main`, `preview`, `dev`, and from branches that do
-not match `squad/{issue-number}-{kebab-slug}`, `sprint/{n}-{kebab-slug}`,
-`hotfix/{kebab-slug}`, or `chore/{kebab-slug}`.
+## Repository layout
 
-## Local validation commands
+| Path | Contents |
+| ---- | -------- |
+| [src/AppHost](../src/AppHost) | .NET Aspire orchestration: the entry point for running the app |
+| [src/Web](../src/Web) | Blazor web application |
+| [src/Domain](../src/Domain) | Domain model and business rules |
+| [src/ServiceDefaults](../src/ServiceDefaults) | Shared Aspire service defaults (telemetry, health checks, resilience) |
+| [tests](../tests) | Test projects: `AppHost`, `Architecture`, `Domain`, `Web` (unit), `Web.UI` (bUnit), `Web.Integration`, and `Web.E2E` (Playwright) |
+| [testutils/Web.TestData](../testutils/Web.TestData) | Shared test data used across test projects ([ADR 0002](adr/0002-shared-test-data-outside-tests-folder.md)) |
+| [CONTEXT.md](../CONTEXT.md) | Domain glossary: the shared vocabulary for the project |
+| [docs/adr](adr) | Architecture decision records |
+| [.github/instructions](../.github/instructions) | Coding, commit, and documentation conventions |
+| [.github/hooks](../.github/hooks) | Local git hooks (`pre-commit`, `pre-push`, `post-checkout`) |
+| [.github/workflows](../.github/workflows) | CI, lint, triage, auto-merge, and release automation |
 
-Run these before pushing:
+## How a change gets to `main`
 
-```bash
-# Build the solution
-DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet build Articles.slnx \
-  --configuration Release
+### 1. Start from an issue
 
-# Run the tests
-DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet test Articles.slnx
+Work is tracked in [GitHub Issues](https://github.com/mpaulosky/Articles/issues).
+Open or pick an issue before starting. Triage uses these labels:
 
-# Lint Markdown files
-npx --yes markdownlint-cli2 "**/*.md"
-```
+- `needs-triage`: a maintainer needs to evaluate it
+- `needs-info`: waiting on the reporter
+- `ready-for-agent`: fully specified and ready for an AFK agent
+- `ready-for-human`: needs a human to implement it
+- `wontfix`: will not be actioned
 
-If you changed workflow YAML, run `yamllint` locally when available.
+If a change introduces or renames a domain concept, update
+[CONTEXT.md](../CONTEXT.md). If it makes a significant architectural decision,
+record it as a new ADR in [docs/adr](adr).
 
-## Development workflow
-
-### Working on canonical assets
-
-Most repository changes land in one of these areas:
-
-- [.github/workflows](../.github/workflows) for canonical workflow YAML
-- [.github/hooks](../.github/hooks) for canonical hook scripts
-- [source/.squad/workflows](../source/.squad/workflows) for policy and manifests
-- [scripts/squad](../scripts/squad) for sync and validation scripts
-- [src/GitGhStandardCli](../src/GitGhStandardCli) for the C# sync/check CLI
-- [tests/AppHost.Tests](../tests/AppHost.Tests) for regression and contract tests
-
-### Creating a branch
-
-Start from `main` and create a branch with a descriptive issue number and slug:
+### 2. Branch from an up-to-date `main`
 
 ```bash
 git checkout main
@@ -90,50 +78,130 @@ git pull origin main
 git checkout -b squad/42-fix-login-validation
 ```
 
-### Pushing your work
+The pre-push hook rejects pushes from `main`, `preview`, and `dev`, and from
+any branch that doesn't match one of these patterns:
 
-Before pushing:
+| Pattern | Use for |
+| ------- | ------- |
+| `squad/{issue-number}-{kebab-slug}` | Work tied to an issue (the default) |
+| `sprint/{n}-{kebab-slug}` | Sprint-scoped work |
+| `hotfix/{kebab-slug}` | Urgent fixes |
+| `chore/{kebab-slug}` | Maintenance, docs, and tooling changes |
 
-1. Verify your branch name.
-2. Run the local validation commands above.
-3. If everything passes, push normally:
+### 3. Make the change, test-first
+
+- Write or update tests alongside every behaviour change, ideally first.
+- Place tests in a folder structure that mirrors the source project, so it's
+  obvious what each test covers. A test for `src/<Project>/<path>/Foo.cs`
+  goes in `tests/<Project>.Tests/<path>/FooTests.cs`.
+- Use xUnit v3 for tests, bUnit for Blazor components, TestContainers for
+  integration tests, and Playwright for end-to-end tests.
+- Follow the conventions in [.github/instructions](../.github/instructions) and
+  the repo's [.editorconfig](../.editorconfig).
+
+### 4. Validate locally
 
 ```bash
-git push
+# Build
+dotnet build Articles.slnx --configuration Release
+
+# Test each project (running against the .slnx can report "zero tests ran"
+# under Microsoft Testing Platform, so the hook runs per project)
+for p in tests/*/*.csproj; do dotnet test "$p" --configuration Release; done
+
+# Lint Markdown
+npx --yes markdownlint-cli2 "**/*.md"
+
+# Lint YAML (if you changed workflows)
+yamllint -c .yamllint.yml .github/workflows
 ```
 
-If the hook reports an issue, fix it and try again.
+### 5. Commit
 
-## Pull requests
+Commit messages follow Conventional Commits, as described in
+[git-commit-instructions.md](../.github/instructions/git-commit-instructions.md):
 
-Create a pull request from your `squad/*`, `sprint/*`, `chore/*`, or
-`hotfix/*` branch to `main`. This repo does not use `dev`/`preview` staging
-branches — work branches PR directly to `main`.
+```text
+<type>(<scope>): <short imperative summary>
+```
 
-A good PR description should include:
+Types include `feat`, `fix`, `docs`, `test`, `refactor`, `build`, `ci`, and
+`chore`. The scope is the affected project or area, such as `Web`, `Domain`, or
+`docs`. The `pre-commit` hook lints any staged Markdown files.
+
+### 6. Push once and open a PR to `main`
+
+```bash
+git push -u origin squad/42-fix-login-validation
+gh pr create --base main
+```
+
+On push, the `pre-push` hook runs these gates:
+
+- branch-name validation,
+- YAML lint on changed `.yml`/`.yaml` files,
+- Markdown lint on changed `.md` files,
+- `dotnet test` for every test project under `tests/`.
+
+Tag-only pushes skip the gates. Avoid `git push --no-verify`. Fix the reported
+problem instead.
+
+This repo has no `dev` or `preview` staging branch: every PR targets `main`
+directly. A good PR description covers:
 
 - what changed,
 - why it changed,
-- any validation that was run.
+- what validation was run.
 
-## Bypassing the hook
+### 7. CI, auto-merge, and the release blog
 
-Bypassing the pre-push hook with `git push --no-verify` is discouraged and should
-only be used for a specific, well-understood reason. Prefer running the local
-validation commands first.
+- **CI** ([squad-ci.yml](../.github/workflows/squad-ci.yml)) builds the
+  solution, runs every test project, and reports coverage. The coverage target
+  is at least 80% line coverage.
+- **Auto-merge** ([squad-pr-automerge.yml](../.github/workflows/squad-pr-automerge.yml))
+  enables squash auto-merge on same-repo PRs, so a PR merges as soon as its
+  checks pass. Once your branch is pushed, don't keep committing to it. Put
+  follow-up work on a new branch from `main` after the PR merges, or the
+  branch can silently diverge from `main`.
+- **Release blog**: after a PR merges, automation opens a follow-up
+  `docs: add release blog for PR #N [skip-release]` PR that adds a post under
+  [docs/blogs](blogs). `main` isn't fully caught up until that PR has merged
+  too.
+
+### 8. Clean up
+
+After both PRs have merged:
+
+```bash
+git checkout main
+git pull origin main
+git branch -d squad/42-fix-login-validation
+```
+
+Stale branches and worktrees can be pruned with
+[scripts/squad/cleanup-squad-branches.sh](../scripts/squad/cleanup-squad-branches.sh).
+The same cleanup also runs nightly in CI.
 
 ## Code standards
 
-- Keep changes focused and easy to review.
-- Prefer small, explicit updates to canonical assets and scripts.
-- Add or update tests when changing CLI behavior or sync logic.
-- Follow standard .NET naming conventions and keep C# code readable.
+- Keep changes focused and easy to review. Prefer several small PRs to one
+  large one.
+- Use the terms from [CONTEXT.md](../CONTEXT.md) in code and docs.
+- Follow standard .NET naming conventions and keep C# readable.
+- Add or update tests with every behaviour change.
+- Manage package versions centrally in
+  [Directory.Packages.props](../Directory.Packages.props). Don't put versions in
+  individual `.csproj` files.
 
 ## Resources
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — high-level project structure and design goals
-- [README.md](../README.md) — repository purpose and sync model
+- [README.md](../README.md): project purpose and overview
+- [CONTEXT.md](../CONTEXT.md): domain glossary
+- [docs/adr](adr): architecture decision records
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [SECURITY.md](SECURITY.md)
 
 ## Questions?
 
-Open an issue or reach out to [@mpaulosky](https://github.com/mpaulosky/Articles).
+Open an [issue](https://github.com/mpaulosky/Articles/issues) or reach out to
+[@mpaulosky](https://github.com/mpaulosky).
