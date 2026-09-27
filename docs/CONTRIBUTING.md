@@ -74,9 +74,19 @@ record it as a new ADR in [docs/adr](adr).
 
 Create each new branch in its own
 [git worktree](https://git-scm.com/docs/git-worktree), branched from the latest
-`origin/main`, instead of switching branches in your main checkout:
+`origin/main`, instead of switching branches in your main checkout.
+
+First make sure `main` has settled. If a PR merged recently, the release
+workflow may still be running or may have opened a
+`docs: add release blog for PR #N [skip-release]` PR. Branching before that PR
+merges leaves your branch behind `main`, and your PR will need
+**Update branch** before it can merge. Wait until the release run has finished
+and no release-blog PR is open, then pull:
 
 ```bash
+gh run list --workflow squad-release.yml --limit 1   # wait until completed
+gh pr list --state open --search "add release blog in:title"   # wait until empty
+git pull origin main
 git fetch origin
 git worktree add ../Articles-worktrees/squad-42-fix-login-validation \
   -b squad/42-fix-login-validation origin/main
