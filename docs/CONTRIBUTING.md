@@ -70,13 +70,32 @@ If a change introduces or renames a domain concept, update
 [CONTEXT.md](../CONTEXT.md). If it makes a significant architectural decision,
 record it as a new ADR in [docs/adr](adr).
 
-### 2. Branch from an up-to-date `main`
+### 2. Create a worktree for the branch
+
+Create each new branch in its own
+[git worktree](https://git-scm.com/docs/git-worktree), branched from the latest
+`origin/main`, instead of switching branches in your main checkout:
 
 ```bash
-git checkout main
-git pull origin main
-git checkout -b squad/42-fix-login-validation
+git fetch origin
+git worktree add ../Articles-worktrees/squad-42-fix-login-validation \
+  -b squad/42-fix-login-validation origin/main
+cd ../Articles-worktrees/squad-42-fix-login-validation
+dotnet restore Articles.slnx
 ```
+
+Your main checkout stays on `main`. While one PR is going through CI,
+auto-merge, and its release-blog PR, you can start the next change in another
+worktree without waiting for it to merge.
+
+- Keep worktrees in the sibling `../Articles-worktrees/` folder, named after the
+  branch with `/` replaced by `-`. Worktrees inside the repo would be picked up
+  by `markdownlint "**/*.md"`, builds, and IDE indexing.
+- Each worktree has its own `bin/` and `obj/` folders, so run `dotnet restore`
+  in each new one.
+- The git hooks apply in every worktree, because `core.hooksPath` is a relative
+  path.
+- List your worktrees with `git worktree list`.
 
 The pre-push hook rejects pushes from `main`, `preview`, and `dev`, and from
 any branch that doesn't match one of these patterns:
@@ -139,9 +158,12 @@ prints a warning and skips the check, so run the `npx` command from step 4 yours
 ### 6. Push once and open a PR to `main`
 
 ```bash
-git push -u origin squad/42-fix-login-validation
+git push -u origin HEAD
 gh pr create --base main
 ```
+
+Use `git push -u origin HEAD` rather than a plain `git push`. A branch created
+from `origin/main` tracks `origin/main` until you set its own upstream.
 
 On push, the `pre-push` hook runs these gates:
 
@@ -167,9 +189,11 @@ directly. A good PR description covers:
   is at least 80% line coverage.
 - **Auto-merge** ([squad-pr-automerge.yml](../.github/workflows/squad-pr-automerge.yml))
   enables squash auto-merge on same-repo PRs, so a PR merges as soon as its
-  checks pass. Once your branch is pushed, don't keep committing to it. Put
-  follow-up work on a new branch from `main` after the PR merges, or the
-  branch can silently diverge from `main`.
+  checks pass. If the workflow hasn't enabled it (check with
+  `gh pr view --json autoMergeRequest`), turn it on with
+  `gh pr merge --auto --squash`. Once your branch is pushed, only commit to it
+  to address review feedback. Put follow-up work in a new worktree branched
+  from `origin/main`, or the branch can silently diverge from `main`.
 - **Release blog**: when a release-eligible PR merges, the release workflow
   ([squad-release.yml](../.github/workflows/squad-release.yml)) publishes a
   release. If that produces changes under [docs/blogs](blogs) or the READMEs,
@@ -180,13 +204,20 @@ directly. A good PR description covers:
 
 ### 8. Clean up
 
-After your PR has merged (and its release-blog PR too, if one was opened):
+After your PR has merged, remove its worktree and branch, then update `main`.
+Run this from your main checkout, not from inside the worktree:
 
 ```bash
-git checkout main
+git worktree remove ../Articles-worktrees/squad-42-fix-login-validation
+git branch -D squad/42-fix-login-validation
 git pull origin main
-git branch -d squad/42-fix-login-validation
 ```
+
+PRs are squash-merged, so the branch's own commits never land on `main`, and
+`git branch -d` refuses to delete it. Use `-D` only after confirming the PR
+shows as merged (`gh pr view <n> --json state`). The remote branch is deleted
+automatically on merge. If a release-blog PR was opened, `main` isn't fully up
+to date until you pull again after that PR merges.
 
 Stale branches and worktrees can be pruned with
 [scripts/squad/cleanup-squad-branches.sh](../scripts/squad/cleanup-squad-branches.sh).

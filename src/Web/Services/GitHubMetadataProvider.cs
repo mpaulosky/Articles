@@ -183,7 +183,9 @@ public static class GitHubMetadataProvider
 		var current = new DirectoryInfo(directory);
 		while (current is not null)
 		{
-			if (Directory.Exists(Path.Combine(current.FullName, ".git")))
+			// .git is a directory in a normal clone and a file in a linked worktree.
+			var gitPath = Path.Combine(current.FullName, ".git");
+			if (Directory.Exists(gitPath) || File.Exists(gitPath))
 			{
 				return current.FullName;
 			}
