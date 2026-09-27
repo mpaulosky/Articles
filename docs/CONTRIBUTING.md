@@ -180,7 +180,7 @@ directly. A good PR description covers:
 
 ### 8. Clean up
 
-After both PRs have merged:
+After your PR has merged (and its release-blog PR too, if one was opened):
 
 ```bash
 git checkout main
