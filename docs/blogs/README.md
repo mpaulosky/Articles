@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-27 | [test(Web): Cover git root discovery from a linked worktree](2026-09-27-pr-228-test-web-cover-git-root-discovery-from-a-linked-worktree.md) | release,automation |
 | 2026-09-27 | [docs: Document the worktree-per-branch workflow](2026-09-27-pr-226-docs-document-the-worktree-per-branch-workflow.md) | release,automation |
 | 2026-09-27 | [docs: Rewrite CONTRIBUTING guide for the Articles repo](2026-09-27-pr-224-docs-rewrite-contributing-guide-for-the-articles-repo.md) | release,automation |
 | 2026-09-27 | [chore: move Web InternalsVisibleTo items out of build-info target](2026-09-27-pr-222-chore-move-web-internalsvisibleto-items-out-of-build-info-target.md) | release,automation |
