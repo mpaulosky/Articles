@@ -112,8 +112,13 @@ for p in tests/*/*.csproj; do dotnet test "$p" --configuration Release; done
 # Lint Markdown
 npx --yes markdownlint-cli2 "**/*.md"
 
-# Lint YAML (if you changed workflows)
-yamllint -c .yamllint.yml .github/workflows
+# Lint YAML (if you changed workflows); uses Docker when yamllint isn't installed
+if command -v yamllint >/dev/null; then
+  yamllint -c .yamllint.yml .github/workflows
+else
+  docker run --rm -v "$PWD:/work" -w /work cytopia/yamllint:latest \
+    -c .yamllint.yml .github/workflows
+fi
 ```
 
 ### 5. Commit
@@ -127,7 +132,9 @@ Commit messages follow Conventional Commits, as described in
 
 Types include `feat`, `fix`, `docs`, `test`, `refactor`, `build`, `ci`, and
 `chore`. The scope is the affected project or area, such as `Web`, `Domain`, or
-`docs`. The `pre-commit` hook lints any staged Markdown files.
+`docs`. The `pre-commit` hook lints staged Markdown files only when it finds a
+`markdownlint` binary (installed globally or in `node_modules`). Otherwise it
+prints a warning and skips the check, so run the `npx` command from step 4 yourself.
 
 ### 6. Push once and open a PR to `main`
 
@@ -163,10 +170,13 @@ directly. A good PR description covers:
   checks pass. Once your branch is pushed, don't keep committing to it. Put
   follow-up work on a new branch from `main` after the PR merges, or the
   branch can silently diverge from `main`.
-- **Release blog**: after a PR merges, automation opens a follow-up
-  `docs: add release blog for PR #N [skip-release]` PR that adds a post under
-  [docs/blogs](blogs). `main` isn't fully caught up until that PR has merged
-  too.
+- **Release blog**: when a release-eligible PR merges, the release workflow
+  ([squad-release.yml](../.github/workflows/squad-release.yml)) publishes a
+  release. If that produces changes under [docs/blogs](blogs) or the READMEs,
+  it opens a follow-up `docs: add release blog for PR #N [skip-release]` PR.
+  PRs with `[skip-release]` in the title (including the blog PRs themselves)
+  don't trigger a release. When a blog PR is opened, `main` isn't fully caught
+  up until it has merged too.
 
 ### 8. Clean up
 
