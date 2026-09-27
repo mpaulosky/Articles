@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-27 | [chore(deps): bump github/codeql-action from 4.38.0 to 4.38.2 in the all-actions group](2026-09-27-pr-220-chore-deps-bump-github-codeql-action-from-4-38-0-to-4-38-2-in-the-all-actions-group.md) | release,automation |
 | 2026-09-14 | [Rename squad-lint workflows to drop squad- prefix](2026-09-14-pr-218-rename-squad-lint-workflows-to-drop-squad-prefix.md) | release,automation |
 | 2026-09-14 | [Bump outdated CodeQL and yamllint action pins](2026-09-14-pr-216-bump-outdated-codeql-and-yamllint-action-pins.md) | release,automation |
 | 2026-09-08 | [chore(deps): bump github/codeql-action from 4.37.7 to 4.37.9 in the all-actions group](2026-09-08-pr-213-chore-deps-bump-github-codeql-action-from-4-37-7-to-4-37-9-in-the-all-actions-group.md) | release,automation |
