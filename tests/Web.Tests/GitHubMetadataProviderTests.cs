@@ -130,6 +130,92 @@ public class GitHubMetadataProviderTests
 	}
 
 	[Fact]
+	public async Task GetMetadataAsync_FromLinkedWorktree_UsesWorktreeRepositoryOrigin()
+	{
+		// Arrange
+		var tempRoot = Path.Combine(Path.GetTempPath(), $"git-metadata-provider-worktree-{Guid.NewGuid():N}");
+		var mainRepo = Path.Combine(tempRoot, "main");
+		var worktree = Path.Combine(tempRoot, "worktree");
+		Directory.CreateDirectory(mainRepo);
+		try
+		{
+			RunGit(mainRepo, "init");
+			RunGit(mainRepo, "remote", "add", "origin", "https://github.com/worktree-owner/worktree-repo.git");
+			RunGit(mainRepo, "config", "user.name", "Test User");
+			RunGit(mainRepo, "config", "user.email", "test@example.com");
+			File.WriteAllText(Path.Combine(mainRepo, "README.md"), "test");
+			RunGit(mainRepo, "add", "README.md");
+			RunGit(mainRepo, "commit", "-m", "initial commit");
+			RunGit(mainRepo, "worktree", "add", worktree, "-b", "feature");
+
+			// A linked worktree has a .git file, not a .git directory.
+			File.Exists(Path.Combine(worktree, ".git")).Should().BeTrue();
+
+			// Both variables short-circuit git discovery; GitHub Actions sets GITHUB_REPOSITORY in CI.
+			var originalCurrentDirectory = Environment.CurrentDirectory;
+			var originalRepositoryUrl = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY_URL");
+			var originalRepository = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
+			Environment.CurrentDirectory = worktree;
+			Environment.SetEnvironmentVariable("GITHUB_REPOSITORY_URL", null);
+			Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
+
+			using var httpClient = new HttpClient(new StubHttpMessageHandler(request =>
+			{
+				var url = request.RequestUri?.AbsoluteUri ?? string.Empty;
+				if (!url.Contains("/repos/worktree-owner/worktree-repo", StringComparison.OrdinalIgnoreCase))
+				{
+					return new HttpResponseMessage(HttpStatusCode.NotFound);
+				}
+
+				if (url.Contains("/releases/latest", StringComparison.OrdinalIgnoreCase))
+				{
+					return new HttpResponseMessage(HttpStatusCode.OK)
+					{
+						Content = new StringContent("{\"tag_name\":\"v9.9.9\"}", Encoding.UTF8, "application/json")
+					};
+				}
+
+				if (url.Contains("/commits/", StringComparison.OrdinalIgnoreCase))
+				{
+					return new HttpResponseMessage(HttpStatusCode.OK)
+					{
+						Content = new StringContent("{\"sha\":\"abcdef1234567890\"}", Encoding.UTF8, "application/json")
+					};
+				}
+
+				return new HttpResponseMessage(HttpStatusCode.OK)
+				{
+					Content = new StringContent("{\"default_branch\":\"main\"}", Encoding.UTF8, "application/json")
+				};
+			}));
+
+			try
+			{
+				// Act
+				var metadata = await GitHubMetadataProvider.GetMetadataAsync(httpClient, CancellationToken.None);
+
+				// Assert
+				metadata.Should().NotBeNull();
+				metadata!.ReleaseTag.Should().Be("v9.9.9");
+				metadata.LastCommit.Should().Be("abcdef1");
+			}
+			finally
+			{
+				Environment.CurrentDirectory = originalCurrentDirectory;
+				Environment.SetEnvironmentVariable("GITHUB_REPOSITORY_URL", originalRepositoryUrl);
+				Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", originalRepository);
+			}
+		}
+		finally
+		{
+			if (Directory.Exists(tempRoot))
+			{
+				Directory.Delete(tempRoot, recursive: true);
+			}
+		}
+	}
+
+	[Fact]
 	public void TryParseGitHubRepository_RejectsNonGitHubRemotes()
 	{
 		// Arrange
