@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-27 | [docs: Document the worktree-per-branch workflow](2026-09-27-pr-226-docs-document-the-worktree-per-branch-workflow.md) | release,automation |
 | 2026-09-27 | [docs: Rewrite CONTRIBUTING guide for the Articles repo](2026-09-27-pr-224-docs-rewrite-contributing-guide-for-the-articles-repo.md) | release,automation |
 | 2026-09-27 | [chore: move Web InternalsVisibleTo items out of build-info target](2026-09-27-pr-222-chore-move-web-internalsvisibleto-items-out-of-build-info-target.md) | release,automation |
 | 2026-09-27 | [chore(deps): bump github/codeql-action from 4.38.0 to 4.38.2 in the all-actions group](2026-09-27-pr-220-chore-deps-bump-github-codeql-action-from-4-38-0-to-4-38-2-in-the-all-actions-group.md) | release,automation |
