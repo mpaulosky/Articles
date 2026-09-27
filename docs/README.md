@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-27 | [docs: Wait for main to settle before creating a worktree](docs/blogs/2026-09-27-pr-230-docs-wait-for-main-to-settle-before-creating-a-worktree.md) | release,automation |
 | 2026-09-27 | [test(Web): Cover git root discovery from a linked worktree](docs/blogs/2026-09-27-pr-228-test-web-cover-git-root-discovery-from-a-linked-worktree.md) | release,automation |
 | 2026-09-27 | [docs: Document the worktree-per-branch workflow](docs/blogs/2026-09-27-pr-226-docs-document-the-worktree-per-branch-workflow.md) | release,automation |
 | 2026-09-27 | [docs: Rewrite CONTRIBUTING guide for the Articles repo](docs/blogs/2026-09-27-pr-224-docs-rewrite-contributing-guide-for-the-articles-repo.md) | release,automation |
 | 2026-09-27 | [chore: move Web InternalsVisibleTo items out of build-info target](docs/blogs/2026-09-27-pr-222-chore-move-web-internalsvisibleto-items-out-of-build-info-target.md) | release,automation |
-| 2026-09-27 | [chore(deps): bump github/codeql-action from 4.38.0 to 4.38.2 in the all-actions group](docs/blogs/2026-09-27-pr-220-chore-deps-bump-github-codeql-action-from-4-38-0-to-4-38-2-in-the-all-actions-group.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-27 | [docs: Wait for main to settle before creating a worktree](docs/blogs/2026-09-27-pr-230-docs-wait-for-main-to-settle-before-creating-a-worktree.md) | release,automation |
 | 2026-09-27 | [test(Web): Cover git root discovery from a linked worktree](docs/blogs/2026-09-27-pr-228-test-web-cover-git-root-discovery-from-a-linked-worktree.md) | release,automation |
 | 2026-09-27 | [docs: Document the worktree-per-branch workflow](docs/blogs/2026-09-27-pr-226-docs-document-the-worktree-per-branch-workflow.md) | release,automation |
 | 2026-09-27 | [docs: Rewrite CONTRIBUTING guide for the Articles repo](docs/blogs/2026-09-27-pr-224-docs-rewrite-contributing-guide-for-the-articles-repo.md) | release,automation |
 | 2026-09-27 | [chore: move Web InternalsVisibleTo items out of build-info target](docs/blogs/2026-09-27-pr-222-chore-move-web-internalsvisibleto-items-out-of-build-info-target.md) | release,automation |
-| 2026-09-27 | [chore(deps): bump github/codeql-action from 4.38.0 to 4.38.2 in the all-actions group](docs/blogs/2026-09-27-pr-220-chore-deps-bump-github-codeql-action-from-4-38-0-to-4-38-2-in-the-all-actions-group.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
