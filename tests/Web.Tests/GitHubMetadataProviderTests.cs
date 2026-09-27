@@ -151,12 +151,14 @@ public class GitHubMetadataProviderTests
 			// A linked worktree has a .git file, not a .git directory.
 			File.Exists(Path.Combine(worktree, ".git")).Should().BeTrue();
 
-			// Both variables short-circuit git discovery; GitHub Actions sets GITHUB_REPOSITORY in CI.
+			// All three variables short-circuit git discovery; GitHub Actions sets GITHUB_REPOSITORY in CI.
 			var originalCurrentDirectory = Environment.CurrentDirectory;
 			var originalRepositoryUrl = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY_URL");
+			var originalPlainRepositoryUrl = Environment.GetEnvironmentVariable("REPOSITORY_URL");
 			var originalRepository = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
 			Environment.CurrentDirectory = worktree;
 			Environment.SetEnvironmentVariable("GITHUB_REPOSITORY_URL", null);
+			Environment.SetEnvironmentVariable("REPOSITORY_URL", null);
 			Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
 
 			using var httpClient = new HttpClient(new StubHttpMessageHandler(request =>
@@ -203,6 +205,7 @@ public class GitHubMetadataProviderTests
 			{
 				Environment.CurrentDirectory = originalCurrentDirectory;
 				Environment.SetEnvironmentVariable("GITHUB_REPOSITORY_URL", originalRepositoryUrl);
+				Environment.SetEnvironmentVariable("REPOSITORY_URL", originalPlainRepositoryUrl);
 				Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", originalRepository);
 			}
 		}
