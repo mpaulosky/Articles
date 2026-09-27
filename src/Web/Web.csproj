@@ -33,6 +33,17 @@
 		<PackageReference Include="WaffleGenerator.Bogus" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="AppHost.Tests" />
+		<InternalsVisibleTo Include="Architecture.Tests" />
+		<InternalsVisibleTo Include="Domain.Tests" />
+		<InternalsVisibleTo Include="Web.Tests" />
+		<InternalsVisibleTo Include="Web.UI.Tests" />
+		<InternalsVisibleTo Include="Web.E2E.Tests" />
+		<InternalsVisibleTo Include="Web.Integration.Tests" />
+		<InternalsVisibleTo Include="Web.TestData" />
+	</ItemGroup>
+
 	<!--
 		Generate BuildInfo.g.cs at build time with the git tag and short commit hash.
 		FooterComponent reads BuildInfo.Version and BuildInfo.Commit at runtime.
@@ -70,17 +81,6 @@
 			<_BuildInfoLine Include="    internal const string Version = &quot;$(_GitTag)&quot;%3B" />
 			<_BuildInfoLine Include="    internal const string Commit = &quot;$(_GitCommit)&quot;%3B" />
 			<_BuildInfoLine Include="}" />
-		</ItemGroup>
-
-		<ItemGroup>
-			<InternalsVisibleTo Include="AppHost.Tests" />
-			<InternalsVisibleTo Include="Architecture.Tests" />
-			<InternalsVisibleTo Include="Domain.Tests" />
-			<InternalsVisibleTo Include="Web.Tests" />
-			<InternalsVisibleTo Include="Web.UI.Tests" />
-			<InternalsVisibleTo Include="Web.E2E.Tests" />
-			<InternalsVisibleTo Include="Web.Integration.Tests" />
-			<InternalsVisibleTo Include="Web.TestData" />
 		</ItemGroup>
 
 		<WriteLinesToFile File="$(IntermediateOutputPath)BuildInfo.g.cs" Lines="@(_BuildInfoLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
