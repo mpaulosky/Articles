@@ -212,7 +212,9 @@ directly. A good PR description covers:
   it opens a follow-up `docs: add release blog for PR #N [skip-release]` PR.
   PRs with `[skip-release]` in the title (including the blog PRs themselves)
   don't trigger a release. When a blog PR is opened, `main` isn't fully caught
-  up until it has merged too.
+  up until it has merged too. If generating the blog fails, the release is
+  still published, and the workflow opens (or comments on) a **Release docs
+  generation is failing** issue.
 
 ### 8. Clean up
 
