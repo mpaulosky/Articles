@@ -2,7 +2,9 @@
 # yamllint disable rule:line-length
 name: Squad PR Auto-Label
 
-"on":
+# pull_request_target (flagged by zizmor) is safe here: the job never checks
+# out PR code, it only reads the PR and sets labels through the API.
+"on":  # zizmor: ignore[dangerous-triggers]
   pull_request_target:
     types: [opened, reopened, synchronize]
 
@@ -15,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Auto-label PR for squad system
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const pr = context.payload.pull_request;

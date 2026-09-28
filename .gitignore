@@ -50,6 +50,9 @@ Generated\ Files/
 # NUnit
 *.VisualState.xml
 TestResult.xml
+
+# Test results the pre-push gate (scripts/gate.sh) writes
+.tmp-test-results/
 nunit-*.xml
 
 # Build Results of an ATL Project
