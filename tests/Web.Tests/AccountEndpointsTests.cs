@@ -9,10 +9,17 @@
 
 using System.Net;
 
+using Auth0.AspNetCore.Authentication;
+
 using FluentAssertions;
 
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Web.Tests;
 
@@ -99,7 +106,19 @@ public class AccountEndpointsTests
 			.UseContentRoot(GetWebProjectContentRoot())
 			.UseSetting("Auth0:Domain", domain)
 			.UseSetting("Auth0:ClientId", clientId)
-			.UseSetting("Auth0:ClientSecret", clientSecret));
+			.UseSetting("Auth0:ClientSecret", clientSecret)
+			.ConfigureTestServices(services => services.PostConfigure<OpenIdConnectOptions>(
+				Auth0Constants.AuthenticationScheme,
+				// The handler reads the OpenID Connect discovery document through its ConfigurationManager, which
+				// would download it from the (fake) example.auth0.com tenant (#243). A static manager hands it the
+				// document directly, so login and logout build their redirects without any network call.
+				options => options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(
+					new OpenIdConnectConfiguration
+					{
+						Issuer = $"https://{domain}/",
+						AuthorizationEndpoint = $"https://{domain}/authorize",
+						EndSessionEndpoint = $"https://{domain}/oidc/logout"
+					}))));
 	}
 
 	/// <summary>
