@@ -58,10 +58,10 @@ rollout history of workflow-standard and major changes by release.
 | Date | Title | Tags |
 |------|-------|------|
 | 2026-09-28 | [fix(ci): Merge as a user and handle UNSTABLE PRs in auto-merge](docs/blogs/2026-09-28-pr-249-fix-ci-merge-as-a-user-and-handle-unstable-prs-in-auto-merge.md) | release,automation |
+| 2026-09-28 | [fix(ci): Arm auto-merge when a PR opens and gate merges on tests](docs/blogs/2026-09-28-pr-248-fix-ci-arm-auto-merge-when-a-pr-opens-and-gate-merges-on-tests.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Keep squad cleanup going when a local delete is refused](docs/blogs/2026-09-28-pr-245-fix-scripts-keep-squad-cleanup-going-when-a-local-delete-is-refused.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Make squad branch cleanup see remote branches and fail safe](docs/blogs/2026-09-28-pr-238-fix-scripts-make-squad-branch-cleanup-see-remote-branches-and-fail-safe.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Delete squash-merged branches in squad branch cleanup](docs/blogs/2026-09-28-pr-236-fix-scripts-delete-squash-merged-branches-in-squad-branch-cleanup.md) | release,automation |
-| 2026-09-28 | [docs: Attribute remote branch deletion to the repo setting](docs/blogs/2026-09-28-pr-234-docs-attribute-remote-branch-deletion-to-the-repo-setting.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -114,10 +114,10 @@ notes) and then:
 | Date | Title | Tags |
 |------|-------|------|
 | 2026-09-28 | [fix(ci): Merge as a user and handle UNSTABLE PRs in auto-merge](docs/blogs/2026-09-28-pr-249-fix-ci-merge-as-a-user-and-handle-unstable-prs-in-auto-merge.md) | release,automation |
+| 2026-09-28 | [fix(ci): Arm auto-merge when a PR opens and gate merges on tests](docs/blogs/2026-09-28-pr-248-fix-ci-arm-auto-merge-when-a-pr-opens-and-gate-merges-on-tests.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Keep squad cleanup going when a local delete is refused](docs/blogs/2026-09-28-pr-245-fix-scripts-keep-squad-cleanup-going-when-a-local-delete-is-refused.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Make squad branch cleanup see remote branches and fail safe](docs/blogs/2026-09-28-pr-238-fix-scripts-make-squad-branch-cleanup-see-remote-branches-and-fail-safe.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Delete squash-merged branches in squad branch cleanup](docs/blogs/2026-09-28-pr-236-fix-scripts-delete-squash-merged-branches-in-squad-branch-cleanup.md) | release,automation |
-| 2026-09-28 | [docs: Attribute remote branch deletion to the repo setting](docs/blogs/2026-09-28-pr-234-docs-attribute-remote-branch-deletion-to-the-repo-setting.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
