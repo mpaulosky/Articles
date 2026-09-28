@@ -149,12 +149,12 @@ tip_in_merged_pr() {
 
 # Every candidate name, from local branches and from origin. A fresh CI
 # checkout has only main locally, so origin's refs are what it cleans up.
-# HAS_REMOTE holds origin's tip as fetched: remote deletion is leased on it,
-# so a branch someone pushed to after this point is left alone.
+# Both maps hold each branch's tip as first seen. Deletion is conditional on
+# that tip, so a branch that gets new commits while this runs is left alone.
 declare -A HAS_LOCAL=() HAS_REMOTE=()
 while IFS=' ' read -r ref oid; do
 	case "$ref" in
-	refs/heads/*) HAS_LOCAL["${ref#refs/heads/}"]=1 ;;
+	refs/heads/*) HAS_LOCAL["${ref#refs/heads/}"]="$oid" ;;
 	refs/remotes/origin/HEAD) ;;
 	refs/remotes/origin/*) HAS_REMOTE["${ref#refs/remotes/origin/}"]="$oid" ;;
 	esac
@@ -172,7 +172,7 @@ while IFS= read -r branch; do
 
 	# The tips this run could delete: the local branch and/or origin's copy.
 	TIPS=()
-	[[ -n "${HAS_LOCAL[$branch]:-}" ]] && TIPS+=("$(git rev-parse "refs/heads/$branch")")
+	[[ -n "${HAS_LOCAL[$branch]:-}" ]] && TIPS+=("${HAS_LOCAL[$branch]}")
 	[[ -n "${HAS_REMOTE[$branch]:-}" ]] && TIPS+=("${HAS_REMOTE[$branch]}")
 
 	if ! OPEN_PR_COUNT="$(pr_count "$branch" open)" ||
@@ -283,10 +283,19 @@ fi
 echo ""
 echo "Deleting local branches..."
 for branch in "${ELIGIBLE[@]}"; do
-	[[ -n "${HAS_LOCAL[$branch]:-}" ]] || continue
-	DELETE_FLAG="-d"
-	[[ "$FORCE_LOCAL" == "true" || -n "${PR_VERIFIED[$branch]:-}" ]] && DELETE_FLAG="-D"
-	if git branch "$DELETE_FLAG" "$branch" >/dev/null 2>&1; then
+	expected="${HAS_LOCAL[$branch]:-}"
+	[[ -n "$expected" ]] || continue
+	if [[ "$(git rev-parse -q --verify "refs/heads/$branch")" != "$expected" ]]; then
+		echo -e "  ${RED}kept local $branch: it changed since it was checked${RESET}"
+		continue
+	fi
+	if [[ "$FORCE_LOCAL" == "true" || -n "${PR_VERIFIED[$branch]:-}" ]]; then
+		# update-ref with an old value only deletes if the tip is still the one checked.
+		deleted=$(git update-ref -d "refs/heads/$branch" "$expected" 2>/dev/null && echo yes)
+	else
+		deleted=$(git branch -d "$branch" >/dev/null 2>&1 && echo yes)
+	fi
+	if [[ "$deleted" == "yes" ]]; then
 		echo -e "  ${GREEN}deleted local $branch${RESET}"
 	else
 		echo -e "  ${RED}failed to delete local $branch (use --force-local for unmerged branches)${RESET}"

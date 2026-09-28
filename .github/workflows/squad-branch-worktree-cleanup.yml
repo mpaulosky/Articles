@@ -85,8 +85,10 @@ jobs:
                 echo "::error::apply_signal must be APPLY_CLEANUP for --apply."
                 exit 1
               fi
-              # Deleting branches uses main's reviewed copy of this workflow
-              # and script, never a copy dispatched from another branch.
+              # Guards against accidentally applying from a feature branch's
+              # copy. Not a security boundary: a dispatch runs the selected
+              # ref's workflow file, which can drop this check, but anyone who
+              # can push a branch can already delete branches directly.
               if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
                 echo "::error::--apply runs only from main (got $GITHUB_REF). Dry runs work from any branch."
                 exit 1

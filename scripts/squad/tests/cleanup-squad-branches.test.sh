@@ -107,7 +107,8 @@ run() {
 
 remote_has() { git -C "$ORIGIN" rev-parse --verify -q "refs/heads/$1" >/dev/null; }
 remote_lacks() { ! remote_has "$1"; }
-local_lacks() { ! git -C "$CLONE" rev-parse --verify -q "refs/heads/$1" >/dev/null; }
+local_has() { git -C "$CLONE" rev-parse --verify -q "refs/heads/$1" >/dev/null; }
+local_lacks() { ! local_has "$1"; }
 output_has() { [[ "$OUTPUT" == *"$1"* ]]; }
 failed_with() { [[ $STATUS -ne 0 ]] && output_has "$1"; }
 
@@ -234,6 +235,18 @@ git -C "\$other/c" push -q origin chore/merged-remote
 EOF
 run --apply --delete-remote
 check "keeps a remote branch that moved after it was checked" remote_has chore/merged-remote
+
+setup
+push_branch chore/merged-local
+pr chore/merged-local merged
+# The local branch gets a new commit after the script has classified it.
+cat >"$GH_FIXTURES/ON_QUERY" <<EOF
+tree="\$(git -C "$CLONE" rev-parse chore/merged-local^{tree})"
+new="\$(git -C "$CLONE" commit-tree -p chore/merged-local -m "local work mid-run" "\$tree")"
+git -C "$CLONE" update-ref refs/heads/chore/merged-local "\$new"
+EOF
+run --apply
+check "keeps a local branch that moved after it was checked" local_has chore/merged-local
 
 # --- worktrees ----------------------------------------------------------------
 
