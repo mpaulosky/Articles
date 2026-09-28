@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [chore(deps): Fix Dependabot config](2026-09-28-pr-257-chore-deps-fix-dependabot-config.md) | release,automation |
 | 2026-09-28 | [fix(ci): Surface release-docs failures and flag a missing release PAT](2026-09-28-pr-255-fix-ci-surface-release-docs-failures-and-flag-a-missing-release-pat.md) | release,automation |
 | 2026-09-28 | [test(web): Stub the OpenID Connect discovery document in Auth0 tests](2026-09-28-pr-253-test-web-stub-the-openid-connect-discovery-document-in-auth0-tests.md) | release,automation |
 | 2026-09-28 | [fix(ci): Merge as a user and handle UNSTABLE PRs in auto-merge](2026-09-28-pr-249-fix-ci-merge-as-a-user-and-handle-unstable-prs-in-auto-merge.md) | release,automation |
