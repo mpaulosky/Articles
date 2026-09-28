@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [fix(ci): Merge as a user and handle UNSTABLE PRs in auto-merge](2026-09-28-pr-249-fix-ci-merge-as-a-user-and-handle-unstable-prs-in-auto-merge.md) | release,automation |
 | 2026-09-28 | [fix(ci): Arm auto-merge when a PR opens and gate merges on tests](2026-09-28-pr-248-fix-ci-arm-auto-merge-when-a-pr-opens-and-gate-merges-on-tests.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Keep squad cleanup going when a local delete is refused](2026-09-28-pr-245-fix-scripts-keep-squad-cleanup-going-when-a-local-delete-is-refused.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Make squad branch cleanup see remote branches and fail safe](2026-09-28-pr-238-fix-scripts-make-squad-branch-cleanup-see-remote-branches-and-fail-safe.md) | release,automation |
