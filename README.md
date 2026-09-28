@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [fix(scripts): Make squad branch cleanup see remote branches and fail safe](docs/blogs/2026-09-28-pr-238-fix-scripts-make-squad-branch-cleanup-see-remote-branches-and-fail-safe.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Delete squash-merged branches in squad branch cleanup](docs/blogs/2026-09-28-pr-236-fix-scripts-delete-squash-merged-branches-in-squad-branch-cleanup.md) | release,automation |
 | 2026-09-28 | [docs: Attribute remote branch deletion to the repo setting](docs/blogs/2026-09-28-pr-234-docs-attribute-remote-branch-deletion-to-the-repo-setting.md) | release,automation |
 | 2026-09-28 | [test(Web): Clear REPOSITORY_URL in the linked-worktree metadata test](docs/blogs/2026-09-28-pr-232-test-web-clear-repository-url-in-the-linked-worktree-metadata-test.md) | release,automation |
 | 2026-09-27 | [docs: Wait for main to settle before creating a worktree](docs/blogs/2026-09-27-pr-230-docs-wait-for-main-to-settle-before-creating-a-worktree.md) | release,automation |
-| 2026-09-27 | [test(Web): Cover git root discovery from a linked worktree](docs/blogs/2026-09-27-pr-228-test-web-cover-git-root-discovery-from-a-linked-worktree.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [fix(scripts): Make squad branch cleanup see remote branches and fail safe](docs/blogs/2026-09-28-pr-238-fix-scripts-make-squad-branch-cleanup-see-remote-branches-and-fail-safe.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Delete squash-merged branches in squad branch cleanup](docs/blogs/2026-09-28-pr-236-fix-scripts-delete-squash-merged-branches-in-squad-branch-cleanup.md) | release,automation |
 | 2026-09-28 | [docs: Attribute remote branch deletion to the repo setting](docs/blogs/2026-09-28-pr-234-docs-attribute-remote-branch-deletion-to-the-repo-setting.md) | release,automation |
 | 2026-09-28 | [test(Web): Clear REPOSITORY_URL in the linked-worktree metadata test](docs/blogs/2026-09-28-pr-232-test-web-clear-repository-url-in-the-linked-worktree-metadata-test.md) | release,automation |
 | 2026-09-27 | [docs: Wait for main to settle before creating a worktree](docs/blogs/2026-09-27-pr-230-docs-wait-for-main-to-settle-before-creating-a-worktree.md) | release,automation |
-| 2026-09-27 | [test(Web): Cover git root discovery from a linked worktree](docs/blogs/2026-09-27-pr-228-test-web-cover-git-root-discovery-from-a-linked-worktree.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
