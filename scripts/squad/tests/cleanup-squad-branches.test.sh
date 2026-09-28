@@ -134,6 +134,10 @@ setup
 run --orphan-days abc
 check "rejects a non-numeric --orphan-days" failed_with "--orphan-days must be a non-negative integer"
 
+setup
+run --orphan-days 9223372036854775807
+check "rejects an --orphan-days too large to be meaningful" failed_with "--orphan-days must be at most 36500"
+
 # --- remote branches (fresh CI checkout) -------------------------------------
 
 setup

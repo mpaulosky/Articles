@@ -75,8 +75,16 @@ if ! [[ "$ORPHAN_DAYS" =~ ^[0-9]+$ ]]; then
 	echo -e "${RED}❌ --orphan-days must be a non-negative integer (got '$ORPHAN_DAYS').${RESET}" >&2
 	exit 1
 fi
+# Bound it before any arithmetic: a huge value would overflow "* 86400" and
+# could turn negative, making every PR-less branch old enough to delete.
+MAX_ORPHAN_DAYS=36500
+DIGITS="${ORPHAN_DAYS#"${ORPHAN_DAYS%%[!0]*}"}"
+if ((${#DIGITS} > ${#MAX_ORPHAN_DAYS})) || ((10#${DIGITS:-0} > MAX_ORPHAN_DAYS)); then
+	echo -e "${RED}❌ --orphan-days must be at most ${MAX_ORPHAN_DAYS} (got '$ORPHAN_DAYS').${RESET}" >&2
+	exit 1
+fi
 # Force base 10: bash arithmetic would read a leading zero (e.g. 08) as octal.
-ORPHAN_DAYS=$((10#$ORPHAN_DAYS))
+ORPHAN_DAYS=$((10#${DIGITS:-0}))
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
