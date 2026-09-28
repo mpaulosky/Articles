@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [test(Web): Clear REPOSITORY_URL in the linked-worktree metadata test](2026-09-28-pr-232-test-web-clear-repository-url-in-the-linked-worktree-metadata-test.md) | release,automation |
 | 2026-09-27 | [docs: Wait for main to settle before creating a worktree](2026-09-27-pr-230-docs-wait-for-main-to-settle-before-creating-a-worktree.md) | release,automation |
 | 2026-09-27 | [test(Web): Cover git root discovery from a linked worktree](2026-09-27-pr-228-test-web-cover-git-root-discovery-from-a-linked-worktree.md) | release,automation |
 | 2026-09-27 | [docs: Document the worktree-per-branch workflow](2026-09-27-pr-226-docs-document-the-worktree-per-branch-workflow.md) | release,automation |
