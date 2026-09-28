@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [fix(scripts): Keep squad cleanup going when a local delete is refused](2026-09-28-pr-245-fix-scripts-keep-squad-cleanup-going-when-a-local-delete-is-refused.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Make squad branch cleanup see remote branches and fail safe](2026-09-28-pr-238-fix-scripts-make-squad-branch-cleanup-see-remote-branches-and-fail-safe.md) | release,automation |
 | 2026-09-28 | [fix(scripts): Delete squash-merged branches in squad branch cleanup](2026-09-28-pr-236-fix-scripts-delete-squash-merged-branches-in-squad-branch-cleanup.md) | release,automation |
 | 2026-09-28 | [docs: Attribute remote branch deletion to the repo setting](2026-09-28-pr-234-docs-attribute-remote-branch-deletion-to-the-repo-setting.md) | release,automation |
