@@ -198,10 +198,12 @@ directly. A good PR description covers:
   solution, runs every test project, and reports coverage. The coverage target
   is at least 80% line coverage.
 - **Auto-merge** ([squad-pr-automerge.yml](../.github/workflows/squad-pr-automerge.yml))
-  enables squash auto-merge on same-repo PRs, so a PR merges as soon as its
-  checks pass. If the workflow hasn't enabled it (check with
-  `gh pr view --json autoMergeRequest`), turn it on with
-  `gh pr merge --auto --squash`. Once your branch is pushed, only commit to it
+  arms squash auto-merge on same-repo PRs as soon as they open. GitHub then
+  merges the PR once the `main` ruleset's required checks pass: **Build
+  Solution**, **All Tests Passed** and **Analyze (csharp)**. Copilot's review
+  is advisory, so it doesn't hold the merge and may land afterwards. If the
+  workflow hasn't armed it (check with `gh pr view --json autoMergeRequest`),
+  turn it on with `gh pr merge --auto --squash`. Once your branch is pushed, only commit to it
   to address review feedback. Put follow-up work in a new worktree branched
   from `origin/main`, or the branch can silently diverge from `main`.
 - **Release blog**: when a release-eligible PR merges, the release workflow
