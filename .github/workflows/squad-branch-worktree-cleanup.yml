@@ -85,6 +85,12 @@ jobs:
                 echo "::error::apply_signal must be APPLY_CLEANUP for --apply."
                 exit 1
               fi
+              # Deleting branches uses main's reviewed copy of this workflow
+              # and script, never a copy dispatched from another branch.
+              if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+                echo "::error::--apply runs only from main (got $GITHUB_REF). Dry runs work from any branch."
+                exit 1
+              fi
               APPLY_ARGS+=(--apply)
 
               if [[ "${INPUT_DELETE_REMOTE:-true}" == "true" ]]; then
