@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [ci: Lint workflows and shell scripts before push and in CI](2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) | release,automation |
 | 2026-09-28 | [ci: Key the Dependabot secret gate on the dependabot/* branch](2026-09-28-pr-266-ci-key-the-dependabot-secret-gate-on-the-dependabot-branch.md) | release,automation |
 | 2026-09-28 | [ci: Withhold secrets from Dependabot-authored PRs, whoever runs them](2026-09-28-pr-264-ci-withhold-secrets-from-dependabot-authored-prs-whoever-runs-them.md) | release,automation |
 | 2026-09-28 | [ci: Keep credentialed E2E tests off Dependabot PRs](2026-09-28-pr-262-ci-keep-credentialed-e2e-tests-off-dependabot-prs.md) | release,automation |
