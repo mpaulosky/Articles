@@ -21,7 +21,8 @@ Options:
   --delete-remote       Also delete eligible remote branches (requires --apply)
   --orphan-days <n>     Minimum age in days before an unmerged, PR-less branch
                         is treated as orphaned (default: 14)
-  --force-local         Use 'git branch -D' instead of '-d' for local deletion
+  --force-local         Use 'git branch -D' for orphaned branches too (squash-merged
+                        branches verified against their merged PR always use -D)
   --force-worktree      Use 'git worktree remove --force'
   -h, --help            Show this help text
 USAGE
@@ -95,6 +96,24 @@ ORPHAN_SECONDS=$((ORPHAN_DAYS * 86400))
 declare -a MERGED_BRANCHES=()
 declare -a ORPHAN_BRANCHES=()
 declare -a SKIPPED_BRANCHES=()
+# Squash-merged branches whose local tip is fully contained in a merged PR.
+# 'git branch -d' always refuses these, so they are deleted with -D.
+declare -A SQUASH_VERIFIED=()
+
+# Succeeds when the branch's local tip is the head of one of its merged PRs, or
+# an ancestor of one (the PR received more commits than the local copy has).
+# Fails if the local branch has commits that never reached a merged PR.
+local_tip_in_merged_pr() {
+	local branch="$1" tip head status
+	tip="$(git rev-parse "$branch")"
+	while IFS= read -r head; do
+		[[ -z "$head" ]] && continue
+		[[ "$head" == "$tip" ]] && return 0
+		status="$(gh api "repos/$REPO/compare/${tip}...${head}" --jq '.status' 2>/dev/null || echo "")"
+		[[ "$status" == "ahead" || "$status" == "identical" ]] && return 0
+	done < <(gh pr list --repo "$REPO" --head "$branch" --state merged --json headRefOid --jq '.[].headRefOid' 2>/dev/null || true)
+	return 1
+}
 
 while IFS= read -r branch; do
 	[[ -z "$branch" ]] && continue
@@ -115,7 +134,12 @@ while IFS= read -r branch; do
 	# branch whose PR shows as merged is just as eligible as a fast-forward.
 	MERGED_PR_COUNT="$(gh pr list --repo "$REPO" --head "$branch" --state merged --json number --jq 'length' 2>/dev/null || echo "0")"
 	if [[ "${MERGED_PR_COUNT:-0}" != "0" ]]; then
-		MERGED_BRANCHES+=("$branch")
+		if local_tip_in_merged_pr "$branch"; then
+			MERGED_BRANCHES+=("$branch")
+			SQUASH_VERIFIED["$branch"]=1
+		else
+			SKIPPED_BRANCHES+=("$branch (PR merged, but the local branch has commits not in it; review, then 'git branch -D')")
+		fi
 		continue
 	fi
 
@@ -188,8 +212,8 @@ echo ""
 echo "Deleting local branches..."
 for branch in "${ELIGIBLE[@]}"; do
 	DELETE_FLAG="-d"
-	[[ "$FORCE_LOCAL" == "true" ]] && DELETE_FLAG="-D"
-	if git branch "$DELETE_FLAG" "$branch" 2>/dev/null; then
+	[[ "$FORCE_LOCAL" == "true" || -n "${SQUASH_VERIFIED[$branch]:-}" ]] && DELETE_FLAG="-D"
+	if git branch "$DELETE_FLAG" "$branch" >/dev/null 2>&1; then
 		echo -e "  ${GREEN}deleted local $branch${RESET}"
 	else
 		echo -e "  ${RED}failed to delete local $branch (use --force-local for unmerged branches)${RESET}"
