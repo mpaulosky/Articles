@@ -4,6 +4,8 @@
 # repo. A stub `gh` answers PR queries from fixture files instead of GitHub:
 #   $GH_FIXTURES/<state>/<branch with / as __>  one merged/open/closed PR head SHA per line
 #   $GH_FIXTURES/FAIL                           present => every gh call fails
+#   $GH_FIXTURES/ON_QUERY                       run (then removed) on the first gh call,
+#                                               e.g. to push to origin mid-run
 # Usage: scripts/squad/tests/cleanup-squad-branches.test.sh
 set -uo pipefail
 
@@ -17,6 +19,10 @@ mkdir -p "$STUBS"
 cat >"$STUBS/gh" <<'EOF'
 #!/usr/bin/env bash
 [[ -e "$GH_FIXTURES/FAIL" ]] && { echo "gh: simulated failure" >&2; exit 1; }
+if [[ -e "$GH_FIXTURES/ON_QUERY" ]]; then
+	hook="$GH_FIXTURES/ON_QUERY.running"
+	mv "$GH_FIXTURES/ON_QUERY" "$hook" && bash "$hook" >/dev/null 2>&1
+fi
 if [[ "$1" == "api" ]]; then
 	# repos/<owner>/<repo>/compare/<base>...<head>: "ahead" when head contains base.
 	range="${2##*/compare/}"
@@ -186,6 +192,13 @@ remote_only chore/young-orphan
 run --apply --delete-remote
 check "keeps a young unmerged branch with no PR" remote_has chore/young-orphan
 
+setup
+push_branch chore/old-orphan 10
+remote_only chore/old-orphan
+run --apply --delete-remote --orphan-days 08
+check "accepts --orphan-days with a leading zero" test "$STATUS" -eq 0
+check "treats it as decimal" remote_lacks chore/old-orphan
+
 # --- fail closed --------------------------------------------------------------
 
 setup
@@ -202,6 +215,21 @@ pr chore/merged-remote merged
 git -C "$CLONE" remote set-url origin "$CASE_DIR/missing.git"
 run --apply --delete-remote
 check "refuses to apply when git fetch fails" failed_with "git fetch origin failed"
+
+setup
+push_branch chore/merged-remote
+pr chore/merged-remote merged
+remote_only chore/merged-remote
+# Someone pushes to the branch after the script has fetched and classified it.
+cat >"$GH_FIXTURES/ON_QUERY" <<EOF
+other="\$(mktemp -d)"
+git clone -q "$ORIGIN" "\$other/c"
+git -C "\$other/c" checkout -q chore/merged-remote
+git -C "\$other/c" commit -q --allow-empty -m "pushed mid-run"
+git -C "\$other/c" push -q origin chore/merged-remote
+EOF
+run --apply --delete-remote
+check "keeps a remote branch that moved after it was checked" remote_has chore/merged-remote
 
 # --- worktrees ----------------------------------------------------------------
 

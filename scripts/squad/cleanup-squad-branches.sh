@@ -75,6 +75,8 @@ if ! [[ "$ORPHAN_DAYS" =~ ^[0-9]+$ ]]; then
 	echo -e "${RED}❌ --orphan-days must be a non-negative integer (got '$ORPHAN_DAYS').${RESET}" >&2
 	exit 1
 fi
+# Force base 10: bash arithmetic would read a leading zero (e.g. 08) as octal.
+ORPHAN_DAYS=$((10#$ORPHAN_DAYS))
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
@@ -139,14 +141,16 @@ tip_in_merged_pr() {
 
 # Every candidate name, from local branches and from origin. A fresh CI
 # checkout has only main locally, so origin's refs are what it cleans up.
+# HAS_REMOTE holds origin's tip as fetched: remote deletion is leased on it,
+# so a branch someone pushed to after this point is left alone.
 declare -A HAS_LOCAL=() HAS_REMOTE=()
-while IFS= read -r ref; do
+while IFS=' ' read -r ref oid; do
 	case "$ref" in
 	refs/heads/*) HAS_LOCAL["${ref#refs/heads/}"]=1 ;;
 	refs/remotes/origin/HEAD) ;;
-	refs/remotes/origin/*) HAS_REMOTE["${ref#refs/remotes/origin/}"]=1 ;;
+	refs/remotes/origin/*) HAS_REMOTE["${ref#refs/remotes/origin/}"]="$oid" ;;
 	esac
-done < <(git for-each-ref --format='%(refname)' refs/heads/ refs/remotes/origin/)
+done < <(git for-each-ref --format='%(refname) %(objectname)' refs/heads/ refs/remotes/origin/)
 
 while IFS= read -r branch; do
 	[[ -z "$branch" ]] && continue
@@ -161,7 +165,7 @@ while IFS= read -r branch; do
 	# The tips this run could delete: the local branch and/or origin's copy.
 	TIPS=()
 	[[ -n "${HAS_LOCAL[$branch]:-}" ]] && TIPS+=("$(git rev-parse "refs/heads/$branch")")
-	[[ -n "${HAS_REMOTE[$branch]:-}" ]] && TIPS+=("$(git rev-parse "refs/remotes/origin/$branch")")
+	[[ -n "${HAS_REMOTE[$branch]:-}" ]] && TIPS+=("${HAS_REMOTE[$branch]}")
 
 	if ! OPEN_PR_COUNT="$(pr_count "$branch" open)" ||
 		! MERGED_PR_COUNT="$(pr_count "$branch" merged)" ||
@@ -285,12 +289,12 @@ if [[ "$DELETE_REMOTE" == "true" ]]; then
 	echo ""
 	echo "Deleting remote branches..."
 	for branch in "${ELIGIBLE[@]}"; do
-		if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
-			if git push origin --delete "$branch" 2>/dev/null; then
-				echo -e "  ${GREEN}deleted remote $branch${RESET}"
-			else
-				echo -e "  ${RED}failed to delete remote $branch${RESET}"
-			fi
+		expected="${HAS_REMOTE[$branch]:-}"
+		[[ -n "$expected" ]] || continue
+		if git push --force-with-lease="refs/heads/$branch:$expected" origin --delete "$branch" 2>/dev/null; then
+			echo -e "  ${GREEN}deleted remote $branch${RESET}"
+		else
+			echo -e "  ${RED}kept remote $branch: it changed since it was checked, or the delete failed${RESET}"
 		fi
 	done
 fi
