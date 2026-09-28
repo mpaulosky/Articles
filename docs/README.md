@@ -57,11 +57,11 @@ rollout history of workflow-standard and major changes by release.
 <!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [ci: Run the test suite on Dependabot PRs](docs/blogs/2026-09-28-pr-259-ci-run-the-test-suite-on-dependabot-prs.md) | release,automation |
 | 2026-09-28 | [chore(deps): Fix Dependabot config](docs/blogs/2026-09-28-pr-257-chore-deps-fix-dependabot-config.md) | release,automation |
 | 2026-09-28 | [fix(ci): Surface release-docs failures and flag a missing release PAT](docs/blogs/2026-09-28-pr-255-fix-ci-surface-release-docs-failures-and-flag-a-missing-release-pat.md) | release,automation |
 | 2026-09-28 | [test(web): Stub the OpenID Connect discovery document in Auth0 tests](docs/blogs/2026-09-28-pr-253-test-web-stub-the-openid-connect-discovery-document-in-auth0-tests.md) | release,automation |
 | 2026-09-28 | [fix(ci): Merge as a user and handle UNSTABLE PRs in auto-merge](docs/blogs/2026-09-28-pr-249-fix-ci-merge-as-a-user-and-handle-unstable-prs-in-auto-merge.md) | release,automation |
-| 2026-09-28 | [fix(ci): Arm auto-merge when a PR opens and gate merges on tests](docs/blogs/2026-09-28-pr-248-fix-ci-arm-auto-merge-when-a-pr-opens-and-gate-merges-on-tests.md) | release,automation |
 <!-- BLOG_END -->
 
 ## Quick start
@@ -113,11 +113,11 @@ notes) and then:
 - updates this README latest-blog block (`<!-- BLOG_START -->
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-28 | [ci: Run the test suite on Dependabot PRs](docs/blogs/2026-09-28-pr-259-ci-run-the-test-suite-on-dependabot-prs.md) | release,automation |
 | 2026-09-28 | [chore(deps): Fix Dependabot config](docs/blogs/2026-09-28-pr-257-chore-deps-fix-dependabot-config.md) | release,automation |
 | 2026-09-28 | [fix(ci): Surface release-docs failures and flag a missing release PAT](docs/blogs/2026-09-28-pr-255-fix-ci-surface-release-docs-failures-and-flag-a-missing-release-pat.md) | release,automation |
 | 2026-09-28 | [test(web): Stub the OpenID Connect discovery document in Auth0 tests](docs/blogs/2026-09-28-pr-253-test-web-stub-the-openid-connect-discovery-document-in-auth0-tests.md) | release,automation |
 | 2026-09-28 | [fix(ci): Merge as a user and handle UNSTABLE PRs in auto-merge](docs/blogs/2026-09-28-pr-249-fix-ci-merge-as-a-user-and-handle-unstable-prs-in-auto-merge.md) | release,automation |
-| 2026-09-28 | [fix(ci): Arm auto-merge when a PR opens and gate merges on tests](docs/blogs/2026-09-28-pr-248-fix-ci-arm-auto-merge-when-a-pr-opens-and-gate-merges-on-tests.md) | release,automation |
 <!-- BLOG_END -->`)
   from `docs/blogs/README.md` (top 5 rows),
 - updates [docs/index.html](docs/index.html) latest blog links from the same rows.
