@@ -225,9 +225,20 @@ git pull origin main
 
 PRs are squash-merged, so the branch's own commits never land on `main`, and
 `git branch -d` refuses to delete it. Use `-D` only after confirming the PR
-shows as merged (`gh pr view <n> --json state`). The remote branch is deleted
-automatically on merge. If a release-blog PR was opened, `main` isn't fully up
-to date until you pull again after that PR merges.
+shows as merged (`gh pr view <n> --json state`).
+
+GitHub deletes the remote branch on merge because the repository setting
+**Automatically delete head branches** is enabled. The auto-merge workflow
+doesn't do it. If the branch is still on `origin` (for example, if that setting
+is turned off), delete it yourself and prune the stale reference:
+
+```bash
+git push origin --delete squad/42-fix-login-validation
+git fetch --prune
+```
+
+If a release-blog PR was opened, `main` isn't fully up to date until you pull
+again after that PR merges.
 
 Stale branches and worktrees can be pruned with
 [scripts/squad/cleanup-squad-branches.sh](../scripts/squad/cleanup-squad-branches.sh).
