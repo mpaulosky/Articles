@@ -289,6 +289,12 @@ for branch in "${ELIGIBLE[@]}"; do
 		echo -e "  ${RED}kept local $branch: it changed since it was checked${RESET}"
 		continue
 	fi
+	# update-ref below bypasses git's own worktree check, so refuse while any
+	# worktree (e.g. one whose removal failed above) still has it checked out.
+	if git worktree list --porcelain | grep -qxF "branch refs/heads/$branch"; then
+		echo -e "  ${RED}kept local $branch: still checked out in a worktree${RESET}"
+		continue
+	fi
 	if [[ "$FORCE_LOCAL" == "true" || -n "${PR_VERIFIED[$branch]:-}" ]]; then
 		# update-ref with an old value only deletes if the tip is still the one checked.
 		deleted=$(git update-ref -d "refs/heads/$branch" "$expected" 2>/dev/null && echo yes)

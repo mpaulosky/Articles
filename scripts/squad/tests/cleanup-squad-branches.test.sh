@@ -257,6 +257,15 @@ git -C "$CLONE" worktree add -q "$CASE_DIR/wt with space" chore/in-worktree
 run --apply --delete-remote
 check "removes the worktree of a merged branch when its path has spaces" test ! -e "$CASE_DIR/wt with space"
 
+setup
+push_branch chore/dirty-worktree
+pr chore/dirty-worktree merged
+git -C "$CLONE" worktree add -q "$CASE_DIR/dirty" chore/dirty-worktree
+echo "unsaved" >"$CASE_DIR/dirty/notes.txt"
+run --apply
+check "keeps the worktree of a merged branch when it has uncommitted files" test -e "$CASE_DIR/dirty/notes.txt"
+check "keeps that branch while its worktree remains" local_has chore/dirty-worktree
+
 echo ""
 echo "$PASSED passed, $FAILED failed"
 [[ $FAILED -eq 0 ]]
