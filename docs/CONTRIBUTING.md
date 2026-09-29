@@ -13,7 +13,7 @@ and how a change travels from an issue to `main`.
 - `git` and the GitHub CLI (`gh`)
 - Docker, for the integration and E2E tests (TestContainers) and for running the
   AppHost
-- Node.js with `npx`, for Markdown lint
+- Node.js and pnpm (`corepack enable`), for the Tailwind CSS build and Markdown lint
 - Optional: `yamllint` (the pre-push hook falls back to Docker when it's missing)
 
 ### 2. Clone, restore, and enable the hooks
@@ -139,7 +139,7 @@ dotnet build Articles.slnx --configuration Release
 for p in tests/*/*.csproj; do dotnet test "$p" --configuration Release; done
 
 # Lint Markdown
-npx --yes markdownlint-cli2 "**/*.md"
+pnpm dlx markdownlint-cli2 "**/*.md"
 
 # Lint YAML (if you changed workflows); uses Docker when yamllint isn't installed
 if command -v yamllint >/dev/null; then
@@ -163,7 +163,7 @@ Types include `feat`, `fix`, `docs`, `test`, `refactor`, `build`, `ci`, and
 `chore`. The scope is the affected project or area, such as `Web`, `Domain`, or
 `docs`. The `pre-commit` hook lints staged Markdown files only when it finds a
 `markdownlint` binary (installed globally or in `node_modules`). Otherwise it
-prints a warning and skips the check, so run the `npx` command from step 4 yourself.
+prints a warning and skips the check, so run the `pnpm dlx` command from step 4 yourself.
 
 ### 6. Push once and open a PR to `main`
 

@@ -3,11 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i ./wwwroot/app.tailwind.css -o ./wwwroot/app.css --minify",
-    "watch:css": "npx @tailwindcss/cli -i ./wwwroot/app.tailwind.css -o ./wwwroot/app.css --watch"
+    "build:css": "tailwindcss -i ./wwwroot/app.tailwind.css -o ./wwwroot/app.css --minify",
+    "watch:css": "tailwindcss -i ./wwwroot/app.tailwind.css -o ./wwwroot/app.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",
     "tailwindcss": "^4.1.11"
-  }
+  },
+  "engines": {
+    "npm": "please-use-pnpm"
+  },
+  "packageManager": "pnpm@12.6.0"
 }
