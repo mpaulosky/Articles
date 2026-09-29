@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 |------|-------|------|
+| 2026-09-29 | [build: switch the web project from npm to pnpm](2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) | release,automation |
 | 2026-09-28 | [chore(web): Stop committing the generated app.css](2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) | release,automation |
 | 2026-09-28 | [ci: Lint workflows and shell scripts before push and in CI](2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) | release,automation |
 | 2026-09-28 | [ci: Key the Dependabot secret gate on the dependabot/* branch](2026-09-28-pr-266-ci-key-the-dependabot-secret-gate-on-the-dependabot-branch.md) | release,automation |
