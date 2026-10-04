@@ -108,9 +108,18 @@ if ! git fetch origin --prune >/dev/null 2>&1; then
 	echo -e "${YELLOW}⚠️  git fetch origin failed; dry-run results may be stale.${RESET}"
 fi
 
-MAIN_REF="origin/main"
-if ! git rev-parse --verify "$MAIN_REF" >/dev/null 2>&1; then
-	MAIN_REF="main"
+# Without main, every merge-base check fails and a branch with nothing of its
+# own would look like unmerged work, so stop rather than guess.
+MAIN_REF=""
+for ref in origin/main main; do
+	if git rev-parse --verify -q "$ref^{commit}" >/dev/null; then
+		MAIN_REF="$ref"
+		break
+	fi
+done
+if [[ -z "$MAIN_REF" ]]; then
+	echo -e "${RED}❌ could not resolve origin/main or main; refusing to classify branches.${RESET}" >&2
+	exit 1
 fi
 
 NOW_EPOCH="$(date +%s)"
@@ -132,12 +141,12 @@ pr_count() {
 	echo "$count"
 }
 
-# Succeeds when commit $2 is the head of one of branch $1's merged PRs, or an
-# ancestor of one (the PR received more commits than this copy has). Fails if
-# the copy has commits that never reached a merged PR, or GitHub can't answer.
-tip_in_merged_pr() {
-	local branch="$1" tip="$2" heads head status
-	heads="$(gh pr list --repo "$REPO" --head "$branch" --state merged --json headRefOid --jq '.[].headRefOid' 2>/dev/null)" || return 1
+# Succeeds when commit $2 is the head of one of branch $1's PRs in state $3, or
+# an ancestor of one (the PR received more commits than this copy has). Fails
+# if the copy has commits that never reached such a PR, or GitHub can't answer.
+tip_in_pr() {
+	local branch="$1" tip="$2" state="$3" heads head status
+	heads="$(gh pr list --repo "$REPO" --head "$branch" --state "$state" --json headRefOid --jq '.[].headRefOid' 2>/dev/null)" || return 1
 	while IFS= read -r head; do
 		[[ -z "$head" ]] && continue
 		[[ "$head" == "$tip" ]] && return 0
@@ -145,6 +154,14 @@ tip_in_merged_pr() {
 		[[ "$status" == "ahead" || "$status" == "identical" ]] && return 0
 	done <<<"$heads"
 	return 1
+}
+
+# Succeeds when branch $1 still has no open PR. Checked again right before each
+# delete: a PR opened after classification doesn't move the tip, so the
+# tip checks alone would let it through.
+still_no_open_pr() {
+	local count
+	count="$(pr_count "$1" open)" && [[ "$count" == "0" ]]
 }
 
 # Every candidate name, from local branches and from origin. A fresh CI
@@ -193,7 +210,7 @@ while IFS= read -r branch; do
 	if [[ "$MERGED_PR_COUNT" != "0" ]]; then
 		ALL_IN_PR=true
 		for tip in "${TIPS[@]}"; do
-			tip_in_merged_pr "$branch" "$tip" || ALL_IN_PR=false
+			tip_in_pr "$branch" "$tip" merged || ALL_IN_PR=false
 		done
 		if [[ "$ALL_IN_PR" == "true" ]]; then
 			MERGED_BRANCHES+=("$branch")
@@ -205,14 +222,23 @@ while IFS= read -r branch; do
 	fi
 
 	# A closed-but-unmerged PR is a deliberate abandonment signal, so it
-	# doesn't need to wait out the age fallback below.
+	# doesn't need to wait out the age fallback below, as long as the branch
+	# hasn't moved on since. A branch reused or pushed to after its PR closed
+	# goes through the same checks as one with no PR.
 	if [[ "$CLOSED_PR_COUNT" != "0" ]]; then
-		ORPHAN_BRANCHES+=("$branch")
-		continue
+		ALL_IN_PR=true
+		for tip in "${TIPS[@]}"; do
+			tip_in_pr "$branch" "$tip" closed || ALL_IN_PR=false
+		done
+		if [[ "$ALL_IN_PR" == "true" ]]; then
+			ORPHAN_BRANCHES+=("$branch")
+			continue
+		fi
 	fi
 
-	# No PR at all. A branch with nothing beyond main is new work that hasn't
-	# started, and main's own commit dates say nothing about its age.
+	# No PR, or the branch moved on after its PR closed. A branch with nothing
+	# beyond main is new work that hasn't started, and main's own commit dates
+	# say nothing about its age.
 	OWN_COMMITS=false
 	for tip in "${TIPS[@]}"; do
 		git merge-base --is-ancestor "$tip" "$MAIN_REF" 2>/dev/null || OWN_COMMITS=true
@@ -264,6 +290,16 @@ while IFS= read -r line; do
 		if [[ "$wt_branch" == "$eligible" ]]; then
 			echo "  - $wt_path [$wt_branch]"
 			if [[ "$APPLY" == "true" ]]; then
+				# Removing it would lose the checkout of any commit made since the
+				# branch was classified, and the branch would be kept anyway.
+				if [[ "$(git rev-parse -q --verify "refs/heads/$wt_branch")" != "${HAS_LOCAL[$wt_branch]:-}" ]]; then
+					echo -e "    ${RED}kept worktree: its branch changed since it was checked${RESET}"
+					continue
+				fi
+				if ! still_no_open_pr "$wt_branch"; then
+					echo -e "    ${RED}kept worktree: its branch has an open PR now, or GitHub can't say${RESET}"
+					continue
+				fi
 				REMOVE_ARGS=(worktree remove)
 				[[ "$FORCE_WORKTREE" == "true" ]] && REMOVE_ARGS+=(--force)
 				REMOVE_ARGS+=("$wt_path")
@@ -295,6 +331,10 @@ for branch in "${ELIGIBLE[@]}"; do
 		echo -e "  ${RED}kept local $branch: still checked out in a worktree${RESET}"
 		continue
 	fi
+	if ! still_no_open_pr "$branch"; then
+		echo -e "  ${RED}kept local $branch: it has an open PR now, or GitHub can't say${RESET}"
+		continue
+	fi
 	# Test the delete in the `if` itself: under set -e, a refused delete
 	# (e.g. `git branch -d` on an unmerged orphan) must be reported, not
 	# abort the run before the remote deletions.
@@ -317,6 +357,10 @@ if [[ "$DELETE_REMOTE" == "true" ]]; then
 	for branch in "${ELIGIBLE[@]}"; do
 		expected="${HAS_REMOTE[$branch]:-}"
 		[[ -n "$expected" ]] || continue
+		if ! still_no_open_pr "$branch"; then
+			echo -e "  ${RED}kept remote $branch: it has an open PR now, or GitHub can't say${RESET}"
+			continue
+		fi
 		if git push --force-with-lease="refs/heads/$branch:$expected" origin --delete "$branch" 2>/dev/null; then
 			echo -e "  ${GREEN}deleted remote $branch${RESET}"
 		else

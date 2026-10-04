@@ -6,6 +6,7 @@
 #   $GH_FIXTURES/FAIL                           present => every gh call fails
 #   $GH_FIXTURES/ON_QUERY                       run (then removed) on the first gh call,
 #                                               e.g. to push to origin mid-run
+#   $GH_FIXTURES/ON_<state>_QUERY                the same, on the first `pr list --state <state>`
 # Usage: scripts/squad/tests/cleanup-squad-branches.test.sh
 set -uo pipefail
 
@@ -41,6 +42,10 @@ while [[ $# -gt 0 ]]; do
 	*) shift ;;
 	esac
 done
+if [[ -e "$GH_FIXTURES/ON_${state}_QUERY" ]]; then
+	hook="$GH_FIXTURES/ON_${state}_QUERY.running"
+	mv "$GH_FIXTURES/ON_${state}_QUERY" "$hook" && bash "$hook" >/dev/null 2>&1
+fi
 file="$GH_FIXTURES/$state/${branch//\//__}"
 heads=()
 [[ -f "$file" ]] && mapfile -t heads <"$file"
@@ -183,7 +188,48 @@ pr chore/reopened open
 run --apply --delete-remote
 check "keeps a branch that still has an open PR, even with a merged one" remote_has chore/reopened
 
+setup
+push_branch chore/pr-opened-mid-run
+pr chore/pr-opened-mid-run merged
+remote_only chore/pr-opened-mid-run
+# A new PR is opened after the open-PR check, without moving the branch tip.
+echo "git -C \"$CLONE\" rev-parse origin/chore/pr-opened-mid-run >\"$GH_FIXTURES/open/chore__pr-opened-mid-run\"" \
+	>"$GH_FIXTURES/ON_merged_QUERY"
+run --apply --delete-remote
+check "keeps a branch whose PR was opened after it was classified" remote_has chore/pr-opened-mid-run
+
+setup
+git -C "$CLONE" branch chore/at-main-tip main
+git -C "$CLONE" branch chore/checked-out main
+git -C "$CLONE" push -q origin chore/at-main-tip chore/checked-out
+git -C "$CLONE" checkout -q chore/checked-out
+git -C "$CLONE" branch -q -D main
+git -C "$ORIGIN" symbolic-ref HEAD refs/heads/chore/checked-out
+git -C "$ORIGIN" update-ref -d refs/heads/main
+run --apply --delete-remote --orphan-days 0
+check "refuses to run when main can't be resolved" failed_with "could not resolve origin/main or main"
+check "keeps a branch at main's old tip" remote_has chore/at-main-tip
+
 # --- orphans ------------------------------------------------------------------
+
+setup
+push_branch chore/closed-pr 3
+pr chore/closed-pr closed
+remote_only chore/closed-pr
+run --apply --delete-remote
+check "deletes a young branch whose PR was closed unmerged" remote_lacks chore/closed-pr
+
+setup
+push_branch chore/reused-after-close 30
+pr chore/reused-after-close closed
+git -C "$CLONE" checkout -q chore/reused-after-close
+git -C "$CLONE" commit -q --allow-empty -m "new work after the PR closed"
+git -C "$CLONE" push -q origin chore/reused-after-close
+git -C "$CLONE" checkout -q main
+remote_only chore/reused-after-close
+run --apply --delete-remote
+check "keeps a young branch pushed to after its PR closed" remote_has chore/reused-after-close
+check "reports it as too young" output_has "chore/reused-after-close (unmerged, younger than 14d)"
 
 setup
 push_branch chore/old-orphan 30
@@ -276,6 +322,16 @@ echo "unsaved" >"$CASE_DIR/dirty/notes.txt"
 run --apply
 check "keeps the worktree of a merged branch when it has uncommitted files" test -e "$CASE_DIR/dirty/notes.txt"
 check "keeps that branch while its worktree remains" local_has chore/dirty-worktree
+
+setup
+push_branch chore/worktree-moved
+pr chore/worktree-moved merged
+git -C "$CLONE" worktree add -q "$CASE_DIR/moved" chore/worktree-moved
+# The worktree gets a commit after the script has classified its branch.
+echo "git -C \"$CASE_DIR/moved\" commit -q --allow-empty -m 'worktree work mid-run'" >"$GH_FIXTURES/ON_QUERY"
+run --apply
+check "keeps the worktree of a branch that moved after it was checked" test -d "$CASE_DIR/moved"
+check "keeps that branch" local_has chore/worktree-moved
 
 echo ""
 echo "$PASSED passed, $FAILED failed"
