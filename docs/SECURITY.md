@@ -127,16 +127,16 @@ locally, set each user's credentials in the project's user secrets
 
 ```bash
 cd tests/Web.E2E.Tests
-dotnet user-secrets set "Auth0:E2E:Admin:Username" "admin-test-user@example.com"
-dotnet user-secrets set "Auth0:E2E:Admin:Password" "..."
-dotnet user-secrets set "Auth0:E2E:Author:Username" "author-test-user@example.com"
-dotnet user-secrets set "Auth0:E2E:Author:Password" "..."
-dotnet user-secrets set "Auth0:E2E:User:Username" "user-test-user@example.com"
-dotnet user-secrets set "Auth0:E2E:User:Password" "..."
+dotnet user-secrets set "Auth0:Admin:Username" "admin-test-user@example.com"
+dotnet user-secrets set "Auth0:Admin:Password" "..."
+dotnet user-secrets set "Auth0:Author:Username" "author-test-user@example.com"
+dotnet user-secrets set "Auth0:Author:Password" "..."
+dotnet user-secrets set "Auth0:User:Username" "user-test-user@example.com"
+dotnet user-secrets set "Auth0:User:Password" "..."
 ```
 
 In CI, the equivalent values are supplied as environment variables using the
-double-underscore convention (`Auth0__E2E__Admin__Username`, etc.), one `NAME=value`
+double-underscore convention (`Auth0__Admin__Username`, etc.), one `NAME=value`
 line each in the repository's `TEST_ENV` secret, which `ci.yml` masks and exports to the test jobs.
 
 If credentials are not configured — locally or in CI — the affected tests **skip**
