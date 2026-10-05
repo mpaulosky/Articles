@@ -2,7 +2,6 @@
 name: build-repair-prompt
 description: Build and repair Prompt
 model: Claude Sonnet 4.5 (copilot)
-agent: Squad
 ---
 
 # Copilot Build Prompt: Universal .NET Solution Build & Error Resolution

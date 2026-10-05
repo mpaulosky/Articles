@@ -2,7 +2,6 @@
 name: "Review Changes"
 description: "Review the full current worktree, fix repo lint issues, validate the approved changes, and commit only the in-scope files."
 model: Claude Sonnet 4.5 (copilot)
-agent: "Squad"
 ---
 
 Review all current worktree changes and treat the entire current worktree as the review surface unless the user explicitly narrows scope. Do not silently exclude unrelated edits; instead, identify them, keep them protected, and only stage the approved in-scope files.

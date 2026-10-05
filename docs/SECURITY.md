@@ -135,8 +135,8 @@ dotnet user-secrets set "Auth0:E2E:User:Password" "..."
 ```
 
 In CI, the equivalent values are supplied as environment variables using the
-double-underscore convention (`Auth0__E2E__Admin__Username`, etc.), wired in
-`squad-ci.yml` from the `AUTH0_ADMIN/AUTHOR/USER_USERNAME`/`PASSWORD` repository secrets.
+double-underscore convention (`Auth0__E2E__Admin__Username`, etc.), one `NAME=value`
+line each in the repository's `TEST_ENV` secret, which `ci.yml` masks and exports to the test jobs.
 
 If credentials are not configured — locally or in CI — the affected tests **skip**
 with a clear message rather than failing, so the suite stays green for contributors
