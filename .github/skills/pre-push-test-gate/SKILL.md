@@ -4,6 +4,8 @@ description: "Before any push, the agent must run the full local test suite and 
 confidence: high
 ---
 
+# Pre-Push Test Gate
+
 ## Steps
 
 - Run `dotnet test Articles.slnx --nologo` and ensure all tests pass with zero failures before push.

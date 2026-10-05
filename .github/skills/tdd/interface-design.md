@@ -1,4 +1,4 @@
-## Interface Design for Testability
+# Interface Design for Testability
 
 Examples below use C# handlers, repositories, and `Result<T>` return types.
 

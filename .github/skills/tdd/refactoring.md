@@ -1,4 +1,4 @@
-## Refactor Candidates
+# Refactor Candidates
 
 After a GREEN TDD cycle, look for:
 

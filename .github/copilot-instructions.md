@@ -18,7 +18,7 @@
 - Prefer existing abstractions, project patterns, and shared configuration over new infrastructure.
 - Keep public APIs and class members documented with XML `/// <summary>` comments.
 
-## .NET and C#
+## .NET and C\#
 
 - Target .NET 10 and use the repository's configured latest C# language version.
 - Nullable reference types, analyzers, code style enforcement, and warnings-as-errors are enabled by `Directory.Build.props`.
@@ -55,7 +55,8 @@
   ```
 
 - For a focused .NET test, use `dotnet test --filter FullyQualifiedName~{Namespace}.{ClassName}.{MethodName}` or filter to the test class.
-- Before a push or PR-ready handoff, run the repository's full required validation. The local pre-push hook checks branch naming and refuses a dirty working tree, then runs `scripts/gate.sh`: it lints the changed Markdown, YAML, workflow (actionlint, zizmor) and shell (shellcheck) files, builds the solution, and runs every test project.
+- Before a push or PR-ready handoff, run the repository's full required validation. The local pre-push hook checks branch naming and refuses a dirty working tree, then runs `scripts/gate.sh`:
+  it lints the changed Markdown, YAML, workflow (actionlint, zizmor) and shell (shellcheck) files, builds the solution, and runs every test project.
 - Report exactly which validation commands ran and whether they passed. Do not claim tests or builds that were not run.
 
 ## Documentation and automation

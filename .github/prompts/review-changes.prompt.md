@@ -4,9 +4,13 @@ description: "Review the full current worktree, fix repo lint issues, validate t
 model: Claude Sonnet 4.5 (copilot)
 ---
 
-Review all current worktree changes and treat the entire current worktree as the review surface unless the user explicitly narrows scope. Do not silently exclude unrelated edits; instead, identify them, keep them protected, and only stage the approved in-scope files.
+# Review Changes
 
-Important guardrail: never skip lint or build validation because a subset of files was approved. Even when the user requests a narrow review, the repo-level validation gates still apply to the current branch state and must be satisfied before the review is complete.
+Review all current worktree changes and treat the entire current worktree as the review surface unless the user explicitly narrows scope.
+Do not silently exclude unrelated edits; instead, identify them, keep them protected, and only stage the approved in-scope files.
+
+Important guardrail: never skip lint or build validation because a subset of files was approved.
+Even when the user requests a narrow review, the repo-level validation gates still apply to the current branch state and must be satisfied before the review is complete.
 
 Always run the repo validation gates for the current worktree:
 
@@ -23,7 +27,8 @@ Mode selection:
   2. Treat existing user changes as protected. Do not reset, checkout, clean, amend, or otherwise modify unrelated files. Do not include this prompt file in the review or the proposed staging set.
   3. Identify all current changes and the files and behavior that are in scope. If the intended scope is unclear, report that clarification is required and stop.
   4. Review the in-scope diff for correctness, regressions, security concerns, missing focused tests, and broken lint issues. Keep unrelated changes untouched.
-  5. Run YAML lint, Markdown lint, the required build-repair flow, and the narrowest relevant tests or validation that is safe in read-only dry-run mode. Do not claim validation that was not run. Report failures without making changes.
+  5. Run YAML lint, Markdown lint, the required build-repair flow, and the narrowest relevant tests or validation that is safe in read-only dry-run mode. Do not claim validation that was not run.
+     Report failures without making changes.
   6. Report exactly what would be staged, the commit message that would be used, the validation commands and results, and what would remain uncommitted. Do not stage, commit, amend, push, or modify files.
 
 Follow this workflow:

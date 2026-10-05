@@ -4,7 +4,7 @@ description: "Plan sprint work and break it into manageable tasks. WHEN: \"sprin
 confidence: high
 ---
 
-## Sprint Planning
+# Sprint Planning
 
 - Identify the highest-priority outcomes.
 - Break them into a small number of concrete tasks.
