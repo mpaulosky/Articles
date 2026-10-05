@@ -63,7 +63,7 @@ Use the **Tailwind CLI** to compile Tailwind CSS into a static file referenced b
 
 ```bash
 pnpm install
-pnpm dlx tailwindcss init
+pnpm exec tailwindcss init
 ```
 
 **2c — Configure `tailwind.config.js` at solution root:**
