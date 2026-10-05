@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-10-05 | [chore: Re-apply the repo-ci-baseline Template](2026-10-05-pr-286-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-05 | [docs: Update ADRs for renamed CI and release workflows](2026-10-05-pr-288-docs-update-adrs-for-renamed-ci-and-release-workflows.md) | release,automation |
 | 2026-10-05 | [chore: Ignore local SDK caches, coverage reports and personal files](2026-10-05-pr-284-chore-ignore-local-sdk-caches-coverage-reports-and-personal-files.md) | release,automation |
 | 2026-10-05 | [chore: Standardize on the repo-ci-baseline Template](2026-10-05-pr-280-chore-standardize-on-the-repo-ci-baseline-template.md) | release,automation |
