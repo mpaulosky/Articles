@@ -28,7 +28,7 @@ All commit messages **must** follow this structure:
 
 ### Scope
 
-The scope should be the name of the affected project, folder, or feature (e.g., `Web`, `Mongo`, `ServiceDefaults`,
+The scope should be the name of the affected project, folder, or feature (e.g., `Web`, `Data`, `Tests`, `ci`,
 `docs`).
 
 ### Short Summary
@@ -44,24 +44,31 @@ The scope should be the name of the affected project, folder, or feature (e.g., 
 - Wrap lines at 72 characters.
 - Reference issues using `Fixes #123` or `Refs #456`.
 
+## PR Titles
+
+A pull request's title follows the same format as a commit's short summary: `<type>(<scope>): <Summary>`, with a capital
+and no closing period. The title becomes the squash commit's subject on `main` and the Release's name, and the required
+**PR title** check (`.github/workflows/pr-title.yml`) enforces it. Dependabot's PRs are exempt.
+
 ## Examples
 
 ```text
-feat(Web): add user authentication with Auth0
+feat(Web): Let users sort the list by date
 
-Implements login and logout functionality using Auth0.
-Updates navigation bar to show user info when authenticated.
+Adds a Sort by date option above the list. The choice is kept in the
+query string, so a shared link keeps the order.
 Fixes #42
 ```
 
 ```text
-fix(Mongo): handle null reference in BlogRepository
+fix(Data): Return an empty list when a record has no children
 
-Adds null checks to prevent exceptions when querying missing documents.
+The query returned null for records without children, which the
+details page then dereferenced.
 ```
 
 ```text
-docs(CONTRIBUTING): update testing section for Playwright
+docs(CONTRIBUTING): Update testing section for Playwright
 
 Adds Playwright usage instructions and links to documentation.
 ```
