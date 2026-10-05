@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "EXAMPLE-github": {
-      "command": "npx",
+      "command": "pnpm",
       "args": [
-        "-y",
+        "dlx",
         "@anthropic/github-mcp-server"
       ],
       "env": {

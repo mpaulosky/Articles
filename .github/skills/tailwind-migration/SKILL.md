@@ -62,8 +62,8 @@ Use the **Tailwind CLI** to compile Tailwind CSS into a static file referenced b
 **2b — Install and initialise:**
 
 ```bash
-npm install
-npx tailwindcss init
+pnpm install
+pnpm exec tailwindcss init
 ```
 
 **2c — Configure `tailwind.config.js` at solution root:**
@@ -94,10 +94,10 @@ module.exports = {
 **2e — Build the output CSS:**
 
 ```bash
-npm run tw:build
+pnpm run tw:build
 ```
 
-During development, run `npm run tw:watch` in a separate terminal alongside `dotnet run`.
+During development, run `pnpm run tw:watch` in a separate terminal alongside `dotnet run`.
 
 **2f — Reference the compiled CSS in `Web/Components/App.razor`:**
 
@@ -115,7 +115,7 @@ Add a build target to `Web/Web.csproj` so `tailwind.css` is regenerated on every
 
 ```xml
 <Target Name="BuildTailwind" BeforeTargets="Build">
-  <Exec Command="npm run tw:build" WorkingDirectory="$(SolutionDir)" />
+  <Exec Command="pnpm run tw:build" WorkingDirectory="$(SolutionDir)" />
 </Target>
 ```
 
