@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.105](https://github.com/mpaulosky/Articles/releases/tag/v0.1.105) | 2026-10-05 | docs: Update ADRs for renamed CI and release workflows | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-288-docs-update-adrs-for-renamed-ci-and-release-workflows.md) |
 | [v0.1.104](https://github.com/mpaulosky/Articles/releases/tag/v0.1.104) | 2026-10-05 | chore: Ignore local SDK caches, coverage reports and personal files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-284-chore-ignore-local-sdk-caches-coverage-reports-and-personal-files.md) |
 | [v0.1.103](https://github.com/mpaulosky/Articles/releases/tag/v0.1.103) | 2026-10-05 | chore: Standardize on the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-280-chore-standardize-on-the-repo-ci-baseline-template.md) |
 | [v0.1.102](https://github.com/mpaulosky/Articles/releases/tag/v0.1.102) | 2026-10-04 | fix(squad): Close the remaining branch-cleanup edge cases | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.98](https://github.com/mpaulosky/Articles/releases/tag/v0.1.98) | 2026-09-28 | ci: Lint workflows and shell scripts before push and in CI | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) |
 | [v0.1.97](https://github.com/mpaulosky/Articles/releases/tag/v0.1.97) | 2026-09-28 | ci: Key the Dependabot secret gate on the dependabot/* branch | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-266-ci-key-the-dependabot-secret-gate-on-the-dependabot-branch.md) |
 | [v0.1.96](https://github.com/mpaulosky/Articles/releases/tag/v0.1.96) | 2026-09-28 | ci: Withhold secrets from Dependabot-authored PRs, whoever runs them | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-264-ci-withhold-secrets-from-dependabot-authored-prs-whoever-runs-them.md) |
-| [v0.1.95](https://github.com/mpaulosky/Articles/releases/tag/v0.1.95) | 2026-09-28 | ci: Keep credentialed E2E tests off Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-262-ci-keep-credentialed-e2e-tests-off-dependabot-prs.md) |
 
 <!-- RELEASES_END -->
 
