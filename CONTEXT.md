@@ -26,5 +26,5 @@ _Avoid_: Attachment — scope is images referenced in Content only, not general 
 
 **Release**:
 A tagged version of the repository (e.g. `v0.1.10`), created by the release workflow and published as a GitHub Release.
-The docs site lists releases live from the GitHub API as tag, date, and link — never hand-authored.
-_Avoid_: Release notes (as a section name) — the old hand-written section was retired in favor of this live list; see [ADR-0001](docs/adr/0001-live-fetched-release-list.md).
+The release workflow writes the release and blog tables in the README and the docs site on every release — never hand-authored.
+_Avoid_: Release notes (as a section name) — the old hand-written section was retired in favor of these generated tables; see [ADR-0001](docs/adr/0001-live-fetched-release-list.md).
