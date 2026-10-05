@@ -7,6 +7,7 @@
 // Project Name :  Web
 // =============================================
 
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -63,6 +64,7 @@ public sealed class ArticleImage
 	/// </summary>
 	[BsonElement("url")]
 	[BsonRepresentation(BsonType.String)]
+	[SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "A site-relative path stored as a string in MongoDB.")]
 	public string Url { get; set; }
 
 	/// <summary>
@@ -95,6 +97,7 @@ public sealed class ArticleImage
 	/// <summary>
 	///   Creates an <see cref="ArticleImage" /> snapshot.
 	/// </summary>
+	[SuppressMessage("Design", "CA1054:URI-like parameters should not be strings", Justification = "Matches the stored string Url.")]
 	public static ArticleImage Create(
 		string fileName,
 		string url,

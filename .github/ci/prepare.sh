@@ -18,8 +18,17 @@ set -euo pipefail
 job="${1:?usage: prepare.sh build|test [test-name]}"
 test_name="${2:-}"
 
+# Building src/Web runs pnpm (Tailwind CSS), and every test project builds it
+# too. Corepack provides the pnpm version pinned by "packageManager" in its
+# package.json.
+enable_pnpm() {
+  export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+  corepack enable
+  (cd src/Web && pnpm --version)
+}
+
 case "$job" in
-  build) ;;
-  test) : "$test_name" ;;
+  build) enable_pnpm ;;
+  test) : "$test_name"; enable_pnpm ;;
   *) echo "prepare.sh: unknown job '$job'" >&2; exit 2 ;;
 esac
