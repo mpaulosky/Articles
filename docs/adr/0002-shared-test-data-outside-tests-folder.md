@@ -3,11 +3,12 @@
 `Web.Tests` and `Web.Integration.Tests` had both grown heavy duplication of the same literal test-data construction (`CreateArticleCommand`, `CategoryDto`, `AuthorDto`, and similar),
 repeated dozens of times across handler and repository test files with no shared builder.
 We decided to extract static factory-method builders (e.g. `TestData.Article.CreateCommand(title: "...")`) into a new project, but rejected putting it under `tests/` alongside the other test projects.
-`squad-ci.yml`'s `discover-tests` job globs every
-`tests/**/*.csproj` unconditionally and feeds each one into the CI test matrix;
+At the time, the `discover-tests` job in the CI workflow (then `squad-ci.yml`) globbed every
+`tests/**/*.csproj` unconditionally and fed each one into the CI test matrix;
 a plain class library with no test SDK and no tests placed there would either fail that job or force a workflow edit to special-case it.
+Its replacement, `ci.yml`, now adds only projects whose `IsTestProject` resolves to true, but the decision stands as the repo's convention.
 We instead placed it at `testutils/Web.TestData/`, referenced as a normal project dependency by both `Web.Tests.csproj` and `Web.Integration.Tests.csproj`,
 so it's semantically distinct from the projects CI treats as test suites and is invisible to the discovery glob.
 
 **Consequences**: any future shared, non-test-suite test infrastructure (fixtures, builders, fakes) belongs in `testutils/`, not `tests/`, unless it's a real test project with its own tests.
-`discover-tests`' glob stays untouched. A reader looking for `Web.TestData` under `tests/` won't find it there and needs this ADR (or the `testutils/` convention) to know where it lives.
+`discover-tests` needed no special case. A reader looking for `Web.TestData` under `tests/` won't find it there and needs this ADR (or the `testutils/` convention) to know where it lives.
