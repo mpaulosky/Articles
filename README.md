@@ -17,12 +17,12 @@
 ## Purpose
 
 This repository is designed to create a Web application that allows a user to
-	create articles on any topic they wish and manage the publication of said
-	articles when they are completed. The articles include a title, an
-	introduction, a category, and the content of the full article. It also allows
-	adding links, pictures, and other attachments. The author is responsible for managing their own articles.
-	They can create, edit, and delete their articles as needed.
-	An administrator oversees the platform to ensure content quality and compliance.
+ create articles on any topic they wish and manage the publication of said
+ articles when they are completed. The articles include a title, an
+ introduction, a category, and the content of the full article. It also allows
+ adding links, pictures, and other attachments. The author is responsible for managing their own articles.
+ They can create, edit, and delete their articles as needed.
+ An administrator oversees the platform to ensure content quality and compliance.
 
 ## Repository structure
 
@@ -51,6 +51,20 @@ dotnet test --solution Articles.slnx
 ## Releases
 
 <!-- RELEASES_START -->
+
+| Version | Date | Title | Blog post |
+| ------- | ---- | ----- | --------- |
+| [v0.1.102](https://github.com/mpaulosky/Articles/releases/tag/v0.1.102) | 2026-10-04 | fix(squad): Close the remaining branch-cleanup edge cases | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) |
+| [v0.1.101](https://github.com/mpaulosky/Articles/releases/tag/v0.1.101) | 2026-09-29 | build: write a single-document pnpm lockfile | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) |
+| [v0.1.100](https://github.com/mpaulosky/Articles/releases/tag/v0.1.100) | 2026-09-29 | build: switch the web project from npm to pnpm | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) |
+| [v0.1.99](https://github.com/mpaulosky/Articles/releases/tag/v0.1.99) | 2026-09-28 | chore(web): Stop committing the generated app.css | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) |
+| [v0.1.98](https://github.com/mpaulosky/Articles/releases/tag/v0.1.98) | 2026-09-28 | ci: Lint workflows and shell scripts before push and in CI | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) |
+| [v0.1.97](https://github.com/mpaulosky/Articles/releases/tag/v0.1.97) | 2026-09-28 | ci: Key the Dependabot secret gate on the dependabot/* branch | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-266-ci-key-the-dependabot-secret-gate-on-the-dependabot-branch.md) |
+| [v0.1.96](https://github.com/mpaulosky/Articles/releases/tag/v0.1.96) | 2026-09-28 | ci: Withhold secrets from Dependabot-authored PRs, whoever runs them | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-264-ci-withhold-secrets-from-dependabot-authored-prs-whoever-runs-them.md) |
+| [v0.1.95](https://github.com/mpaulosky/Articles/releases/tag/v0.1.95) | 2026-09-28 | ci: Keep credentialed E2E tests off Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-262-ci-keep-credentialed-e2e-tests-off-dependabot-prs.md) |
+| [v0.1.94](https://github.com/mpaulosky/Articles/releases/tag/v0.1.94) | 2026-09-28 | ci: Run the test suite on Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-259-ci-run-the-test-suite-on-dependabot-prs.md) |
+| [v0.1.93](https://github.com/mpaulosky/Articles/releases/tag/v0.1.93) | 2026-09-28 | chore(deps): Fix Dependabot config | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-257-chore-deps-fix-dependabot-config.md) |
+
 <!-- RELEASES_END -->
 
 [All releases →](https://github.com/mpaulosky/Articles/releases)
