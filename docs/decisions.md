@@ -21,3 +21,5 @@ catalogs, MCP server and `squad*` labels were removed, and the repo moved to the
 Baseline, whose process is described in [`PROCESS.md`](PROCESS.md). Branches follow that standard (`feature/`, `fix/`,
 `hotfix/`, `chore/`); `squad/` and `sprint/` are retired. The squad decision log's release and blog rules are replaced
 by the Baseline's release pipeline, and its session logs and agent history were dropped rather than migrated.
+
+<!-- docs-only probe, not for merging -->
