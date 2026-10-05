@@ -3,7 +3,7 @@ name: tdd
 description: "Apply test-driven development with red-green-refactor loop for building features or fixing bugs with tests written first. WHEN: \"test-driven development\", \"TDD\", \"red-green-refactor\", \"build with tests first\", \"integration tests first\"."
 ---
 
-## Test-Driven Development
+# Test-Driven Development
 
 ## Philosophy
 
@@ -13,9 +13,13 @@ infrastructure where that provides better confidence than mocks.
 
 **Core principle**: Tests should verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't.
 
-**Good tests** are integration-style: they exercise real code paths through public APIs. They describe _what_ the system does, not _how_ it does it. A good test reads like a specification - "customer can complete checkout with a valid cart" tells you exactly what capability exists. These tests survive refactors because they don't care about internal structure.
+**Good tests** are integration-style: they exercise real code paths through public APIs. They describe _what_ the system does, not _how_ it does it.
+A good test reads like a specification - "customer can complete checkout with a valid cart" tells you exactly what capability exists.
+These tests survive refactors because they don't care about internal structure.
 
-**Bad tests** are coupled to implementation. They mock internal collaborators, test private methods, or verify through external means (like querying a database directly instead of using the interface). The warning sign: your test breaks when you refactor, but behavior hasn't changed. If you rename an internal function and tests fail, those tests were testing implementation, not behavior.
+**Bad tests** are coupled to implementation.
+They mock internal collaborators, test private methods, or verify through external means (like querying a database directly instead of using the interface). The warning sign:
+your test breaks when you refactor, but behavior hasn't changed. If you rename an internal function and tests fail, those tests were testing implementation, not behavior.
 
 See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
 
@@ -30,7 +34,8 @@ This produces **crap tests**:
 - Tests become insensitive to real changes - they pass when behavior breaks, fail when behavior is fine
 - You outrun your headlights, committing to test structure before understanding the implementation
 
-**Correct approach**: Vertical slices via tracer bullets. One test → one implementation → repeat. Each test responds to what you learned from the previous cycle. Because you just wrote the code, you know exactly what behavior matters and how to verify it.
+**Correct approach**: Vertical slices via tracer bullets. One test → one implementation → repeat. Each test responds to what you learned from the previous cycle.
+Because you just wrote the code, you know exactly what behavior matters and how to verify it.
 
 ```text
 WRONG (horizontal):

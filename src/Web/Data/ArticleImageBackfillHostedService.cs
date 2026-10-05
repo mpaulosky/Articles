@@ -15,7 +15,7 @@ namespace Web.Data;
 ///     Runs <see cref="ArticleImageBackfillMigration" /> once in the background when the application
 ///     starts, without delaying startup and without failing it if MongoDB isn't reachable yet.
 /// </summary>
-public sealed class ArticleImageBackfillHostedService : BackgroundService
+public sealed partial class ArticleImageBackfillHostedService : BackgroundService
 {
 	private readonly IDbContextFactory<ArticlesMongoDbContext> _contextFactory;
 	private readonly ILogger<ArticleImageBackfillHostedService> _logger;
@@ -38,13 +38,15 @@ public sealed class ArticleImageBackfillHostedService : BackgroundService
 	{
 		try
 		{
-			await using var context = await _contextFactory.CreateDbContextAsync(stoppingToken)
-				.ConfigureAwait(false);
-			await ArticleImageBackfillMigration.RunAsync(context, stoppingToken).ConfigureAwait(false);
+			var context = await _contextFactory.CreateDbContextAsync(stoppingToken).ConfigureAwait(false);
+			await using (context.ConfigureAwait(false))
+			{
+				await ArticleImageBackfillMigration.RunAsync(context, stoppingToken).ConfigureAwait(false);
+			}
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
-			_logger.LogWarning(ex, "ArticleImage backfill migration did not complete at startup.");
+			LogBackfillFailed(_logger, ex);
 		}
 	}
 
@@ -57,4 +59,7 @@ public sealed class ArticleImageBackfillHostedService : BackgroundService
 	{
 		return Task.CompletedTask;
 	}
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "ArticleImage backfill migration did not complete at startup.")]
+	private static partial void LogBackfillFailed(ILogger logger, Exception exception);
 }

@@ -1,13 +1,13 @@
 # Articles
 
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![xUnit Tests](https://img.shields.io/badge/Tests-xUnit-blueviolet?logo=github)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
+[![xUnit Tests](https://img.shields.io/badge/Tests-xUnit-blueviolet?logo=github)](https://github.com/mpaulosky/Articles/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/mpaulosky/Articles?logo=github&color=blue&label=Release)](https://github.com/mpaulosky/Articles/releases/latest)
 
-[![CI/CD](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
+[![CI/CD](https://github.com/mpaulosky/Articles/actions/workflows/ci.yml/badge.svg)](https://github.com/mpaulosky/Articles/actions/workflows/ci.yml)
 [![CodeCov Coverage](https://codecov.io/gh/mpaulosky/Articles/branch/main/graph/badge.svg)](https://codecov.io/gh/mpaulosky/Articles)
-[![Coverage Gate](https://img.shields.io/badge/Coverage%20Gate-≥80%25-brightgreen?logo=codecov)](https://github.com/mpaulosky/Articles/actions/workflows/squad-ci.yml)
+[![Coverage Gate](https://img.shields.io/badge/Coverage%20Gate-≥80%25-brightgreen?logo=codecov)](https://github.com/mpaulosky/Articles/actions/workflows/ci.yml)
 
 [![Open Issues](https://img.shields.io/github/issues/mpaulosky/Articles?color=0366d6)](https://github.com/mpaulosky/Articles/issues?q=is%3Aopen+is%3Aissue)
 [![Closed Issues](https://img.shields.io/github/issues-closed/mpaulosky/Articles?color=6f42c1)](https://github.com/mpaulosky/Articles/issues?q=is%3Aclosed+is%3Aissue)
@@ -17,107 +17,54 @@
 ## Purpose
 
 This repository is designed to create a Web application that allows a user to
-	create articles on any topic they wish and manage the publication of said
-	articles when they are completed. The articles include a title, an
-	introduction, a category, and the content of the full article. It also allows
-	adding links, pictures, and other attachments. The author is responsible for managing their own articles.
-	They can create, edit, and delete their articles as needed.
-	An administrator oversees the platform to ensure content quality and compliance.
+ create articles on any topic they wish and manage the publication of said
+ articles when they are completed. The articles include a title, an
+ introduction, a category, and the content of the full article. It also allows
+ adding links, pictures, and other attachments. The author is responsible for managing their own articles.
+ They can create, edit, and delete their articles as needed.
+ An administrator oversees the platform to ensure content quality and compliance.
 
 ## Repository structure
 
-- [.github/workflows](.github/workflows) — canonical CI/CD, lint, triage, sync,
-  and release automation workflows.
-- [.github/hooks](.github/hooks) — local hook scripts (including pre-push gates).
-- [.github/instructions](.github/instructions) — coding and documentation
-  instructions applied to contributors and agents.
-- [src](src) — .NET implementation projects used by the standard toolchain.
-- [tests](tests) — architecture, domain, component, unit, and end-to-end test
-  suites.
-- [docs](docs) — architecture, contribution guidance, and release-review history.
-- [Directory.Packages.props](Directory.Packages.props), [global.json](global.json),
-  and [GitVersion.yml](GitVersion.yml) — shared dependency/version governance.
+- [src](../src): the .NET projects (the Blazor web app and its Aspire host).
+- [tests](../tests): architecture, unit, component, integration and end-to-end test suites.
+- [docs](./): the development process, decisions, ADRs and release posts.
+- [.github](../.github): CI, release and lint workflows, git hooks and contributor instructions.
 
-## Documentation index
+## Documentation
 
-- [Docs landing page](docs/index.html) — overview and documentation entry points.
-- [Architecture overview](docs/ARCHITECTURE.md) — repository layout and policy
-  boundaries.
-- [Contributing guide](docs/CONTRIBUTING.md) — contribution workflow and validation
-  expectations.
-- [Release review blog index](docs/blogs/README.md) — release-review post index.
-
-## Release review blogs
-
-The release review posts in [docs/blogs](docs/blogs/README.md) summarize the
-rollout history of workflow-standard and major changes by release.
-
-### Latest blogs (top 5, generated)
-
-<!-- BLOG_START -->
-| Date | Title | Tags |
-|------|-------|------|
-| 2026-10-04 | [fix(squad): Close the remaining branch-cleanup edge cases](docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) | release,automation |
-| 2026-09-29 | [build: write a single-document pnpm lockfile](docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) | release,automation |
-| 2026-09-29 | [build: switch the web project from npm to pnpm](docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) | release,automation |
-| 2026-09-28 | [chore(web): Stop committing the generated app.css](docs/blogs/2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) | release,automation |
-| 2026-09-28 | [ci: Lint workflows and shell scripts before push and in CI](docs/blogs/2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) | release,automation |
-<!-- BLOG_END -->
+- [Development process](PROCESS.md): hooks, branches, worktrees, commits, pull requests and releases.
+- [Contributing guide](CONTRIBUTING.md): setting up and validating a change.
+- [Decisions](decisions.md) and [ADRs](adr): why the code is the way it is.
+- [Release posts](blogs/README.md): one post per release.
 
 ## Quick start
 
-### For adopters (using this standard in another repo)
+```bash
+git clone https://github.com/mpaulosky/Articles.git
+cd Articles
+git config core.hooksPath .github/hooks
+dotnet build Articles.slnx
+dotnet test --solution Articles.slnx
+```
 
-1. Review the standard and policy surface in
-   [.github/workflows](.github/workflows), [.github/hooks](.github/hooks), and
-   [.github/instructions](.github/instructions).
-2. Copy the assets you want to adopt into your target repository.
-3. Validate in CI and locally with the same gates this repo uses
-   (workflows in `.github/workflows`, hook behavior in `.github/hooks/pre-push`).
-4. Track updates through releases and release-review posts in
-   [docs/blogs](docs/blogs/README.md).
+## Releases
 
-### For contributors (updating this repo)
+<!-- RELEASES_START -->
 
-1. Clone and restore:
+| Version | Date | Title | Blog post |
+| ------- | ---- | ----- | --------- |
+| [v0.1.102](https://github.com/mpaulosky/Articles/releases/tag/v0.1.102) | 2026-10-04 | fix(squad): Close the remaining branch-cleanup edge cases | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) |
+| [v0.1.101](https://github.com/mpaulosky/Articles/releases/tag/v0.1.101) | 2026-09-29 | build: write a single-document pnpm lockfile | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) |
+| [v0.1.100](https://github.com/mpaulosky/Articles/releases/tag/v0.1.100) | 2026-09-29 | build: switch the web project from npm to pnpm | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) |
+| [v0.1.99](https://github.com/mpaulosky/Articles/releases/tag/v0.1.99) | 2026-09-28 | chore(web): Stop committing the generated app.css | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) |
+| [v0.1.98](https://github.com/mpaulosky/Articles/releases/tag/v0.1.98) | 2026-09-28 | ci: Lint workflows and shell scripts before push and in CI | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) |
+| [v0.1.97](https://github.com/mpaulosky/Articles/releases/tag/v0.1.97) | 2026-09-28 | ci: Key the Dependabot secret gate on the dependabot/* branch | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-266-ci-key-the-dependabot-secret-gate-on-the-dependabot-branch.md) |
+| [v0.1.96](https://github.com/mpaulosky/Articles/releases/tag/v0.1.96) | 2026-09-28 | ci: Withhold secrets from Dependabot-authored PRs, whoever runs them | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-264-ci-withhold-secrets-from-dependabot-authored-prs-whoever-runs-them.md) |
+| [v0.1.95](https://github.com/mpaulosky/Articles/releases/tag/v0.1.95) | 2026-09-28 | ci: Keep credentialed E2E tests off Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-262-ci-keep-credentialed-e2e-tests-off-dependabot-prs.md) |
+| [v0.1.94](https://github.com/mpaulosky/Articles/releases/tag/v0.1.94) | 2026-09-28 | ci: Run the test suite on Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-259-ci-run-the-test-suite-on-dependabot-prs.md) |
+| [v0.1.93](https://github.com/mpaulosky/Articles/releases/tag/v0.1.93) | 2026-09-28 | chore(deps): Fix Dependabot config | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-257-chore-deps-fix-dependabot-config.md) |
 
-   ```bash
-   git clone https://github.com/mpaulosky/Articles.git
-   cd Articles
-   dotnet restore Articles.slnx
-   ```
+<!-- RELEASES_END -->
 
-2. Run baseline validation:
-
-   ```bash
-   dotnet build Articles.slnx --configuration Release
-   dotnet test Articles.slnx
-   ```
-
-3. Follow the full contribution workflow in
-   [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
-
-## Merged-PR release automation (concise)
-
-The [Squad Release workflow](.github/workflows/squad-release.yml) runs when a PR
-is merged to `main` (or by manual dispatch with a merged PR number).
-
-Every merged PR to `main` is treated as release-eligible. The workflow runs one
-release/blog pass per PR (idempotency marker: `Source PR: #<number>` in release
-notes) and then:
-
-- computes semver bump from PR labels, with idempotency checks to avoid duplicate
-  releases,
-- generates a release-review post and rebuilds
-  [docs/blogs/README.md](docs/blogs/README.md),
-- updates this README latest-blog block (`<!-- BLOG_START -->
-| Date | Title | Tags |
-|------|-------|------|
-| 2026-10-04 | [fix(squad): Close the remaining branch-cleanup edge cases](docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) | release,automation |
-| 2026-09-29 | [build: write a single-document pnpm lockfile](docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) | release,automation |
-| 2026-09-29 | [build: switch the web project from npm to pnpm](docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) | release,automation |
-| 2026-09-28 | [chore(web): Stop committing the generated app.css](docs/blogs/2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) | release,automation |
-| 2026-09-28 | [ci: Lint workflows and shell scripts before push and in CI](docs/blogs/2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) | release,automation |
-<!-- BLOG_END -->`)
-  from `docs/blogs/README.md` (top 5 rows),
-- updates [docs/index.html](docs/index.html) latest blog links from the same rows.
+[All releases →](https://github.com/mpaulosky/Articles/releases)

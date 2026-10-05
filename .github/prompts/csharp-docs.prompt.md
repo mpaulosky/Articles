@@ -41,7 +41,7 @@ description: 'Ensure that C# types are documented with XML comments and follow b
 
 ## Constructors
 
-- The summary wording should be "Initializes a new instance of the <Class> class [or struct].".
+- The summary wording should be "Initializes a new instance of the \<Class> class [or struct].".
 
 ## Properties
 

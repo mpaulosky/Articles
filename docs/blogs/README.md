@@ -96,19 +96,19 @@ This directory contains concise release-review posts for merged PR releases.
 | 2026-08-21 | [feat: add Article archiving domain, commands, and authorization](2026-08-21-pr-39-feat-add-article-archiving-domain-commands-and-authorization.md) | release,automation |
 | 2026-08-21 | [fix: run required Build Solution check on docs-only PRs](2026-08-21-pr-29-fix-run-required-build-solution-check-on-docs-only-prs.md) | release,automation |
 | 2026-08-21 | [docs: backfill v0.1.9 release blog](2026-08-21-pr-25-docs-backfill-v0-1-9-release-blog.md) | release,automation |
-| 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](2026-08-21-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
-| 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](2026-08-20-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
-| 2026-08-20 | [Articles v0.1.7: Code Coverage Tooling and Analysis Cleanup](2026-08-20-v0.1.7-code-coverage-analysis-warnings.md) | code-coverage, dotcover, static-analysis, code-quality, warnings |
-| 2026-08-20 | [Articles v0.1.6: Populate Article Author from Logged-In User](2026-08-20-v0.1.6-author-from-logged-in-user.md) | auth0, authorization, user-context, security |
-| 2026-08-20 | [Articles v0.1.5: Custom Mediator Pipeline and Navigation Links](2026-08-20-v0.1.5-custom-mediator-navigation.md) | mediator, pipeline, navigation, blazor, middleware |
-| 2026-08-20 | [Articles v0.1.4: Article and Category Management Features](2026-08-20-v0.1.4-article-category-management.md) | crud, blazor, mediator, cqrs, management-ui |
-| 2026-08-20 | [Articles v0.1.3: UI Test Reorganization and Demo Cleanup](2026-08-20-v0.1.3-ui-test-reorganization.md) | bunit, ui-tests, test-organization, cleanup, refactoring |
-| 2026-08-19 | [Articles v0.1.2: Blog Post Documentation](2026-08-19-v0.1.2-blog-post-documentation.md) | blog, documentation, release-notes, changelog |
-| 2026-08-19 | [Articles v0.1.1: MongoDB Data Layer Implementation](2026-08-19-v0.1.1-mongodb-data-layer.md) | mongodb, data-access, repository-pattern, entity-framework, tdd |
+| 2026-08-21 | [Articles v0.1.9: Release Blog Backfill and Branch-Protected Docs Automation](2026-08-21-pr-24-v0.1.9-release-docs-branch-protection.md) | release-notes, github-actions, branch-protection, automation, changelog |
+| 2026-08-20 | [Articles v0.1.8: Test Coverage Expansion and Build Cleanup](2026-08-20-pr-23-v0.1.8-test-coverage-expansion.md) | unit-tests, coverage, file-storage, text-editor, mediator, build-warnings |
+| 2026-08-20 | [Articles v0.1.7: Code Coverage Tooling and Analysis Cleanup](2026-08-20-pr-22-v0.1.7-code-coverage-analysis-warnings.md) | code-coverage, dotcover, static-analysis, code-quality, warnings |
+| 2026-08-20 | [Articles v0.1.6: Populate Article Author from Logged-In User](2026-08-20-pr-21-v0.1.6-author-from-logged-in-user.md) | auth0, authorization, user-context, security |
+| 2026-08-20 | [Articles v0.1.5: Custom Mediator Pipeline and Navigation Links](2026-08-20-pr-20-v0.1.5-custom-mediator-navigation.md) | mediator, pipeline, navigation, blazor, middleware |
+| 2026-08-20 | [Articles v0.1.4: Article and Category Management Features](2026-08-20-pr-19-v0.1.4-article-category-management.md) | crud, blazor, mediator, cqrs, management-ui |
+| 2026-08-20 | [Articles v0.1.3: UI Test Reorganization and Demo Cleanup](2026-08-20-pr-18-v0.1.3-ui-test-reorganization.md) | bunit, ui-tests, test-organization, cleanup, refactoring |
+| 2026-08-19 | [Articles v0.1.2: Blog Post Documentation](2026-08-19-pr-17-v0.1.2-blog-post-documentation.md) | blog, documentation, release-notes, changelog |
+| 2026-08-19 | [Articles v0.1.1: MongoDB Data Layer Implementation](2026-08-19-pr-16-v0.1.1-mongodb-data-layer.md) | mongodb, data-access, repository-pattern, entity-framework, tdd |
 | 2026-08-19 | [Articles v0.1.0: Domain Refactoring Complete](2026-08-19-v0.1.0-domain-refactoring.md) | domain-driven-design, refactoring, vertical-slices, clean-architecture, testing |
-| 2026-08-19 | [Articles v0.0.6: Domain Refactoring Preparation](2026-08-19-v0.0.6-domain-refactoring-prep.md) | architecture, domain-design, refactoring, redis, aspire |
-| 2026-08-18 | [Articles v0.0.5: Auth0 Integration and Stability](2026-08-18-v0.0.5-auth0-integration.md) | auth0, authentication, security, testing, stability |
-| 2026-08-17 | [Articles v0.0.4: Theme Management Testing](2026-08-17-v0.0.4-testing-expansion.md) | unit-tests, blazor, theme-management, web-testing |
-| 2026-08-16 | [Articles v0.0.3: CI Coverage Report Discovery](2026-08-16-v0.0.3-ci-improvements.md) | ci-cd, code-coverage, codecov, testing |
-| 2026-08-16 | [Articles v0.0.2: Enhanced Project Validation](2026-08-16-v0.0.2-project-validation.md) | validation, ci-cd, quality-gates |
-| 2026-08-16 | [Articles v0.0.1: Initial Setup and Foundation](2026-08-16-v0.0.1-initial-setup.md) | initial-release, codeql, dependabot, project-setup |
+| 2026-08-19 | [Articles v0.0.6: Domain Refactoring Preparation](2026-08-19-pr-14-v0.0.6-domain-refactoring-prep.md) | architecture, domain-design, refactoring, redis, aspire |
+| 2026-08-18 | [Articles v0.0.5: Auth0 Integration and Stability](2026-08-18-pr-12-v0.0.5-auth0-integration.md) | auth0, authentication, security, testing, stability |
+| 2026-08-17 | [Articles v0.0.4: Theme Management Testing](2026-08-17-pr-7-v0.0.4-testing-expansion.md) | unit-tests, blazor, theme-management, web-testing |
+| 2026-08-16 | [Articles v0.0.3: CI Coverage Report Discovery](2026-08-16-pr-6-v0.0.3-ci-improvements.md) | ci-cd, code-coverage, codecov, testing |
+| 2026-08-16 | [Articles v0.0.2: Enhanced Project Validation](2026-08-16-pr-4-v0.0.2-project-validation.md) | validation, ci-cd, quality-gates |
+| 2026-08-16 | [Articles v0.0.1: Initial Setup and Foundation](2026-08-16-pr-2-v0.0.1-initial-setup.md) | initial-release, codeql, dependabot, project-setup |

@@ -7,6 +7,7 @@
 // Project Name :  Web
 // =============================================
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 using Web.Components.Features.Articles.Models;
@@ -25,6 +26,7 @@ public static partial class ArticleImageParser
 	///     metadata (size, mime type, uploaded timestamp) of any <paramref name="previousImages" />
 	///     entry still referenced by the same URL, so unchanged images keep their recorded metadata.
 	/// </summary>
+	[SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "The result becomes Article.ArticleImages, which is a List.")]
 	public static List<ArticleImage> Parse(string? content, IReadOnlyList<ArticleImage> previousImages)
 	{
 		if (string.IsNullOrEmpty(content))

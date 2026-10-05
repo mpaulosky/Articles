@@ -6,9 +6,13 @@ confidence: "high"
 source: "extracted from Drucker and Trejo charters — earned knowledge from v0.8.22 release incident"
 ---
 
+# CI Validation Gates
+
 ## Context
 
-CI workflows must be defensive. These patterns were learned from the v0.8.22 release disaster where invalid semver, wrong token types, missing retry logic, and draft releases caused a multi-hour outage. Both Drucker (CI/CD) and Trejo (Release Manager) carried this knowledge in their charters — now centralized here.
+CI workflows must be defensive.
+These patterns were learned from the v0.8.22 release disaster where invalid semver, wrong token types, missing retry logic, and draft releases caused a multi-hour outage.
+Both Drucker (CI/CD) and Trejo (Release Manager) carried this knowledge in their charters — now centralized here.
 
 ## Patterns
 

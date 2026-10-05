@@ -3,9 +3,13 @@ name: grill-with-docs
 description: "Challenge a plan against the existing domain model, sharpen terminology, and update CONTEXT.md and ADRs inline as decisions crystallize. WHEN: \"grill me with docs\", \"stress test against docs\", \"challenge plan with domain model\", \"grill with context\"."
 ---
 
+# Grill With Docs
+
+<!-- markdownlint-disable-next-line MD033 -->
 <what-to-do>
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one.
+For each question, provide your recommended answer.
 
 Ask the questions one at a time, waiting for feedback on each question before continuing.
 
@@ -13,6 +17,7 @@ If a question can be answered by exploring the codebase, explore the codebase in
 
 </what-to-do>
 
+<!-- markdownlint-disable-next-line MD033 -->
 <supporting-info>
 
 ## Domain awareness
@@ -67,7 +72,8 @@ When domain relationships are being discussed, stress-test them with specific sc
 
 ### Cross-reference with code
 
-When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
+When the user states how something works, check whether the code agrees. If you find a contradiction, surface it:
+"Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
 
 ### Update CONTEXT.md inline
 

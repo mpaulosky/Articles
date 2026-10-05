@@ -1,3 +1,11 @@
+# Agent instructions
+
+## Process
+
+Branches, worktrees, commits, PR titles and descriptions, merging and releases follow [`docs/PROCESS.md`](docs/PROCESS.md).
+Name every branch to its standard (`feature/{issue}-{slug}`, `fix/{issue}-{slug}`, `hotfix/{issue}-{slug}` or `chore/{slug}`),
+including in a cloud session: CI's **Branch name** check refuses any other name.
+
 ## Agent skills
 
 ### Issue tracker

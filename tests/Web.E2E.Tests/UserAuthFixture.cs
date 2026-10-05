@@ -13,8 +13,8 @@ namespace Web.E2E.Tests;
 /// Authenticates as the plain authenticated User test user per the fixture design on wayfinder
 /// #158. Drives one real Auth0 Universal Login through the shared browser and caches the resulting
 /// storage state in memory, so tests can spin up authenticated pages without repeating the login.
-/// Reads <c>Auth0:E2E:User:Username</c>/<c>Password</c> from Web.E2E.Tests' user secrets locally, or
-/// <c>Auth0__E2E__User__Username</c>/<c>Password</c> env vars in CI; when absent, sets
+/// Reads <c>Auth0:User:Username</c>/<c>Password</c> from Web.E2E.Tests' user secrets locally, or
+/// <c>Auth0__User__Username</c>/<c>Password</c> env vars in CI; when absent, sets
 /// <see cref="SkipReason"/> instead of touching the network.
 /// </summary>
 public sealed class UserAuthFixture(PlaywrightAppFixture app) : IAsyncLifetime
@@ -30,12 +30,12 @@ public sealed class UserAuthFixture(PlaywrightAppFixture app) : IAsyncLifetime
 			.AddEnvironmentVariables()
 			.Build();
 
-		var username = config["Auth0:E2E:User:Username"];
-		var password = config["Auth0:E2E:User:Password"];
+		var username = config["Auth0:User:Username"];
+		var password = config["Auth0:User:Password"];
 
 		if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
 		{
-			SkipReason = "Auth0:E2E:User:Username/Password not configured; " +
+			SkipReason = "Auth0:User:Username/Password not configured; " +
 				"run `dotnet user-secrets set` on Web.E2E.Tests to enable this test locally.";
 			return;
 		}

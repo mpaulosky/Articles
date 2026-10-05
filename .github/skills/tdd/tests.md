@@ -1,9 +1,9 @@
-## Good and Bad Tests
+# Good and Bad Tests
 
 Examples below use a modern .NET stack: C#, xUnit v3,
 FluentAssertions, NSubstitute, and bUnit.
 
-### Good Tests
+## Good Tests
 
 **Behavior-first**: test through a public interface or visible UI surface and
 assert the outcome a caller actually cares about.
@@ -35,7 +35,7 @@ Characteristics:
 - Describes WHAT, not HOW
 - Keeps assertions focused on the observable outcome
 
-### Bad Tests
+## Bad Tests
 
 **Implementation-detail tests**: coupled to internal structure or obsessed with
 the mechanics instead of the result.

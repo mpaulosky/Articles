@@ -6,6 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<UserSecretsId>9d23fd99-a98f-42ef-bc1f-6303b9907945</UserSecretsId>
+		<!-- The AppHost doesn't use the Aspire CLI bundle's features. -->
+		<NoWarn>$(NoWarn);ASPIRE010</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

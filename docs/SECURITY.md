@@ -9,7 +9,8 @@ The following versions of Articles are currently supported with security updates
 | 0.1.x   | :white_check_mark: |
 | < 0.1   | :x:                |
 
-**Note:** This is an early-stage project. Security updates will be provided for the latest 0.1.x release. Once the project reaches 1.0, we will maintain security support for the current major version and one previous major version.
+**Note:** This is an early-stage project. Security updates will be provided for the latest 0.1.x release.
+Once the project reaches 1.0, we will maintain security support for the current major version and one previous major version.
 
 ## Security Features
 
@@ -126,17 +127,17 @@ locally, set each user's credentials in the project's user secrets
 
 ```bash
 cd tests/Web.E2E.Tests
-dotnet user-secrets set "Auth0:E2E:Admin:Username" "admin-test-user@example.com"
-dotnet user-secrets set "Auth0:E2E:Admin:Password" "..."
-dotnet user-secrets set "Auth0:E2E:Author:Username" "author-test-user@example.com"
-dotnet user-secrets set "Auth0:E2E:Author:Password" "..."
-dotnet user-secrets set "Auth0:E2E:User:Username" "user-test-user@example.com"
-dotnet user-secrets set "Auth0:E2E:User:Password" "..."
+dotnet user-secrets set "Auth0:Admin:Username" "admin-test-user@example.com"
+dotnet user-secrets set "Auth0:Admin:Password" "..."
+dotnet user-secrets set "Auth0:Author:Username" "author-test-user@example.com"
+dotnet user-secrets set "Auth0:Author:Password" "..."
+dotnet user-secrets set "Auth0:User:Username" "user-test-user@example.com"
+dotnet user-secrets set "Auth0:User:Password" "..."
 ```
 
 In CI, the equivalent values are supplied as environment variables using the
-double-underscore convention (`Auth0__E2E__Admin__Username`, etc.), wired in
-`squad-ci.yml` from the `AUTH0_ADMIN/AUTHOR/USER_USERNAME`/`PASSWORD` repository secrets.
+double-underscore convention (`Auth0__Admin__Username`, etc.), one `NAME=value`
+line each in the repository's `TEST_ENV` secret, which `ci.yml` masks and exports to the test jobs.
 
 If credentials are not configured — locally or in CI — the affected tests **skip**
 with a clear message rather than failing, so the suite stays green for contributors

@@ -4,7 +4,7 @@ description: "Iterative build repair process for the IssueManager .NET solution.
 confidence: high
 ---
 
-## Build Repair Skill
+# Build Repair Skill
 
 1. Reproduce the failure locally.
 2. Read the failing output and isolate the root cause.

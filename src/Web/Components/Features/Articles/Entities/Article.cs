@@ -7,6 +7,7 @@
 // Project Name :  Domain
 // =============================================
 
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using static Domain.Helpers.DomainHelpers;
@@ -104,6 +105,7 @@ public sealed class Article
 	///     Gets the structured record of images referenced inside <see cref="Content" />. See ADR-0003.
 	/// </summary>
 	[BsonElement("articleImages")]
+	[SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "Persisted to MongoDB through the EF Core provider; the stored shape is fixed by ADR-0003.")]
 	public List<ArticleImage> ArticleImages { get; private set; } = [];
 
 	private Article()
