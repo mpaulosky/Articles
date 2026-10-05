@@ -19,6 +19,7 @@ release. Standard library only, so no pip install is needed to run it.
 """
 
 import argparse
+import bisect
 import datetime
 import html
 import json
@@ -105,8 +106,16 @@ def render_commits(commits):
     if not commits:
         lines.append("No commits were found.")
     for commit in commits:
-        lines.append(f"- {commit_subject(commit)} (`{commit.get('sha', '')[:7]}`)")
+        lines.append(f"- {sanitize_inline(commit_subject(commit))} (`{commit.get('sha', '')[:7]}`)")
     return "\n".join(lines) + "\n"
+
+
+def code_name(name):
+    """A file name as inline code; one with a backtick or a risky character is written as <code> instead."""
+    if re.fullmatch(r"[A-Za-z0-9._/@+=,~()-]+(?: [A-Za-z0-9._/@+=,~()-]+)*", name):
+        return f"`{name}`"
+    # A space at either end would be trimmed by a code span, so the name keeps it as <code>.
+    return code_html(name, trim=False)
 
 
 def area_of(path):
@@ -126,7 +135,7 @@ def render_files(files):
             continue
         lines += [f"### {area}", ""]
         for file in sorted(groups[area], key=lambda f: f["filename"]):
-            lines.append(f"- `{file['filename']}` (+{file.get('additions', 0)} / -{file.get('deletions', 0)})")
+            lines.append(f"- {code_name(file['filename'])} (+{file.get('additions', 0)} / -{file.get('deletions', 0)})")
         lines.append("")
     return "\n".join(lines).rstrip("\n") + "\n"
 
@@ -340,7 +349,32 @@ def interrupts_paragraph(line):
     )
 
 
-def scan_blocks(lines, headings, code=None):
+def from_column(raw, column):
+    """The raw line from a column of its tab-expanded form on, tabs and all.
+
+    Columns are only used to find where the code starts; the code itself is
+    the raw text (#58). A tab that straddles the column leaves its remaining
+    columns as spaces, as CommonMark does.
+    """
+    raw = raw.removesuffix("\r")
+    col = 0
+    for pos, char in enumerate(raw):
+        if col >= column:
+            return " " * (col - column) + raw[pos:]
+        col = col + 4 - col % 4 if char == "\t" else col + 1
+    return " " * max(col - column, 0)
+
+
+def fence_content(raw, offset, rest, block):
+    """A fenced code line's text, from the raw line, with its containers and the opener's indent removed.
+
+    `rest` is the tab-expanded line from column `offset`, after its containers.
+    """
+    spaces = len(rest) - len(rest.lstrip(" "))
+    return from_column(raw, offset + min(spaces, block["indent"]))
+
+
+def scan_blocks(lines, headings, code=None, blocks=None, continued=None):
     """Finds the headings in Markdown lines, including those inside block quotes and list items.
 
     Appends (line index, prefix, level, rest of line) to `headings` for each
@@ -348,14 +382,22 @@ def scan_blocks(lines, headings, code=None):
     (container markers and indent). The later lines of a setext heading,
     including its underline, are set to None in `lines`. When `code` is a set,
     the indexes of fenced code and raw HTML block lines are added to it.
+    When `blocks` is a list, each fenced code block is appended to it as
+    {"kind": "fence", "lines", "content", "info", "nested"}, and each indented
+    code line as {"kind": "indented", "lines", "content", "nested"}, where
+    "nested" says whether a quote or list item holds it. When `continued` is
+    a set, the indexes of the lines that continue an open paragraph, lazily or
+    not, are added to it; every other line starts a block or is blank.
 
     This follows CommonMark's block parsing in one pass: each line first
     matches the open quotes and list items, may lazily continue an open
     paragraph, then opens new containers before its content is read. Columns
     are measured with tabs expanded to CommonMark's 4-column stops, and a
-    blank line holds only spaces and tabs (a non-breaking space is text).
+    blank line holds only spaces and tabs (a non-breaking space is text). A
+    code block's "content" is taken from the raw lines, tabs and all (#58).
     """
     code = set() if code is None else code
+    continued = set() if continued is None else continued
     # Open containers, outermost first: {"kind": "quote"}, or
     # {"kind": "list", "width": content column, "has_content": bool}.
     # quote_levels holds the stack positions of the quotes, so a blank line,
@@ -364,6 +406,7 @@ def scan_blocks(lines, headings, code=None):
     quote_levels = []
     paragraph = None  # [(line index, container prefix, text)] of the open paragraph
     fence = None
+    fence_block = None  # the open fence's entry in `blocks`
     html_end = None  # end condition of the open HTML block, see html_block_end()
 
     def mark_content():
@@ -404,18 +447,25 @@ def scan_blocks(lines, headings, code=None):
             )
             if paragraph is not None and rest.strip(" ") and not opens_block:
                 paragraph.append((index, line[:offset], rest))
+                continued.add(index)
                 continue
             del stack[matched:]
             while quote_levels and quote_levels[-1] >= matched:
                 quote_levels.pop()
-            paragraph = fence = html_end = None
+            paragraph = fence = fence_block = html_end = None
 
         if html_end is HTML_ENDS_AT_BLANK and not rest.strip(" "):
             html_end = None  # the blank line ends the block and is read as usual
         if fence is not None or html_end is not None:
             code.add(index)
             if fence is not None:
-                fence = None if closes_fence(fence, rest) else fence
+                closed = closes_fence(fence, rest)
+                if fence_block is not None:
+                    fence_block["lines"].append(index)
+                    if not closed:
+                        fence_block["content"].append(fence_content(raw, offset, rest, fence_block))
+                fence = None if closed else fence
+                fence_block = None if closed else fence_block
             elif html_block_ends(html_end, rest):
                 html_end = None
             continue
@@ -454,6 +504,16 @@ def scan_blocks(lines, headings, code=None):
             code.add(index)
             if fence_match:
                 fence = fence_match.group(1)
+                if blocks is not None:
+                    fence_block = {
+                        "kind": "fence",
+                        "lines": [index],
+                        "content": [],
+                        "info": fence_match.group(2),
+                        "indent": len(rest) - len(rest.lstrip(" ")),
+                        "nested": bool(stack),
+                    }
+                    blocks.append(fence_block)
             elif not html_block_ends(html_start, rest):
                 html_end = html_start
             paragraph = None
@@ -477,10 +537,387 @@ def scan_blocks(lines, headings, code=None):
                 paragraph = None
             else:
                 paragraph.append((index, line[:offset], rest))
+                continued.add(index)
             continue
-        if INDENTED_CODE.match(rest) or THEMATIC_BREAK.match(rest):
+        if INDENTED_CODE.match(rest):
+            if blocks is not None:
+                content = from_column(raw, offset + 4)
+                blocks.append({"kind": "indented", "lines": [index], "content": [content], "nested": bool(stack)})
+            continue
+        if THEMATIC_BREAK.match(rest):
             continue
         paragraph = [(index, line[:offset], rest)]
+
+
+# Untrusted Markdown. A PR's title, description and commits, and the AI
+# summary of them, are written into docs/blogs and published by GitHub Pages
+# (Jekyll, with kramdown), so none of them may carry live HTML, a script link,
+# a kramdown attribute list or Liquid. Code keeps its text: a code block is
+# re-emitted as a fence both parsers read the same way, and a code span holding
+# anything that's escaped elsewhere becomes <code> with every symbol as an
+# entity. From mpaulosky/dotfiles#48. Code is found first, on the raw text, and
+# everything else is changed only outside it (#58).
+
+SAFE_SCHEMES = {"http", "https", "mailto"}
+SCHEME = re.compile(r"([a-z][a-z0-9+.\-]*):")
+# Besides letters and digits, what a scheme can be written with: its own
+# symbols, the colon, entities (&#9; &colon;) and backslash escapes.
+SCHEME_TEXT = set("+.-:&#;\\")
+# Only these autolinks keep their angle brackets; any other "<" is escaped.
+AUTOLINK = re.compile(r"<(?:https?://|mailto:)[^\s<>\"'`\\]*>", re.I)
+LINK_DESTINATION_START = re.compile(r"\]\(|\]:")
+# A footnote definition's start, with kramdown's footnote ID (\w[\w-]*, and Ruby's \w is
+# ASCII): GitHub Pages reads any other "[^...]:" as a reference definition, a link.
+FOOTNOTE_DEFINITION = re.compile(r"[ \t>]*\[\^[A-Za-z0-9_][A-Za-z0-9_-]*\]:")
+# What inline_code() stops at: a backtick run, a comment's opener, and the "](" before a link destination.
+INLINE_MARK = re.compile(r"`+|<!--|\]\(")
+CONTAINER_MARKER = re.compile(r"[ \t]*(?:>|(?:[-+*]|[0-9]{1,9}[.)])(?=[ \t]|$))")
+BACKTICKS = re.compile(r"`+")
+# Characters that make a code span unsafe to leave between backticks: a parser
+# that pairs the backticks differently would read them as HTML, an attribute
+# list, Liquid or a link.
+CODE_SPAN_RISK = re.compile(r"[<{\]]")
+
+
+DECIMAL_ZEROS = re.compile(r"&#0+(?=[0-9])")
+HEX_ZEROS = re.compile(r"&#([xX])0+(?=[0-9a-fA-F])")
+# Past 8 digits no reference names a character: the largest is &#1114111; (&#x10FFFF;).
+OVERSIZED_REFERENCE = re.compile(r"&#(?:[xX][0-9a-fA-F]{9,}|[0-9]{9,});?")
+
+
+def safe_unescape(text):
+    """html.unescape that can't raise on untrusted text.
+
+    Python refuses to convert more than 4300 digits, so html.unescape raises
+    on "&#000...9;". Leading zeros don't change a reference's value, so they
+    go first, and a reference still too long for any character becomes
+    U+FFFD, as html.unescape makes any out-of-range one.
+    """
+    text = HEX_ZEROS.sub(r"&#\1", DECIMAL_ZEROS.sub("&#", text))
+    return html.unescape(OVERSIZED_REFERENCE.sub("\ufffd", text))
+
+
+def safe_destination(text, start):
+    """Whether the link destination starting at text[start] has no scheme, or one in SAFE_SCHEMES.
+
+    Browsers drop control characters and whitespace from a URL and decode
+    entities, so "java&#9;script:" is still a javascript: link. The whole
+    destination's scheme is read however long it is: padding ("j&#9;&#9;...
+    avascript:", or an entity's leading zeros) can push it arbitrarily far
+    from the start. The read stops at the first character that can't be part
+    of a scheme, an entity or an escape, so it never runs into the next "](".
+    """
+    end = start
+    while end < len(text) and (text[end].isalnum() or text[end] in SCHEME_TEXT):
+        end += 1
+    candidate = safe_unescape(text[start:end]).replace("\\", "")
+    candidate = "".join(char for char in candidate if char > " " and char != "\x7f").lower()
+    scheme = SCHEME.match(candidate)
+    return not scheme or scheme.group(1) in SAFE_SCHEMES
+
+
+def neutralize_links(text, at_line_start=True):
+    """The text with a "#" in front of each link destination whose scheme isn't safe.
+
+    Any "](" or "]:" counts, wherever it is, since a parser may read a link or
+    reference definition where this one wouldn't; the destination may follow
+    on the next line, after its quote markers. A "#" makes it a harmless
+    fragment link. A footnote definition ("[^1]: text", alone at the start of
+    its line) isn't a link; anything else ending in "]:", such as a label
+    holding an escaped "\\[^", is read as one. at_line_start is False for
+    text that follows a code span on its first line.
+    """
+    out = []
+    done = 0
+    for match in LINK_DESTINATION_START.finditer(text):
+        if match.group() == "]:":
+            line_start = text.rfind("\n", 0, match.start()) + 1
+            if (line_start or at_line_start) and FOOTNOTE_DEFINITION.fullmatch(text, line_start, match.end()):
+                continue
+        start = match.end()
+        while start < len(text) and text[start] in " \t\n>":
+            start += 1
+        if start < len(text) and text[start] == "<":
+            start += 1
+        if start >= done and not safe_destination(text, start):
+            out.append(text[done:start] + "#")
+            done = start
+    return "".join(out) + text[done:]
+
+
+def odd_backslashes_before(text, pos):
+    count = 0
+    while pos - count > 0 and text[pos - count - 1] == "\\":
+        count += 1
+    return count % 2 == 1
+
+
+def code_html(content, trim=True):
+    """A code span's text as <code>, every character but letters, digits and spaces as an entity.
+
+    trim strips one space from each end, as CommonMark does for a code span;
+    a file name, which isn't one, keeps them.
+    """
+    if trim and len(content) > 1 and content.startswith(" ") and content.endswith(" ") and content.strip(" "):
+        content = content[1:-1]  # CommonMark strips one space from each side
+    return "<code>" + "".join(char if char.isalnum() or char == " " else f"&#{ord(char)};" for char in content) + "</code>"
+
+
+def escape_text(text, liquid):
+    """Escape the HTML, attribute lists and (with liquid) Liquid in text outside code spans."""
+    out = []
+    pos = 0
+    while pos < len(text):
+        char = text[pos]
+        if char == "<" and not odd_backslashes_before(text, pos):
+            autolink = AUTOLINK.match(text, pos)
+            if autolink:
+                out.append(autolink.group())
+                pos = autolink.end()
+                continue
+            out.append("&lt;")
+        elif char == "{" and (liquid or text.startswith("{:", pos)):  # even after a backslash: parsers differ
+            out.append("&#123;")
+        else:
+            out.append(char)
+        pos += 1
+    return "".join(out)
+
+
+def escape_fence_marker(line):
+    """The line with its first backtick or tilde escaped when it could open a fence.
+
+    A real fence was re-emitted already, so this one only looked like one
+    where it sat (in an HTML block, say).
+    """
+    pos = 0
+    while True:
+        marker = CONTAINER_MARKER.match(line, pos)
+        if not marker or marker.end() == pos:
+            break
+        pos = marker.end()
+    rest = line[pos:].lstrip(" \t")
+    if rest.startswith(("```", "~~~")):
+        cut = len(line) - len(rest)
+        line = line[:cut] + "\\" + line[cut:]
+    return line
+
+
+def paragraph_breaks(lines, continues=None):
+    """The offset, in "\\n".join(lines), of each line but the first that doesn't continue the paragraph before it.
+
+    continues[i] says whether lines[i] continues a paragraph, as scan_blocks()
+    reports it in `continued`. A caller that scanned the whole document passes
+    it, so a run of its lines is read in its place (#58); without it, the lines
+    are scanned on their own.
+    """
+    if continues is None:
+        continued = set()
+        scan_blocks(list(lines), [], continued=continued)
+        continues = [index in continued for index in range(len(lines))]
+    breaks = []
+    offset = 0
+    for index, line in enumerate(lines):
+        if index and not continues[index]:
+            breaks.append(offset)
+        offset += len(line) + 1
+    return breaks
+
+
+def link_end(text, start, limit):
+    """The end of a complete inline link's destination and title, read from just after its "](", or None.
+
+    CommonMark reads them when it reaches the "]", before any backtick in them,
+    so they hold no code span: [x](docs/a.md "Use `code`") is one link.
+    The link must end before `limit`, the end of its paragraph.
+    """
+    while start < limit and text[start] in " \t":
+        start += 1
+    angle = LINK_ANGLE_DESTINATION.match(text, start)
+    end = angle.end() if angle else bare_destination_end(text, start)
+    tail = LINK_INLINE_TAIL.match(text, end) if end is not None else None
+    return tail.end() if tail and tail.end() <= limit else None
+
+
+def inline_code(text, continues=None):
+    """Each code span and HTML comment in Markdown text, as (start, end, content); content is None for a comment.
+
+    The text is read left to right, as CommonMark reads it, and whatever
+    starts first wins: a backtick before "<!--" opens a span that may hold the
+    comment's opener, and a comment hides the backticks inside it. A run opens
+    a span only where a later run of the same length closes it; a backslash
+    escapes a run's first backtick. A span may cross line breaks, but only
+    within its paragraph (#57); `continues` is as for paragraph_breaks(). A
+    comment ends at the first "-->", wherever it is, as the sanitizer has
+    always dropped it. A complete inline link's destination and title are
+    skipped, so their backticks open no span (#58).
+
+    Runs and paragraph ends are indexed once, and bare_destination_end() caps
+    how far a link is read, so the scan stays linear.
+    """
+    breaks = paragraph_breaks(text.split("\n"), continues)
+    starts_by_length = {}
+    for match in BACKTICKS.finditer(text):
+        starts_by_length.setdefault(len(match.group()), []).append(match.start())
+    comments_can_close = True  # False once a "<!--" found no "-->" after it
+    pos = 0
+    while mark := INLINE_MARK.search(text, pos):
+        start, token = mark.start(), mark.group()
+        pos = mark.end()
+        paragraph = bisect.bisect_right(breaks, start)
+        paragraph_end = breaks[paragraph] if paragraph < len(breaks) else len(text)
+        if token == "<!--":
+            close = text.find("-->", pos) if comments_can_close else -1
+            if close < 0:
+                comments_can_close = False
+                continue
+            yield start, close + 3, None
+            pos = close + 3
+        elif token == "](":
+            end = None if odd_backslashes_before(text, start) else link_end(text, pos, paragraph_end)
+            pos = pos if end is None else end
+        else:
+            length = len(token)
+            if odd_backslashes_before(text, start):
+                start, length = start + 1, length - 1
+                if not length:
+                    continue
+            after = start + length
+            candidates = starts_by_length.get(length, [])
+            index = bisect.bisect_left(candidates, after)
+            if index < len(candidates) and candidates[index] < paragraph_end:
+                closer = candidates[index]
+                yield start, closer + length, text[after:closer]
+                pos = closer + length
+
+
+def code_spans(text, continues=None):
+    """Each code span in Markdown text, as (start, end, content), as inline_code() finds them."""
+    return ((start, end, content) for start, end, content in inline_code(text, continues) if content is not None)
+
+
+def link_label(markdown):
+    """Sanitized Markdown made safe as a link's text: brackets outside code spans become entities.
+
+    A title's "]" would otherwise close the label early, so "fix: ](https://x)"
+    would make the row link somewhere else. A code span keeps its "[". Every
+    "]" becomes an entity, even in what reads as a span here: a span the
+    sanitizer kept as written has none, so any "]" this finds in one comes from
+    a pairing the sanitizer didn't make, and a parser may not make it either.
+    """
+    out = []
+    done = 0
+    for start, end, _ in [*code_spans(markdown), (len(markdown), len(markdown), "")]:
+        out.append(markdown[done:start].replace("[", "&#91;") + markdown[start:end])
+        done = end
+    return "".join(out).replace("]", "&#93;")
+
+
+def sanitize_text(text, continues=None, liquid=False):
+    """Untrusted Markdown text (no code blocks) made safe to publish; HTML comments are dropped.
+
+    Code spans and comments are found first, on the raw text, so code keeps
+    its text (#58). A span holding anything risky becomes <code>; one that
+    crossed a line break has it as a space, as CommonMark renders it. The rest
+    is prose: the comments are dropped from it, so a destination a comment
+    split is read whole, then its links are neutralized and its HTML escaped.
+    `continues` is as for paragraph_breaks().
+    """
+    out = []
+    prose = []  # the prose since the last span, without its comments
+    at_line_start = True
+    done = 0
+    for start, end, content in inline_code(text, continues):
+        prose.append(text[done:start])
+        done = end
+        if content is None:
+            continue
+        out.append(escape_text(neutralize_links("".join(prose), at_line_start), liquid))
+        out.append(code_html(content.replace("\n", " ")) if CODE_SPAN_RISK.search(content) else text[start:end])
+        prose = []
+        at_line_start = False
+    prose.append(text[done:])
+    out.append(escape_text(neutralize_links("".join(prose), at_line_start), liquid))
+    # Last, so a fence marker that a dropped comment brought to the start of a line is escaped too.
+    return "\n".join(escape_fence_marker(line) for line in "".join(out).split("\n"))
+
+
+def sanitize_inline(text, liquid=False):
+    """A single line of untrusted text, such as a PR title or commit subject, made safe to publish."""
+    return sanitize_text(text, liquid=liquid)
+
+
+def code_fence(content, info):
+    """A fenced code block's lines, read the same way by CommonMark and kramdown.
+
+    The fence is longer than any backtick run in the code, so no line inside
+    closes it, and it always has an info string, so it can't close a fence
+    left open before it.
+    """
+    longest = max((len(run) for line in content for run in BACKTICKS.findall(line)), default=0)
+    fence = "`" * max(3, longest + 1)
+    word = re.match(r"[A-Za-z0-9_+#.-]+", info.strip())
+    return [fence + (word.group() if word else "text"), *content, fence]
+
+
+def code_blocks(lines, continued=None):
+    """The fenced and indented code blocks in Markdown lines, as scan_blocks() lists them, each with an "info".
+
+    Indented code lines separated only by blank lines are one block, the
+    blank lines included. `continued` is passed on to scan_blocks().
+    """
+    blocks = []
+    scan_blocks(list(lines), [], blocks=blocks, continued=continued)
+    merged = []
+    for block in blocks:
+        last = merged[-1] if merged else None
+        if (
+            block["kind"] == "indented"
+            and last is not None
+            and last["kind"] == "indented"
+            and all(not lines[i].strip(" \t") for i in range(last["lines"][-1] + 1, block["lines"][0]))
+        ):
+            gap = block["lines"][0] - last["lines"][-1] - 1
+            last["content"] += [""] * gap + block["content"]
+            last["lines"].append(block["lines"][-1])
+        else:
+            merged.append(dict(block, info=block.get("info", "")))
+    return merged
+
+
+def sanitize_markdown(markdown):
+    """Untrusted Markdown, such as a PR description, made safe to publish on GitHub Pages.
+
+    Every code block, nested or not, becomes a top-level fence (a block in a
+    list or quote moves out of it), with a blank line on each side; everything
+    else is text for sanitize_text. The document is scanned once, so each run
+    of text is paired in its place. Runs of blank lines in the text become
+    one; the code keeps its own.
+    """
+    lines = re.split(r"\r\n|\r|\n", markdown)
+    continued = set()
+    starts = {block["lines"][0]: block for block in code_blocks(lines, continued)}
+
+    def text(first, end):
+        sanitized = sanitize_text("\n".join(lines[first:end]), [i in continued for i in range(first, end)])
+        return re.sub(r"\n{3,}", "\n\n", sanitized).strip("\n")
+
+    chunks = []
+    first = index = 0
+    while index < len(lines):
+        block = starts.get(index)
+        if block is None:
+            index += 1
+            continue
+        chunks += [text(first, index), "\n".join(code_fence(block["content"], block["info"]))]
+        first = index = block["lines"][-1] + 1
+    chunks.append(text(first, len(lines)))
+    return "\n\n".join(chunk for chunk in chunks if chunk)
+
+
+def break_liquid_raw(text):
+    """Text that can sit inside {% raw %}: each "{%" that would read as {% endraw %} is printed by Liquid instead."""
+    return re.sub(r"\{%(?=-?\s*endraw)", "{% endraw %}{{ '{%' }}{% raw %}", text)
 
 
 def nest_headings(markdown):
@@ -535,17 +972,20 @@ def render_post(pr, title_line, tag, merged_date, commits, files, summary, model
         ]
     )
     sections = [
-        f"# {title_line}\n\n"
+        f"# {sanitize_inline(title_line)}\n\n"
         f"- **Release tag:** `{tag}`\n"
         f"- **Source PR:** [#{number}]({pr.get('html_url') or ''})\n"
     ]
     if summary:
-        sections.append(f"## Summary\n\n{nest_headings(summary)}\n")
+        sections.append(f"## Summary\n\n{nest_headings(sanitize_markdown(summary))}\n")
     body = (pr.get("body") or "").strip() or "No PR description was provided."
-    sections.append(f"## PR description\n\n{nest_headings(body)}\n")
+    sections.append(f"## PR description\n\n{nest_headings(sanitize_markdown(body))}\n")
     sections.append(render_commits(commits))
     sections.append(render_files(files))
-    return front_matter + "\n".join(sections)
+    # Jekyll runs Liquid over the page first, even inside code; raw keeps the
+    # text as written. The tags sit in HTML comments, so neither GitHub's view
+    # of the file nor the Pages site shows them.
+    return front_matter + "<!-- {% raw %} -->\n" + break_liquid_raw("\n".join(sections)) + "\n<!-- {% endraw %} -->\n"
 
 
 def update_blog_index(blog_dir, merged_date, title_line, post_name):
@@ -570,7 +1010,7 @@ def update_blog_index(blog_dir, merged_date, title_line, post_name):
         linked = re.search(r"\]\(([^)]+\.md)\)", row)
         return not linked or (blog_dir / linked.group(1)).exists()
 
-    row_title = title_line.replace("|", "\\|")
+    row_title = link_label(sanitize_inline(title_line, liquid=True)).replace("|", "\\|")
     rows = [r for r in rows if f"({post_name})" not in r and linked_post_exists(r)]
     rows.insert(0, f"| {merged_date} | [{row_title}]({post_name}) | release,automation |")
 
@@ -675,10 +1115,11 @@ def first_paragraph(markdown):
     """The first paragraph of prose or list text, as plain text."""
     for block in re.split(r"\n\s*\n", blank_code(markdown)):
         lines = [line.strip() for line in block.strip().splitlines()]
-        if not lines or lines[0].startswith(("#", "|", "<!--", ">")):
+        # "&lt;" opens what was an HTML block before the post escaped it.
+        if not lines or lines[0].startswith(("#", "|", "<!--", ">", "&lt;")):
             continue
         # Join list items and wrapped lines into one line of text.
-        plain = plain_text(" ".join(re.sub(r"^(?:[-*+]|\d+[.)])\s+", "", line) for line in lines))
+        plain = plain_text(" ".join(re.sub(r"^(?:[-*+]|\d+[.)])(?:\s+|$)", "", line) for line in lines))
         if plain and not ISSUE_REFERENCE.match(plain):
             return plain
     return ""
@@ -698,6 +1139,9 @@ def plain_text(markdown):
     text = re.sub(r"(\*\*|\*)(\S(?:.*?\S)?)\1", r"\2", text)
     # Underscores only mark emphasis at word edges, so snake_case names keep theirs.
     text = re.sub(r"(?<!\w)(__|_)(\S(?:.*?\S)?)\1(?!\w)", r"\2", text)
+    # What sanitize_markdown escaped reads as the text it stands for.
+    text = re.sub(r"</?code>", "", text)
+    text = safe_unescape(re.sub(r"\\([!-/:-@\[-`{-~])", r"\1", text))
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -777,7 +1221,7 @@ def render_releases_markdown(entries):
     rows = []
     for entry in entries:
         blog_cell = f"[Post]({entry['post_url']})" if entry["post_url"] else "—"
-        title = entry["title"].replace("|", "\\|")
+        title = sanitize_inline(entry["title"], liquid=True).replace("|", "\\|")
         rows.append(f"| [{entry['tag']}]({entry['url']}) | {entry['date']} | {title} | {blog_cell} |")
     return "\n".join(
         [
@@ -870,6 +1314,17 @@ def replace_between(text, name, lines):
     return text[: match.start()] + block + text[match.end() :]
 
 
+def collapse_blank_lines(markdown):
+    """Markdown with each run of empty lines outside code cut to one; code keeps its own (#58)."""
+    lines = markdown.split("\n")
+    code = {index for block in code_blocks(lines) for index in range(block["lines"][0], block["lines"][-1] + 1)}
+    out = []
+    for index, line in enumerate(lines):
+        if not (line == "" and out and out[-1] == "" and index not in code):
+            out.append(line)
+    return "\n".join(out)
+
+
 def update_readme(readme, releases_block, repository):
     # Migrate READMEs written by the previous workflow: drop the legacy
     # Dev Blog section and its BLOG_START/BLOG_END block.
@@ -879,7 +1334,7 @@ def update_readme(readme, releases_block, repository):
         readme,
         flags=re.DOTALL | re.MULTILINE,
     )
-    readme = re.sub(r"\n{3,}", "\n\n", readme).strip("\n") + "\n" if readme.strip() else ""
+    readme = collapse_blank_lines(readme).strip("\n") + "\n" if readme.strip() else ""
 
     if "<!-- RELEASES_START -->" in readme and "<!-- RELEASES_END -->" in readme:
         return re.sub(
@@ -930,13 +1385,13 @@ def update_index_html(path, entries, posts, repository):
 # (title), then the closing parenthesis.
 LINK_INLINE_TAIL = re.compile(r"""(?:[ \t]+(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\((?:[^()\\]|\\.)*\)))?[ \t]*\)""")
 LINK_ANGLE_DESTINATION = re.compile(r"<((?:[^<>\n\\]|\\.)+)>")
+# cmark's limit on nested parentheses in a bare destination.
+LINK_PAREN_DEPTH = 32
 LINK_REFERENCE = re.compile(r"^(\s{0,3}\[[^\]]+\]:\s*)(<?)(\S+?)(>?)(?=\s|$)", re.MULTILINE)
 # Not preceded by a name character, so data-src is not src, but a tag's
 # continuation line may start with one. ASCII, as for HTML_BLOCKS: "\u017f"
 # must not case-fold into "src".
 LINK_HTML_ATTRIBUTE = re.compile(r"""(?<![\w-])((?:src|href)\s*=\s*)(?:"([^"]+)"|'([^']+)'|([^\s"'=<>`]+))""", re.I | re.A)
-# Any indent, so a fence inside a list item is still skipped.
-LINK_FENCE = re.compile(r"^\s*(`{3,}|~{3,})(.*)$")
 
 
 def rebase_link(target):
@@ -954,7 +1409,10 @@ def bare_destination_end(line, start):
 
     It runs to the first space or control character, or the first ")" that
     closes no "(" of its own, so docs/a_(b).md is one destination; a
-    backslash escapes the next character.
+    backslash escapes the next character. Parentheses nest at most
+    LINK_PAREN_DEPTH deep, as CommonMark lets a parser limit them: each "]("
+    is read up to there at most, so text full of them is still read in
+    linear time.
     """
     depth = 0
     pos = start
@@ -967,6 +1425,8 @@ def bare_destination_end(line, start):
             break
         if char == "(":
             depth += 1
+            if depth > LINK_PAREN_DEPTH:
+                return None
         elif char == ")":
             if not depth:
                 break
@@ -1009,51 +1469,72 @@ def rebase_html_attribute(match):
             return match.group(1) + quote + rebase_link(match.group(group)) + quote
 
 
-def quote_prefix(line, depth=None):
-    """(block quote markers at the start of the line, the rest), counting at most `depth` markers."""
-    count = pos = 0
-    while depth is None or count < depth:
-        quote_match = QUOTE_AT.match(line, pos)
-        if not quote_match:
-            break
-        count += 1
-        pos = quote_match.end()
-    return count, line[pos:]
+def rebase_text_links(lines, continues=None):
+    """Lines of Markdown text with their links rebased; code spans, which may cross lines, are left alone.
+
+    A reference definition is read before any code span, so code in its label
+    doesn't hide its destination, and so is an inline link's destination and
+    title, so code in its title doesn't either (#58). `continues` is as for
+    paragraph_breaks().
+    """
+    text = "\n".join(lines)
+    spans = [(start, end) for start, end, _ in code_spans(text, continues)]  # in order, never overlapping
+    first = 0  # the first span that may still reach this line or a later one
+    out = []
+    offset = 0
+    for line in lines:
+        end_of_line = offset + len(line)
+        while first < len(spans) and spans[first][1] <= offset:
+            first += 1
+        # The parts of this line inside a span, relative to the line.
+        inside = []
+        index = first
+        while index < len(spans) and spans[index][0] < end_of_line:
+            start, end = spans[index]
+            inside.append((max(start, offset) - offset, min(end, end_of_line) - offset))
+            index += 1
+        reference = LINK_REFERENCE.match(line)
+        if reference and not any(start <= reference.start(3) < end for start, end in inside):
+            out.append(line[:reference.start(3)] + rebase_link(reference.group(3)) + line[reference.end(3):])
+        else:
+            parts = []
+            done = 0
+            for start, end in [*inside, (len(line), len(line))]:
+                prose = rebase_inline_links(line[done:start])
+                parts.append(LINK_HTML_ATTRIBUTE.sub(rebase_html_attribute, prose) + line[start:end])
+                done = end
+            out.append("".join(parts))
+        offset = end_of_line + 1
+    return out
 
 
 def rebase_readme_links(markdown):
-    """The README text with every relative link rebased for docs/README.md; fenced code is left alone.
+    """The README text with every relative link rebased for docs/README.md; code is left alone.
 
-    A fence belongs to the block quote it opens in: it closes on a line at
-    that quote depth, or ends with the quote when a line lacks its markers.
+    Fenced and indented code blocks, at any depth, are copied as they are, and
+    so are code spans. In a raw HTML block backticks are text, so its whole
+    line is rebased. The README is scanned once, so each run of text is
+    paired in its place.
     """
+    lines = markdown.split("\n")
+    raw = set()
+    blocks = []
+    continued = set()
+    scan_blocks(list(lines), [], raw, blocks, continued)
+    code = {index for block in blocks for index in block["lines"]}
+
+    def text(first, end):
+        return rebase_text_links(lines[first:end], [i in continued for i in range(first, end)])
+
     out = []
-    fence = None
-    for line in markdown.splitlines(keepends=True):
-        if fence is not None:
-            depth, marker = fence
-            line_depth, rest = quote_prefix(line, depth)
-            if line_depth == depth:
-                fence_match = LINK_FENCE.match(rest)
-                # Closed by a run of the same character, at least as long, with no info string.
-                if fence_match:
-                    closer, info = fence_match.groups()
-                    if closer[0] == marker[0] and len(closer) >= len(marker) and not info.strip():
-                        fence = None
-                out.append(line)
-                continue
-            fence = None
-        depth, rest = quote_prefix(line)
-        fence_match = LINK_FENCE.match(rest)
-        if fence_match:
-            fence = (depth, fence_match.group(1))
-            out.append(line)
-            continue
-        line = rebase_inline_links(line)
-        line = LINK_REFERENCE.sub(lambda m: m.group(1) + m.group(2) + rebase_link(m.group(3)) + m.group(4), line)
-        line = LINK_HTML_ATTRIBUTE.sub(rebase_html_attribute, line)
-        out.append(line)
-    return "".join(out)
+    first = 0  # the first line of the run of text since the last code or HTML line
+    for index, line in enumerate(lines):
+        if index in code or index in raw:
+            out += text(first, index)
+            first = index + 1
+            out.append(line if index in code else LINK_HTML_ATTRIBUTE.sub(rebase_html_attribute, rebase_inline_links(line)))
+    out += text(first, len(lines))
+    return "\n".join(out)
 
 
 def write_post(gh, pr_number, tag, root=Path("."), api_key=None, model=DEFAULT_MODEL, urlopen=urllib.request.urlopen):
