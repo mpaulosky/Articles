@@ -54,6 +54,8 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.108](https://github.com/mpaulosky/Articles/releases/tag/v0.1.108) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template for the release-post fixes | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-291-chore-re-apply-the-repo-ci-baseline-template-for-the-release-post-fixes.md) |
+| [v0.1.107](https://github.com/mpaulosky/Articles/releases/tag/v0.1.107) | 2026-10-05 | chore: Use pnpm instead of npm and npx in the Squad files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-287-chore-use-pnpm-instead-of-npm-and-npx-in-the-squad-files.md) |
 | [v0.1.106](https://github.com/mpaulosky/Articles/releases/tag/v0.1.106) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-286-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.105](https://github.com/mpaulosky/Articles/releases/tag/v0.1.105) | 2026-10-05 | docs: Update ADRs for renamed CI and release workflows | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-288-docs-update-adrs-for-renamed-ci-and-release-workflows.md) |
 | [v0.1.104](https://github.com/mpaulosky/Articles/releases/tag/v0.1.104) | 2026-10-05 | chore: Ignore local SDK caches, coverage reports and personal files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-284-chore-ignore-local-sdk-caches-coverage-reports-and-personal-files.md) |
@@ -62,8 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.101](https://github.com/mpaulosky/Articles/releases/tag/v0.1.101) | 2026-09-29 | build: write a single-document pnpm lockfile | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) |
 | [v0.1.100](https://github.com/mpaulosky/Articles/releases/tag/v0.1.100) | 2026-09-29 | build: switch the web project from npm to pnpm | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) |
 | [v0.1.99](https://github.com/mpaulosky/Articles/releases/tag/v0.1.99) | 2026-09-28 | chore(web): Stop committing the generated app.css | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) |
-| [v0.1.98](https://github.com/mpaulosky/Articles/releases/tag/v0.1.98) | 2026-09-28 | ci: Lint workflows and shell scripts before push and in CI | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-268-ci-lint-workflows-and-shell-scripts-before-push-and-in-ci.md) |
-| [v0.1.97](https://github.com/mpaulosky/Articles/releases/tag/v0.1.97) | 2026-09-28 | ci: Key the Dependabot secret gate on the dependabot/* branch | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-266-ci-key-the-dependabot-secret-gate-on-the-dependabot-branch.md) |
 
 <!-- RELEASES_END -->
 
