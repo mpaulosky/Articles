@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.103](https://github.com/mpaulosky/Articles/releases/tag/v0.1.103) | 2026-10-05 | chore: Standardize on the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-280-chore-standardize-on-the-repo-ci-baseline-template.md) |
 | [v0.1.102](https://github.com/mpaulosky/Articles/releases/tag/v0.1.102) | 2026-10-04 | fix(squad): Close the remaining branch-cleanup edge cases | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) |
 | [v0.1.101](https://github.com/mpaulosky/Articles/releases/tag/v0.1.101) | 2026-09-29 | build: write a single-document pnpm lockfile | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) |
 | [v0.1.100](https://github.com/mpaulosky/Articles/releases/tag/v0.1.100) | 2026-09-29 | build: switch the web project from npm to pnpm | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.96](https://github.com/mpaulosky/Articles/releases/tag/v0.1.96) | 2026-09-28 | ci: Withhold secrets from Dependabot-authored PRs, whoever runs them | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-264-ci-withhold-secrets-from-dependabot-authored-prs-whoever-runs-them.md) |
 | [v0.1.95](https://github.com/mpaulosky/Articles/releases/tag/v0.1.95) | 2026-09-28 | ci: Keep credentialed E2E tests off Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-262-ci-keep-credentialed-e2e-tests-off-dependabot-prs.md) |
 | [v0.1.94](https://github.com/mpaulosky/Articles/releases/tag/v0.1.94) | 2026-09-28 | ci: Run the test suite on Dependabot PRs | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-259-ci-run-the-test-suite-on-dependabot-prs.md) |
-| [v0.1.93](https://github.com/mpaulosky/Articles/releases/tag/v0.1.93) | 2026-09-28 | chore(deps): Fix Dependabot config | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-257-chore-deps-fix-dependabot-config.md) |
 
 <!-- RELEASES_END -->
 
