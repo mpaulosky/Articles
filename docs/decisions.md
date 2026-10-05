@@ -5,14 +5,15 @@ Lasting decisions about Articles that don't warrant a full ADR. Architectural de
 
 ## Tailwind shared component styles
 
-Component CSS shared across pages lives in `src/Web/Styles/app.tailwind.css`, as reusable Tailwind component classes
+Component CSS shared across pages lives in `src/Web/wwwroot/app.tailwind.css`, as reusable Tailwind component classes
 (headings such as `h1` to `h3`, and common layout patterns), rather than repeated utility lists in each page.
 
 ## Auth0 Management API configuration is separate from login
 
 Server-side user and role management uses the Auth0 Management API through its own configuration namespace
-(`Auth0Management:*`) and service layer. It authenticates with the client-credentials flow (machine to machine), so it
-is independent of the user-login configuration (`Auth0:*`).
+(`Auth0:Management:*`, read by `Auth0ManagementApiClientFactory`) and service layer. It authenticates with the
+client-credentials flow (machine to machine), so it is independent of the user-login settings (`Auth0:Domain`,
+`Auth0:ClientId`, `Auth0:ClientSecret`).
 
 ## Squad removed (2026-10)
 
