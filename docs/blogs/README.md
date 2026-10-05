@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-10-05 | [chore: Ignore local SDK caches, coverage reports and personal files](2026-10-05-pr-284-chore-ignore-local-sdk-caches-coverage-reports-and-personal-files.md) | release,automation |
 | 2026-10-05 | [chore: Standardize on the repo-ci-baseline Template](2026-10-05-pr-280-chore-standardize-on-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-04 | [fix(squad): Close the remaining branch-cleanup edge cases](2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) | release,automation |
 | 2026-09-29 | [build: write a single-document pnpm lockfile](2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) | release,automation |
