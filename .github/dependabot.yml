@@ -1,6 +1,8 @@
 # Dependabot version updates. Every label used below must exist in the repo:
 # Dependabot doesn't create them, and silently leaves them off the PR.
 # https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+# This file is Seed, so it belongs to the repo: add its other ecosystems and
+# its own ignores here.
 ---
 
 version: 2
@@ -15,6 +17,10 @@ updates:
       day: "sunday"
       time: "16:00"
     open-pull-requests-limit: 10
+    # Conventional commits, like the repo's own: "chore(deps): bump ...".
+    commit-message:
+      prefix: "chore"
+      include: "scope"
     # Wait a week before proposing a new release, so a compromised or broken
     # one is usually caught upstream before it reaches a PR here.
     cooldown:
@@ -36,6 +42,10 @@ updates:
       day: "sunday"
       time: "16:00"
     open-pull-requests-limit: 10
+    # Conventional commits, like the repo's own: "chore(deps): bump ...".
+    commit-message:
+      prefix: "chore"
+      include: "scope"
     # Wait a week before proposing a new release, so a compromised or broken
     # one is usually caught upstream before it reaches a PR here.
     cooldown:
@@ -44,6 +54,12 @@ updates:
       - "nuget"
       - "dependencies"
     groups:
+      # Testcontainers modules only work with the matching core version,
+      # so they always move together. A dependency joins the first group
+      # that matches it, so this group stays ahead of all-nuget.
+      testcontainers:
+        patterns:
+          - "Testcontainers*"
       all-nuget:
         patterns:
           - "*"
@@ -57,6 +73,10 @@ updates:
       day: "sunday"
       time: "16:00"
     open-pull-requests-limit: 10
+    # Conventional commits, like the repo's own: "chore(deps): bump ...".
+    commit-message:
+      prefix: "chore"
+      include: "scope"
     # Wait a week before proposing a new release, so a compromised or broken
     # one is usually caught upstream before it reaches a PR here.
     cooldown:
@@ -78,6 +98,10 @@ updates:
       day: "sunday"
       time: "16:00"
     open-pull-requests-limit: 10
+    # Conventional commits, like the repo's own: "chore(deps): bump ...".
+    commit-message:
+      prefix: "chore"
+      include: "scope"
     # Wait a week before proposing a new release, so a compromised or broken
     # one is usually caught upstream before it reaches a PR here.
     cooldown:
