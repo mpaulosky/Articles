@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.109](https://github.com/mpaulosky/Articles/releases/tag/v0.1.109) | 2026-10-07 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-07-pr-293-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.108](https://github.com/mpaulosky/Articles/releases/tag/v0.1.108) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template for the release-post fixes | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-291-chore-re-apply-the-repo-ci-baseline-template-for-the-release-post-fixes.md) |
 | [v0.1.107](https://github.com/mpaulosky/Articles/releases/tag/v0.1.107) | 2026-10-05 | chore: Use pnpm instead of npm and npx in the Squad files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-287-chore-use-pnpm-instead-of-npm-and-npx-in-the-squad-files.md) |
 | [v0.1.106](https://github.com/mpaulosky/Articles/releases/tag/v0.1.106) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-286-chore-re-apply-the-repo-ci-baseline-template.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.102](https://github.com/mpaulosky/Articles/releases/tag/v0.1.102) | 2026-10-04 | fix(squad): Close the remaining branch-cleanup edge cases | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) |
 | [v0.1.101](https://github.com/mpaulosky/Articles/releases/tag/v0.1.101) | 2026-09-29 | build: write a single-document pnpm lockfile | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-274-build-write-a-single-document-pnpm-lockfile.md) |
 | [v0.1.100](https://github.com/mpaulosky/Articles/releases/tag/v0.1.100) | 2026-09-29 | build: switch the web project from npm to pnpm | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-29-pr-272-build-switch-the-web-project-from-npm-to-pnpm.md) |
-| [v0.1.99](https://github.com/mpaulosky/Articles/releases/tag/v0.1.99) | 2026-09-28 | chore(web): Stop committing the generated app.css | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-09-28-pr-270-chore-web-stop-committing-the-generated-app-css.md) |
 
 <!-- RELEASES_END -->
 

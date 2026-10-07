@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-10-07 | [chore: Re-apply the repo-ci-baseline Template](2026-10-07-pr-293-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-05 | [chore: Re-apply the repo-ci-baseline Template for the release-post fixes](2026-10-05-pr-291-chore-re-apply-the-repo-ci-baseline-template-for-the-release-post-fixes.md) | release,automation |
 | 2026-10-05 | [chore: Use pnpm instead of npm and npx in the Squad files](2026-10-05-pr-287-chore-use-pnpm-instead-of-npm-and-npx-in-the-squad-files.md) | release,automation |
 | 2026-10-05 | [chore: Re-apply the repo-ci-baseline Template](2026-10-05-pr-286-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
