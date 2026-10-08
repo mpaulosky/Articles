@@ -1,18 +1,14 @@
 FROM node:22-bookworm
 
-# Install system dependencies
+# Install system dependencies. libicu is for .NET, python3 for the test
+# discovery .sandcastle/check.sh shares with CI. There's no GitHub CLI: the
+# sandbox never talks to GitHub (see main.mts).
 RUN apt-get update && apt-get install -y \
   git \
   curl \
   jq \
-  && rm -rf /var/lib/apt/lists/*
-
-# Install GitHub CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-  | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-  | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-  && apt-get update && apt-get install -y gh \
+  libicu72 \
+  python3 \
   && rm -rf /var/lib/apt/lists/*
 
 # Build-args for UID/GID alignment: sandcastle docker build-image
@@ -23,13 +19,28 @@ ARG AGENT_GID=1000
 
 # Rename the base image's "node" user to "agent" and align UID/GID.
 RUN groupmod -o -g $AGENT_GID node && usermod -o -u $AGENT_UID -g $AGENT_GID -d /home/agent -m -l agent node
+
+# pnpm through Corepack, at the version package.json's "packageManager" pins
+# (the root one for Sandcastle, src/Web's for the Tailwind build).
+RUN corepack enable pnpm
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 USER ${AGENT_UID}:${AGENT_GID}
 
 # Install Claude Code CLI
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
-# Add Claude to PATH
-ENV PATH="/home/agent/.local/bin:$PATH"
+# Install the .NET SDK that global.json pins. It pins 10.0.401 with
+# rollForward latestMinor, so the latest 10.0 SDK satisfies it.
+RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
+  && bash /tmp/dotnet-install.sh --channel 10.0 --install-dir /home/agent/.dotnet \
+  && rm /tmp/dotnet-install.sh
+
+ENV DOTNET_ROOT="/home/agent/.dotnet" \
+  DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+  DOTNET_NOLOGO=1
+
+# Add Claude and .NET to PATH
+ENV PATH="/home/agent/.local/bin:/home/agent/.dotnet:/home/agent/.dotnet/tools:$PATH"
 
 WORKDIR /home/agent
 

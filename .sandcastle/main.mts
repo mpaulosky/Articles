@@ -1,240 +1,133 @@
-// Parallel Planner with Review — four-phase orchestration loop
+// Parallel Planner with Review: plan → build → review → pull request loop
 //
-// This template drives a multi-phase workflow:
-//   Phase 1 (Plan):             An opus agent analyzes open issues, builds a
-//                               dependency graph, and outputs a <plan> JSON
-//                               listing unblocked issues. The host names
-//                               each issue's branch (lib/branches.mts).
-//   Phase 2 (Execute + Review): For each issue, a sandbox is created via
-//                               createSandbox(). The implementer runs first
-//                               (100 iterations). If it produces commits, a
-//                               reviewer runs in the same sandbox on the same
-//                               branch (1 iteration). All issue pipelines run
-//                               concurrently via Promise.allSettled().
-//   Phase 3 (Merge):            A single agent merges all completed branches
-//                               into the current branch.
+//   Phase 1 (Plan):   The host reads the open Sandcastle issues with its own gh
+//                     auth, keeping only issues and comments from the owner,
+//                     members and collaborators, and holds back every issue
+//                     that already has an open PR. A planner agent picks the
+//                     ones that can be built in parallel. The host names each
+//                     issue's branch (lib/branches.mts).
+//   Phase 2 (Build):  For each issue, in its own sandbox (lib/build.mts): the
+//                     implementer works the issue, the host runs
+//                     .sandcastle/check.sh, a reviewer refines the change and
+//                     returns an approve/reject verdict, and the host checks
+//                     again if the reviewer committed. An approved branch is
+//                     pushed and gets its own draft PR that fixes the issue;
+//                     anything else gets a comment on the issue and isn't
+//                     pushed. All pipelines run concurrently.
 //
-// The outer loop repeats up to MAX_ITERATIONS times so that newly unblocked
-// issues are picked up after each round of merges.
+// Nothing is merged locally and no issue is closed here: each change reaches
+// main through its PR and the checks in docs/PROCESS.md.
+//
+// The sandbox gets no GitHub token. Agents read the issue from their prompt,
+// and every GitHub write (comments, pushes, PRs) is made by the host, in code.
+//
+// The loop repeats up to MAX_ITERATIONS times so that newly unblocked issues
+// are picked up, and stops early when a round opens no pull request.
 //
 // Usage:
-//   npx tsx .sandcastle/main.mts
-// Or add to package.json:
-//   "scripts": { "sandcastle": "npx tsx .sandcastle/main.mts" }
+//   pnpm run sandcastle
 
+import { existsSync, readFileSync } from "node:fs";
 import * as sandcastle from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { z } from "zod";
-import { branchFor, localIssueBranches, openSandcastleIssues } from "./lib/branches.mts";
+import { fetchMain, prepareBranches, withoutOpenPullRequests } from "./lib/branches.mts";
+import { buildIssue } from "./lib/build.mts";
+import { MAX_ITERATIONS, MODEL } from "./lib/config.mts";
+import { listSandcastleIssues, openPullRequestBranches } from "./lib/github.mts";
+import { plannerPromptArgs } from "./lib/prompts.mts";
+import { githubTokensIn } from "./lib/sandbox-env.mts";
+
+const envFile = ".sandcastle/.env";
+const leakedTokens = existsSync(envFile) ? githubTokensIn(readFileSync(envFile, "utf8")) : [];
+if (leakedTokens.length > 0) {
+  throw new Error(
+    `${envFile} sets ${leakedTokens.join(" and ")}, which Sandcastle would pass into the sandbox. ` +
+      "Remove it: the host uses its own gh auth, and agents must not reach GitHub.",
+  );
+}
 
 // The planner emits its plan as JSON inside <plan> tags; Output.object extracts
-// and validates it against this schema. We use Zod here, but any Standard
-// Schema validator works just as well — Valibot, ArkType, etc. See
-// https://standardschema.dev.
+// and validates it against this schema. There's no branch field: the host
+// names branches, so a re-plan can't move an issue's work to a new branch.
 const planSchema = z.object({
-  issues: z.array(
-    z.object({ id: z.string(), title: z.string() }),
-  ),
+  issues: z.array(z.object({ id: z.string(), title: z.string() })),
 });
-
-// ---------------------------------------------------------------------------
-// Configuration
-// ---------------------------------------------------------------------------
-
-// Maximum number of plan→execute→merge cycles before stopping.
-// Raise this if your backlog is large; lower it for a quick smoke-test run.
-const MAX_ITERATIONS = 10;
-
-// Hooks run inside the sandbox before the agent starts each iteration.
-// npm install ensures the sandbox always has fresh dependencies.
-const hooks = {
-  sandbox: { onSandboxReady: [{ command: "npm install" }] },
-};
-
-// Copy node_modules from the host into the worktree before each sandbox
-// starts. Avoids a full npm install from scratch; the hook above handles
-// platform-specific binaries and any packages added since the last copy.
-const copyToWorktree = ["node_modules"];
-
-// ---------------------------------------------------------------------------
-// Main loop
-// ---------------------------------------------------------------------------
 
 for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   console.log(`\n=== Iteration ${iteration}/${MAX_ITERATIONS} ===\n`);
 
   // -------------------------------------------------------------------------
   // Phase 1: Plan
-  //
-  // The planning agent (opus, for deeper reasoning) reads the open issue list,
-  // builds a dependency graph, and selects the issues that can be worked in
-  // parallel right now (i.e., no blocking dependencies on other open issues).
-  //
-  // It outputs a <plan> JSON block — Output.object parses and validates it.
   // -------------------------------------------------------------------------
+  const { ready, inReview } = withoutOpenPullRequests(listSandcastleIssues(), openPullRequestBranches());
+  for (const issue of inReview) {
+    console.log(`  ⏸ #${issue.number} is held back: its pull request is open.`);
+  }
+  if (ready.length === 0) {
+    console.log("No open Sandcastle issues ready to build. Exiting.");
+    break;
+  }
+
   const plan = await sandcastle.run({
-    hooks,
     sandbox: docker(),
     name: "planner",
-    // One iteration is enough: the planner just needs to read and reason,
-    // not write code. (Structured output requires maxIterations: 1.)
+    // Structured output requires maxIterations: 1.
     maxIterations: 1,
-    // Opus for planning: dependency analysis benefits from deeper reasoning.
-    agent: sandcastle.claudeCode("claude-opus-4-8"),
+    agent: sandcastle.claudeCode(MODEL),
     promptFile: "./.sandcastle/plan-prompt.md",
-    // Extract and validate the <plan> JSON into a typed object. Throws
-    // StructuredOutputError if the tag is missing, the JSON is malformed, or
-    // validation fails — which aborts the loop.
+    promptArgs: plannerPromptArgs(ready),
+    // Throws StructuredOutputError if the tag is missing, the JSON is
+    // malformed, or validation fails, which aborts the loop.
     output: sandcastle.Output.object({ tag: "plan", schema: planSchema }),
   });
 
-  // Name each picked issue's branch from its number, title and labels on
-  // GitHub, so the name follows the branch standard and doesn't drift
-  // between plans. An id that isn't an open Sandcastle issue is skipped.
-  const openIssues = openSandcastleIssues();
-  const existingBranches = localIssueBranches();
-  const issues = plan.output.issues.flatMap(({ id }) => {
-    const issue = openIssues.find((open) => String(open.number) === id);
-    if (!issue) {
-      console.warn(`  Skipping ${id}: not an open issue labelled Sandcastle.`);
-      return [];
-    }
-    return [{ id, title: issue.title, branch: branchFor(issue, existingBranches) }];
+  // Keep only ids from the ready list, so a hallucinated or stale id can't
+  // start work on an issue that wasn't offered.
+  const picks = plan.output.issues.flatMap(({ id }) => {
+    const issue = ready.find((open) => String(open.number) === id);
+    if (!issue) console.warn(`  Skipping ${id}: it isn't one of the ready issues.`);
+    return issue ? [issue] : [];
   });
 
-  if (issues.length === 0) {
-    // No unblocked work — either everything is done or everything is blocked.
+  if (picks.length === 0) {
     console.log("No unblocked issues to work on. Exiting.");
     break;
   }
 
-  console.log(
-    `Planning complete. ${issues.length} issue(s) to work in parallel:`,
-  );
-  for (const issue of issues) {
-    console.log(`  ${issue.id}: ${issue.title} → ${issue.branch}`);
+  // -------------------------------------------------------------------------
+  // Phase 2: Build, review and publish
+  // -------------------------------------------------------------------------
+  fetchMain();
+  const work = prepareBranches(picks);
+
+  console.log(`Planning complete. ${work.length} issue(s) to build in parallel:`);
+  for (const { issue, branch } of work) {
+    console.log(`  #${issue.number}: ${issue.title} → ${branch}`);
   }
 
-  // -------------------------------------------------------------------------
-  // Phase 2: Execute + Review
-  //
-  // For each issue, create a sandbox via createSandbox() so the implementer
-  // and reviewer share the same sandbox instance per branch. The implementer
-  // runs first; if it produces commits, the reviewer runs in the same sandbox.
-  //
   // Promise.allSettled means one failing pipeline doesn't cancel the others.
-  // -------------------------------------------------------------------------
+  const settled = await Promise.allSettled(work.map(({ issue, branch }) => buildIssue(issue, branch)));
 
-  const settled = await Promise.allSettled(
-    issues.map(async (issue) => {
-      const sandbox = await sandcastle.createSandbox({
-        branch: issue.branch,
-        sandbox: docker(),
-        hooks,
-        copyToWorktree,
-      });
-
-      try {
-        // Run the implementer
-        const implement = await sandbox.run({
-          name: "implementer",
-          maxIterations: 100,
-          agent: sandcastle.claudeCode("claude-opus-4-8"),
-          promptFile: "./.sandcastle/implement-prompt.md",
-          promptArgs: {
-            TASK_ID: issue.id,
-            ISSUE_TITLE: issue.title,
-            BRANCH: issue.branch,
-          },
-        });
-
-        // Only review if the implementer produced commits
-        if (implement.commits.length > 0) {
-          const review = await sandbox.run({
-            name: "reviewer",
-            maxIterations: 1,
-            agent: sandcastle.claudeCode("claude-opus-4-8"),
-            promptFile: "./.sandcastle/review-prompt.md",
-            promptArgs: {
-              BRANCH: issue.branch,
-            },
-          });
-
-          // Merge commits from both runs so the merge phase sees all of them.
-          // Each sandbox.run() only returns commits from its own run.
-          return {
-            ...review,
-            commits: [...implement.commits, ...review.commits],
-          };
-        }
-
-        return implement;
-      } finally {
-        await sandbox.close();
-      }
-    }),
-  );
-
-  // Log any agents that threw (network error, sandbox crash, etc.).
+  const published: string[] = [];
   for (const [i, outcome] of settled.entries()) {
+    const { issue, branch } = work[i]!;
     if (outcome.status === "rejected") {
-      console.error(
-        `  ✗ ${issues[i]!.id} (${issues[i]!.branch}) failed: ${outcome.reason}`,
-      );
+      console.error(`  ✗ #${issue.number} (${branch}) failed: ${outcome.reason}`);
+    } else if (outcome.value.prUrl) {
+      published.push(`  #${issue.number} (${branch}) → ${outcome.value.prUrl}`);
     }
   }
 
-  // Only pass branches that actually produced commits to the merge phase.
-  // An agent that ran successfully but made no commits has nothing to merge.
-  const completedIssues = settled
-    .map((outcome, i) => ({ outcome, issue: issues[i]! }))
-    .filter(
-      (entry) =>
-        entry.outcome.status === "fulfilled" &&
-        entry.outcome.value.commits.length > 0,
-    )
-    .map((entry) => entry.issue);
+  console.log(`\nRound complete. ${published.length} pull request(s):`);
+  for (const line of published) console.log(line);
 
-  const completedBranches = completedIssues.map((i) => i.branch);
-
-  console.log(
-    `\nExecution complete. ${completedBranches.length} branch(es) with commits:`,
-  );
-  for (const branch of completedBranches) {
-    console.log(`  ${branch}`);
+  if (published.length === 0) {
+    // Nothing reached a PR, so the next plan would pick the same issues and
+    // repeat the same round. Stop and let a person look at the issue comments.
+    console.log("No pull requests opened this round. Stopping.");
+    break;
   }
-
-  if (completedBranches.length === 0) {
-    // All agents ran but none made commits — nothing to merge this cycle.
-    console.log("No commits produced. Nothing to merge.");
-    continue;
-  }
-
-  // -------------------------------------------------------------------------
-  // Phase 3: Merge
-  //
-  // One agent merges all completed branches into the current branch,
-  // resolving any conflicts and running tests to confirm everything works.
-  //
-  // The {{BRANCHES}} and {{ISSUES}} prompt arguments are lists that the agent
-  // uses to know which branches to merge and which issues to close.
-  // -------------------------------------------------------------------------
-  await sandcastle.run({
-    hooks,
-    sandbox: docker(),
-    name: "merger",
-    maxIterations: 1,
-    agent: sandcastle.claudeCode("claude-opus-4-8"),
-    promptFile: "./.sandcastle/merge-prompt.md",
-    promptArgs: {
-      // A markdown list of branch names, one per line.
-      BRANCHES: completedBranches.map((b) => `- ${b}`).join("\n"),
-      // A markdown list of issue IDs and titles, one per line.
-      ISSUES: completedIssues.map((i) => `- ${i.id}: ${i.title}`).join("\n"),
-    },
-  });
-
-  console.log("\nBranches merged.");
 }
 
 console.log("\nAll done.");
