@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.112](https://github.com/mpaulosky/Articles/releases/tag/v0.1.112) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-300-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.111](https://github.com/mpaulosky/Articles/releases/tag/v0.1.111) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-298-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.110](https://github.com/mpaulosky/Articles/releases/tag/v0.1.110) | 2026-10-07 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-07-pr-296-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.109](https://github.com/mpaulosky/Articles/releases/tag/v0.1.109) | 2026-10-07 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-07-pr-293-chore-re-apply-the-repo-ci-baseline-template.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.105](https://github.com/mpaulosky/Articles/releases/tag/v0.1.105) | 2026-10-05 | docs: Update ADRs for renamed CI and release workflows | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-288-docs-update-adrs-for-renamed-ci-and-release-workflows.md) |
 | [v0.1.104](https://github.com/mpaulosky/Articles/releases/tag/v0.1.104) | 2026-10-05 | chore: Ignore local SDK caches, coverage reports and personal files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-284-chore-ignore-local-sdk-caches-coverage-reports-and-personal-files.md) |
 | [v0.1.103](https://github.com/mpaulosky/Articles/releases/tag/v0.1.103) | 2026-10-05 | chore: Standardize on the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-280-chore-standardize-on-the-repo-ci-baseline-template.md) |
-| [v0.1.102](https://github.com/mpaulosky/Articles/releases/tag/v0.1.102) | 2026-10-04 | fix(squad): Close the remaining branch-cleanup edge cases | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-04-pr-278-fix-squad-close-the-remaining-branch-cleanup-edge-cases.md) |
 
 <!-- RELEASES_END -->
 
