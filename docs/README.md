@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.116](https://github.com/mpaulosky/Articles/releases/tag/v0.1.116) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-309-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.115](https://github.com/mpaulosky/Articles/releases/tag/v0.1.115) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-306-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.114](https://github.com/mpaulosky/Articles/releases/tag/v0.1.114) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-304-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.113](https://github.com/mpaulosky/Articles/releases/tag/v0.1.113) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-302-chore-re-apply-the-repo-ci-baseline-template.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.109](https://github.com/mpaulosky/Articles/releases/tag/v0.1.109) | 2026-10-07 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-07-pr-293-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.108](https://github.com/mpaulosky/Articles/releases/tag/v0.1.108) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template for the release-post fixes | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-291-chore-re-apply-the-repo-ci-baseline-template-for-the-release-post-fixes.md) |
 | [v0.1.107](https://github.com/mpaulosky/Articles/releases/tag/v0.1.107) | 2026-10-05 | chore: Use pnpm instead of npm and npx in the Squad files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-287-chore-use-pnpm-instead-of-npm-and-npx-in-the-squad-files.md) |
-| [v0.1.106](https://github.com/mpaulosky/Articles/releases/tag/v0.1.106) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-286-chore-re-apply-the-repo-ci-baseline-template.md) |
 
 <!-- RELEASES_END -->
 
