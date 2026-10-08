@@ -1,14 +1,15 @@
-// Build one planned issue in a single sandbox: implement, check, review, check
-// again, and publish it as its own pull request. Nothing is merged locally and
-// no issue is closed here: the PR says "Fixes #n", so the issue closes when the
-// PR merges through the normal checks and review in docs/PROCESS.md.
+// Build one planned issue in a single sandbox: implement, merge main in, check,
+// review, check again, and publish it as its own pull request. The branch is
+// never merged into main locally and no issue is closed here: the PR says
+// "Fixes #n", so the issue closes when the PR merges through the normal checks
+// and review in docs/PROCESS.md.
 
 import * as sandcastle from "@ai-hero/sandcastle";
-import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { commitsAhead } from "./branches.mts";
 import { fenced, runCheck, tail } from "./check.mts";
 import { BASE_BRANCH, CHECK_COMMENT_LINES, copyToWorktree, hooks, IMPLEMENTER_ITERATIONS, MODEL } from "./config.mts";
 import { commentOnIssue, openPullRequest, type SandcastleIssue } from "./github.mts";
+import { sandbox as dockerSandbox } from "./host-safety.mts";
 import { issuePromptArgs } from "./prompts.mts";
 import { prBody, prTitle } from "./publish.mts";
 import { sh } from "./shell.mts";
@@ -27,16 +28,20 @@ export type BuildHost = {
   log(line: string): void;
 };
 
-// Push from the worktree: the pre-push hook gates the checkout's HEAD, and runs
-// the full gate (with the Docker test suites the sandbox can't run) on the host.
+// Push from the worktree with git hooks off. The pre-push hook would run the
+// branch's own .github/hooks/pre-push, scripts/gate.sh and test code: files the
+// agents wrote, run on the host with its gh auth, Docker socket and home
+// directory. The sandbox already ran .sandcastle/check.sh on this HEAD, and CI
+// runs the full suite on the PR. main.mts turns hooks off for every host git
+// command too (lib/host-safety.mts); this repeats it where it matters most.
 function publish(worktreePath: string, branch: string, title: string, body: string): string {
-  sh(worktreePath, "git", "push", "--force-with-lease", "-u", "origin", branch);
+  sh(worktreePath, "git", "-c", "core.hooksPath=/dev/null", "push", "--force-with-lease", "-u", "origin", branch);
   return openPullRequest(worktreePath, branch, title, body);
 }
 
 const liveHost: BuildHost = {
   createSandbox: (branch) =>
-    sandcastle.createSandbox({ branch, baseBranch: BASE_BRANCH, sandbox: docker(), hooks, copyToWorktree }),
+    sandcastle.createSandbox({ branch, baseBranch: BASE_BRANCH, sandbox: dockerSandbox(), hooks, copyToWorktree }),
   commitsAhead,
   commentOnIssue,
   publish,
@@ -47,6 +52,7 @@ export type BuildOutcome =
   | "published"
   | "nothing-to-publish"
   | "implementer-unfinished"
+  | "merge-conflict"
   | "check-failed"
   | "rejected"
   | "publish-failed";
@@ -94,6 +100,20 @@ export async function buildIssue(
       return { outcome: "nothing-to-publish" };
     }
 
+    // Bring main in, so a branch that started on an older main (a reused
+    // branch, or main moving during the build) is checked and reviewed as it
+    // would merge, and its PR can merge. A conflict stops the issue: resolving
+    // it is a person's call.
+    const merge = await sandbox.exec(`git merge --no-edit ${BASE_BRANCH} 2>&1`);
+    if (merge.exitCode !== 0) {
+      await sandbox.exec("git merge --abort");
+      return stop(
+        "merge-conflict",
+        `Sandcastle stopped building this issue: merging \`${BASE_BRANCH}\` into \`${branch}\` failed. ${notPushed}\n\n` +
+          `The last ${CHECK_COMMENT_LINES} lines of its output:\n\n${fenced(tail(merge.stdout, CHECK_COMMENT_LINES))}`,
+      );
+    }
+
     const checkPasses = async (when: string) => {
       const check = await runCheck(sandbox);
       log(`check ${when}: ${check.passed ? "passed" : "failed"}`);
@@ -110,6 +130,9 @@ export async function buildIssue(
 
     // Review. The reviewer may commit refinements, and must end with a
     // verdict; anything but an approval keeps the branch from being published.
+    // The check runs again whenever HEAD moved, not only on new commits: a
+    // reviewer could reset or rebase to a HEAD the check never saw.
+    const headBefore = await head(sandbox);
     let verdict;
     try {
       const review = await sandbox.run({
@@ -119,7 +142,9 @@ export async function buildIssue(
         promptFile: "./.sandcastle/review-prompt.md",
         promptArgs,
       });
-      if (review.commits.length > 0 && !(await checkPasses("after the reviewer's commits"))) {
+      const headAfter = await head(sandbox);
+      const moved = review.commits.length > 0 || headBefore === undefined || headAfter !== headBefore;
+      if (moved && !(await checkPasses("after the reviewer's changes"))) {
         return { outcome: "check-failed" };
       }
       verdict = parseVerdict(review.stdout);
@@ -142,4 +167,11 @@ export async function buildIssue(
   } finally {
     await sandbox.close();
   }
+}
+
+// The sandbox's HEAD commit, or undefined when it can't be read; an unknown
+// HEAD counts as moved, so the check runs again.
+async function head(sandbox: Pick<BuildSandbox, "exec">): Promise<string | undefined> {
+  const { stdout, exitCode } = await sandbox.exec("git rev-parse HEAD");
+  return exitCode === 0 && stdout.trim() ? stdout.trim() : undefined;
 }

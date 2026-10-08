@@ -15,9 +15,20 @@ function pipeline(options: {
   checks?: boolean[];
   ahead?: number;
   publishError?: Error;
+  // Exit code of `git merge` (0 by default).
+  mergeExit?: number;
+  // What `git rev-parse HEAD` prints, in order (the same commit by default).
+  heads?: string[];
 }) {
   const checks = [...(options.checks ?? [true, true])];
-  const calls = { runs: [] as string[], comments: [] as string[], published: [] as { title: string; body: string }[], closed: false };
+  const heads = [...(options.heads ?? [])];
+  const calls = {
+    runs: [] as string[],
+    comments: [] as string[],
+    published: [] as { title: string; body: string }[],
+    execs: [] as string[],
+    closed: false,
+  };
   const results: Record<string, RunResult> = {
     implementer: options.implementer ?? { completionSignal: "<promise>COMPLETE</promise>", commits: [{ sha: "a" }] },
     reviewer: options.reviewer ?? { stdout: '<verdict>{"approved": true, "summary": "Clean."}</verdict>', commits: [] },
@@ -32,6 +43,14 @@ function pipeline(options: {
       return { iterations: [], stdout: "", commits: [], ...result };
     },
     exec: async (command: string) => {
+      calls.execs.push(command);
+      if (command.startsWith("git merge --no-edit")) {
+        const exitCode = options.mergeExit ?? 0;
+        return { stdout: exitCode === 0 ? "Already up to date." : "CONFLICT (content): Merge conflict in src/A.cs", stderr: "", exitCode };
+      }
+      if (command === "git rev-parse HEAD") {
+        return { stdout: `${heads.length > 0 ? heads.shift() : "c0ffee"}\n`, stderr: "", exitCode: 0 };
+      }
       if (command.startsWith(".sandcastle/check.sh")) {
         const passed = checks.shift();
         if (passed === undefined) throw new Error("check ran more often than scripted");
@@ -116,7 +135,31 @@ describe("buildIssue", () => {
     assert.deepEqual(calls.published, []);
   });
 
-  it("doesn't check again when the reviewer commits nothing", async () => {
+  it("checks again when the reviewer moves HEAD without committing", async () => {
+    const { run, calls, checksLeft } = pipeline({ heads: ["c0ffee", "decade"], checks: [true, false] });
+    assert.equal((await run()).outcome, "check-failed");
+    assert.equal(checksLeft.length, 0);
+    assert.deepEqual(calls.published, []);
+  });
+
+  it("merges main in before the first check", async () => {
+    const { run, calls } = pipeline({});
+    assert.equal((await run()).outcome, "published");
+    const merge = calls.execs.findIndex((command) => command.startsWith("git merge --no-edit origin/main"));
+    const check = calls.execs.findIndex((command) => command.startsWith(".sandcastle/check.sh"));
+    assert.ok(merge !== -1 && merge < check, calls.execs.join("\n"));
+  });
+
+  it("stops on a conflict merging main, aborts the merge and says why", async () => {
+    const { run, calls, checksLeft } = pipeline({ mergeExit: 1 });
+    assert.equal((await run()).outcome, "merge-conflict");
+    assert.ok(calls.execs.includes("git merge --abort"));
+    assert.match(calls.comments[0]!, /Merge conflict in src\/A\.cs/);
+    assert.equal(checksLeft.length, 2);
+    assert.deepEqual(calls.published, []);
+  });
+
+  it("doesn't check again when the reviewer leaves HEAD where it was", async () => {
     const { run, checksLeft } = pipeline({ checks: [true, true] });
     assert.equal((await run()).outcome, "published");
     assert.equal(checksLeft.length, 1);
@@ -130,9 +173,9 @@ describe("buildIssue", () => {
   });
 
   it("reports a failed push on the issue", async () => {
-    const { run, calls } = pipeline({ publishError: new Error("pre-push gate failed") });
+    const { run, calls } = pipeline({ publishError: new Error("push rejected") });
     assert.equal((await run()).outcome, "publish-failed");
-    assert.match(calls.comments[0]!, /pre-push gate failed/);
+    assert.match(calls.comments[0]!, /push rejected/);
     assert.ok(calls.closed);
   });
 });

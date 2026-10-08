@@ -31,9 +31,12 @@ export function slugFor(title: string): string {
   return boundary > 0 ? cut.slice(0, boundary) : slug.slice(0, maxSlugLength);
 }
 
-// Whether a branch belongs to the issue: feature/{n}-*, fix/{n}-* or hotfix/{n}-*.
+// Whether a branch is the issue's: feature/{n}-{slug}, fix/{n}-{slug} or
+// hotfix/{n}-{slug}, with a slug scripts/check-branch-name.sh accepts. Only such
+// a name is reused, because the branch name reaches a shell: review-prompt.md
+// passes {{BRANCH}} to the `git diff` it runs in the sandbox.
 export function isIssueBranch(branch: string, issueNumber: number): boolean {
-  return issuePrefixes.some((prefix) => branch.startsWith(`${prefix}/${issueNumber}-`));
+  return new RegExp(`^(?:${issuePrefixes.join("|")})/${issueNumber}-[a-z0-9]+(?:-[a-z0-9]+)*$`).test(branch);
 }
 
 // The issue's branch: its existing feature/, fix/ or hotfix/{n}-* branch when
