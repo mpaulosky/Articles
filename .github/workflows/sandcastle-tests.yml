@@ -1,22 +1,22 @@
 ---
 name: Sandcastle Tests
 # Type-checks Sandcastle's orchestration code (.sandcastle/) and runs its tests
-# on every PR that changes it or the root package files, as the local gate's
-# .github/ci/gate-checks.sh does. A workflow of its own, not a step of
-# ci.yml's Build Solution job: Detect Changes counts every .md file as docs, so
-# a PR that only edits a .sandcastle/*-prompt.md would skip that job, and
-# prompts.test.mts is what checks the prompts. Not a required check, but a
-# failing run leaves the PR UNSTABLE, which PR Auto-Merge waits on.
+# when a PR changes a Markdown file there, such as a *-prompt.md that
+# prompts.test.mts checks. ci.yml's Build Solution job runs the same tests
+# through .github/ci/prepare.sh, but Detect Changes counts every .md file as
+# docs, so a PR that only edits a prompt skips that job. This covers that case.
+#
+# Not a required check, and PR Auto-Merge doesn't re-evaluate when it finishes
+# (pr-automerge.yml and detect_changes.py are Owned by the repo-ci-baseline
+# Template). A failing run leaves the PR UNSTABLE, so it isn't merged; a
+# passing one is picked up by PR Auto-Merge's next scheduled sweep.
 
 "on":
   pull_request:
     branches:
       - "main"
     paths:
-      - ".sandcastle/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
+      - ".sandcastle/**/*.md"
   workflow_dispatch:
 
 permissions:

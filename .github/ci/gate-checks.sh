@@ -25,8 +25,10 @@ changed() {
   ! git diff --quiet --no-renames "$base" HEAD -- "$@"
 }
 
-# Sandcastle's orchestration code: type-check it and run its tests. CI runs the
-# same in .github/workflows/sandcastle-tests.yml, docs-only PRs included.
+# Sandcastle's orchestration code: type-check it and run its tests. CI's
+# Build Solution job runs the same through .github/ci/prepare.sh, and
+# .github/workflows/sandcastle-tests.yml covers a PR that only changes a
+# .sandcastle/ Markdown file, which Build Solution skips as docs.
 if changed .sandcastle package.json pnpm-lock.yaml pnpm-workspace.yaml; then
   echo "Sandcastle type check and tests"
   pnpm install --frozen-lockfile
