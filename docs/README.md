@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.114](https://github.com/mpaulosky/Articles/releases/tag/v0.1.114) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-304-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.113](https://github.com/mpaulosky/Articles/releases/tag/v0.1.113) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-302-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.112](https://github.com/mpaulosky/Articles/releases/tag/v0.1.112) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-300-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.111](https://github.com/mpaulosky/Articles/releases/tag/v0.1.111) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-298-chore-re-apply-the-repo-ci-baseline-template.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.107](https://github.com/mpaulosky/Articles/releases/tag/v0.1.107) | 2026-10-05 | chore: Use pnpm instead of npm and npx in the Squad files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-287-chore-use-pnpm-instead-of-npm-and-npx-in-the-squad-files.md) |
 | [v0.1.106](https://github.com/mpaulosky/Articles/releases/tag/v0.1.106) | 2026-10-05 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-286-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.105](https://github.com/mpaulosky/Articles/releases/tag/v0.1.105) | 2026-10-05 | docs: Update ADRs for renamed CI and release workflows | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-288-docs-update-adrs-for-renamed-ci-and-release-workflows.md) |
-| [v0.1.104](https://github.com/mpaulosky/Articles/releases/tag/v0.1.104) | 2026-10-05 | chore: Ignore local SDK caches, coverage reports and personal files | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-05-pr-284-chore-ignore-local-sdk-caches-coverage-reports-and-personal-files.md) |
 
 <!-- RELEASES_END -->
 
