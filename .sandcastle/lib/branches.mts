@@ -101,9 +101,10 @@ export function fetchMain(): void {
   sh(process.cwd(), "git", "fetch", "--quiet", "origin", "main");
 }
 
-// Count the commits on the worktree's branch that origin/main doesn't have.
-export function commitsAhead(worktreePath: string): number {
-  return Number(sh(worktreePath, "git", "rev-list", "--count", "origin/main..HEAD"));
+// Count the commits on the branch that origin/main doesn't have. Run in the
+// main checkout, never the branch's worktree (see lib/host-safety.mts).
+export function commitsAhead(branch: string): number {
+  return Number(sh(process.cwd(), "git", "rev-list", "--count", `origin/main..refs/heads/${branch}`));
 }
 
 // Name each issue's branch, and fetch the ones that already exist on origin,

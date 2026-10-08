@@ -4,6 +4,8 @@ import { buildIssue, type BuildHost, type BuildSandbox } from "./build.mts";
 
 const issue = { number: 7, title: "Add search", body: "Search articles.", labels: ["Sandcastle"], comments: [] };
 const branch = "feature/7-add-search";
+const commitA = "a".repeat(40);
+const commitB = "b".repeat(40);
 
 type RunResult = { completionSignal?: string; commits?: { sha: string }[]; stdout?: string } | Error;
 
@@ -15,6 +17,8 @@ function pipeline(options: {
   checks?: boolean[];
   ahead?: number;
   publishError?: Error;
+  // What the host finds wrong with the worktree's links (nothing by default).
+  worktreeProblems?: string[];
   // Exit code of `git merge` (0 by default).
   mergeExit?: number;
   // What `git rev-parse HEAD` prints, in order (the same commit by default).
@@ -25,7 +29,7 @@ function pipeline(options: {
   const calls = {
     runs: [] as string[],
     comments: [] as string[],
-    published: [] as { title: string; body: string }[],
+    published: [] as { branch: string; commit: string; title: string; body: string }[],
     execs: [] as string[],
     closed: false,
   };
@@ -49,7 +53,7 @@ function pipeline(options: {
         return { stdout: exitCode === 0 ? "Already up to date." : "CONFLICT (content): Merge conflict in src/A.cs", stderr: "", exitCode };
       }
       if (command === "git rev-parse HEAD") {
-        return { stdout: `${heads.length > 0 ? heads.shift() : "c0ffee"}\n`, stderr: "", exitCode: 0 };
+        return { stdout: `${heads.length > 0 ? heads.shift() : commitA}\n`, stderr: "", exitCode: 0 };
       }
       if (command.startsWith(".sandcastle/check.sh")) {
         const passed = checks.shift();
@@ -68,11 +72,12 @@ function pipeline(options: {
     createSandbox: async () => sandbox,
     commitsAhead: () => options.ahead ?? 1,
     commentOnIssue: (_, body) => calls.comments.push(body),
-    publish: (_, __, title, body) => {
+    publish: (branch, commit, title, body) => {
       if (options.publishError) throw options.publishError;
-      calls.published.push({ title, body });
+      calls.published.push({ branch, commit, title, body });
       return "https://github.com/o/r/pull/1";
     },
+    worktreeProblems: () => options.worktreeProblems ?? [],
     log: () => {},
   };
 
@@ -136,7 +141,7 @@ describe("buildIssue", () => {
   });
 
   it("checks again when the reviewer moves HEAD without committing", async () => {
-    const { run, calls, checksLeft } = pipeline({ heads: ["c0ffee", "decade"], checks: [true, false] });
+    const { run, calls, checksLeft } = pipeline({ heads: [commitA, commitB], checks: [true, false] });
     assert.equal((await run()).outcome, "check-failed");
     assert.equal(checksLeft.length, 0);
     assert.deepEqual(calls.published, []);
@@ -157,6 +162,30 @@ describe("buildIssue", () => {
     assert.match(calls.comments[0]!, /Merge conflict in src\/A\.cs/);
     assert.equal(checksLeft.length, 2);
     assert.deepEqual(calls.published, []);
+  });
+
+  it("publishes the commit the check passed on", async () => {
+    const { run, calls } = pipeline({
+      reviewer: { stdout: '<verdict>{"approved": true, "summary": "Tidied."}</verdict>', commits: [{ sha: "b" }] },
+      heads: [commitA, commitB],
+      checks: [true, true],
+    });
+    assert.equal((await run()).outcome, "published");
+    assert.equal(calls.published[0]!.commit, commitB);
+    assert.equal(calls.published[0]!.branch, branch);
+  });
+
+  it("doesn't publish when the checked commit can't be read", async () => {
+    const { run, calls } = pipeline({ heads: ["not a commit", "not a commit"], checks: [true, true] });
+    assert.equal((await run()).outcome, "publish-failed");
+    assert.deepEqual(calls.published, []);
+  });
+
+  it("leaves a worktree that no longer points at the repository unclosed, and says so", async () => {
+    const { run, calls } = pipeline({ worktreeProblems: ["/w/.git doesn't point into /r/.git/worktrees"] });
+    await run();
+    assert.equal(calls.closed, false);
+    assert.match(calls.comments.at(-1)!, /no longer points at this repository/);
   });
 
   it("doesn't check again when the reviewer leaves HEAD where it was", async () => {

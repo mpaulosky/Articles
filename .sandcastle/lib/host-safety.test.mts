@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { protectedGitMounts, withoutGitHooks } from "./host-safety.mts";
+import { protectedGitMounts, withoutGitHooks, worktreeLinkProblems } from "./host-safety.mts";
 
 describe("withoutGitHooks", () => {
   it("forces core.hooksPath to /dev/null through the environment", () => {
@@ -60,5 +60,62 @@ describe("protectedGitMounts", () => {
       protectedGitMounts("/repo/.git", (path) => path.endsWith("config")).map((mount) => mount.hostPath),
       ["/repo/.git/config"],
     );
+  });
+});
+
+describe("worktreeLinkProblems", () => {
+  const setup = () => {
+    const root = mkdtempSync(join(tmpdir(), "sandcastle-link-"));
+    const git = (cwd: string, ...args: string[]) =>
+      execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", "-c", "core.hooksPath=/dev/null", ...args], { cwd, stdio: "ignore" });
+    const repo = join(root, "repo");
+    mkdirSync(repo);
+    git(repo, "init", "--quiet");
+    git(repo, "commit", "--quiet", "--allow-empty", "-m", "init");
+    const worktree = join(repo, ".sandcastle", "worktrees", "feature-1-x");
+    git(repo, "worktree", "add", "--quiet", "-b", "feature/1-x", worktree);
+    return { root, repo, worktree, commonDir: join(repo, ".git") };
+  };
+
+  it("finds nothing wrong with a worktree git made", () => {
+    const { root, worktree, commonDir } = setup();
+    try {
+      assert.deepEqual(worktreeLinkProblems(worktree, commonDir), []);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("catches a .git file pointed at a directory of the agent's making", () => {
+    const { root, worktree, commonDir } = setup();
+    try {
+      mkdirSync(join(worktree, "evil"));
+      writeFileSync(join(worktree, ".git"), `gitdir: ${join(worktree, "evil")}\n`);
+      assert.match(worktreeLinkProblems(worktree, commonDir).join(), /doesn't point into/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("catches a commondir that leads somewhere else", () => {
+    const { root, worktree, commonDir } = setup();
+    try {
+      writeFileSync(join(commonDir, "worktrees", "feature-1-x", "commondir"), `${join(root, "evil")}\n`);
+      assert.match(worktreeLinkProblems(worktree, commonDir).join(), /doesn't lead back/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("catches a worktree directory swapped for a symlink", () => {
+    const { root, worktree, commonDir } = setup();
+    try {
+      const admin = join(commonDir, "worktrees", "feature-1-x");
+      renameSync(admin, `${admin}-moved`);
+      symlinkSync(`${admin}-moved`, admin);
+      assert.match(worktreeLinkProblems(worktree, commonDir).join(), /symlink/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

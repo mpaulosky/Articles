@@ -7,14 +7,29 @@
 // worktree a command runs in), and commands named in .git/config
 // (core.fsmonitor, credential helpers, core.sshCommand, aliases and more).
 //
-// So the host never runs a git hook, and the sandbox can't change .git/config
-// or .git/hooks. The host still runs git in the worktree (push, rev-list) and
-// in the main checkout (fetch), and Sandcastle runs git there too (worktree
-// add and remove, a fast-forward of a reused worktree).
+// A worktree also finds its repository through files agents can write: its
+// .git file, and commondir in its directory under .git/worktrees. Pointed at a
+// directory of the agent's making, they'd make git read a config the agent
+// wrote, so a git command run in the worktree isn't safe.
+//
+// So:
+// - the host never runs a git hook (withoutGitHooks);
+// - the sandbox can't change .git/config or .git/hooks (protectedGitMounts);
+// - the host runs git and gh only in the main checkout, whose .git directory
+//   is the repository itself, never in a worktree (lib/build.mts);
+// - Sandcastle does run git in a worktree, when it reuses one and when it
+//   removes one, so the host checks the worktree still points at this
+//   repository before either (worktreeLinkProblems), and leaves a worktree
+//   that doesn't for a person to look at.
+//
+// What's left: pipelines run concurrently, so another issue's agent could
+// change a worktree's links between that check and Sandcastle's git command.
+// Closing that needs Sandcastle to mount the .git directory read-only but for
+// what a commit writes.
 
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, lstatSync, readFileSync } from "node:fs";
+import { basename, join, resolve } from "node:path";
 import type { MountConfig } from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 
@@ -59,11 +74,53 @@ export function gitCommonDir(cwd: string = process.cwd()): string {
   }).trim();
 }
 
-let mounts: MountConfig[] | undefined;
+// What's wrong with how the worktree at `worktreePath` finds its repository,
+// whose shared .git directory is `commonDir`; empty when nothing is. Its .git
+// must be a file naming its directory under <commonDir>/worktrees, that
+// directory must be a real one whose commondir leads back to `commonDir`, and
+// none of them may be a symlink.
+export function worktreeLinkProblems(worktreePath: string, commonDir: string): string[] {
+  const kind = (path: string) => {
+    try {
+      const stat = lstatSync(path);
+      return stat.isSymbolicLink() ? "symlink" : stat.isDirectory() ? "directory" : stat.isFile() ? "file" : "other";
+    } catch {
+      return "missing";
+    }
+  };
+  const expectKind = (path: string, wanted: string) =>
+    kind(path) === wanted ? [] : [`${path} is ${kind(path) === "missing" ? "missing" : `a ${kind(path)}`}, not a ${wanted}`];
+
+  const gitFile = join(worktreePath, ".git");
+  const problems = [...expectKind(worktreePath, "directory"), ...expectKind(gitFile, "file")];
+  if (problems.length > 0) return problems;
+
+  const gitdir = /^gitdir: (.+)$/.exec(readFileSync(gitFile, "utf8").trim())?.[1];
+  const worktreesDir = join(commonDir, "worktrees");
+  if (!gitdir || resolve(worktreePath, gitdir) !== join(worktreesDir, basename(resolve(worktreePath, gitdir)))) {
+    return [`${gitFile} doesn't point into ${worktreesDir}`];
+  }
+  const adminDir = resolve(worktreePath, gitdir);
+  const commondirFile = join(adminDir, "commondir");
+  problems.push(...expectKind(worktreesDir, "directory"), ...expectKind(adminDir, "directory"), ...expectKind(commondirFile, "file"));
+  if (problems.length > 0) return problems;
+
+  if (resolve(adminDir, readFileSync(commondirFile, "utf8").trim()) !== resolve(commonDir)) {
+    problems.push(`${commondirFile} doesn't lead back to ${commonDir}`);
+  }
+  return problems;
+}
+
+let commonDir: string | undefined;
+
+// This repository's shared .git directory, read once.
+export function repoGitDir(): string {
+  commonDir ??= gitCommonDir();
+  return commonDir;
+}
 
 // The Docker sandbox every agent runs in, with .git/config and .git/hooks
 // read-only.
 export function sandbox() {
-  mounts ??= protectedGitMounts(gitCommonDir());
-  return docker({ mounts });
+  return docker({ mounts: protectedGitMounts(repoGitDir()) });
 }
