@@ -28,8 +28,13 @@ describe("prTitle", () => {
     assert.equal(prTitle({ title: "add search...", labels: [] }), "feat: Add search");
   });
 
+  it("drops spaces before and between closing periods", () => {
+    assert.equal(prTitle({ title: "add search .", labels: [] }), "feat: Add search");
+    assert.equal(prTitle({ title: "fix: stop the crash . .", labels: [] }), "fix: Stop the crash");
+  });
+
   it("only produces titles that pass the PR title check", () => {
-    for (const title of ["feat: Add search", "fix(Web): stop the crash.", "add search", "  Odd   spacing ", "chore!: drop it", "..."]) {
+    for (const title of ["feat: Add search", "fix(Web): stop the crash.", "add search", "  Odd   spacing ", "chore!: drop it", "...", "add search .", "fix: stop the crash . ", "feat: ."]) {
       for (const labels of [[], ["bug"]]) {
         const pr = prTitle({ title, labels });
         assert.ok(passesTitleCheck(pr), `${pr} fails scripts/check-pr-title.sh`);

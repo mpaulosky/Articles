@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { trustedIssues, type RawIssue } from "./github.mts";
+import { sameRepository, trustedIssues, type RawIssue } from "./github.mts";
 
 const raw = (number: number, authorAssociation: string, comments: RawIssue["comments"] = []): RawIssue => ({
   number,
@@ -39,5 +39,22 @@ describe("trustedIssues", () => {
       ]),
     ]);
     assert.deepEqual(issues[0]!.comments, ["Use the existing helper.", "Keep it small."]);
+  });
+});
+
+describe("sameRepository", () => {
+  it("drops pull requests from forks, whatever their branch is called", () => {
+    const listed = [
+      { headRefName: "fix/12-stop-the-crash", isCrossRepository: true, url: "https://github.com/o/r/pull/1" },
+      { headRefName: "feature/7-add-search", isCrossRepository: false, url: "https://github.com/o/r/pull/2" },
+    ];
+    assert.deepEqual(
+      sameRepository(listed).map((pr) => pr.url),
+      ["https://github.com/o/r/pull/2"],
+    );
+  });
+
+  it("drops a pull request whose origin gh didn't report", () => {
+    assert.deepEqual(sameRepository([{ headRefName: "fix/1-x" } as never]), []);
   });
 });

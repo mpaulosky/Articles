@@ -120,11 +120,23 @@ export function listSandcastleIssues(): SandcastleIssue[] {
   return issues;
 }
 
-// The head branches of the open pull requests.
+// An open pull request as gh pr list reports it.
+export type ListedPullRequest = { headRefName: string; isCrossRepository: boolean; url?: string };
+
+// Only the pull requests whose branch is in this repository. Anyone can open a
+// pull request from a fork, with any branch name: matching those by name would
+// let an outsider hold an issue back, or pass a fork's PR off as the one the
+// host opened.
+export function sameRepository<T extends ListedPullRequest>(pullRequests: readonly T[]): T[] {
+  return pullRequests.filter((pr) => pr.isCrossRepository === false);
+}
+
+// The head branches of the open pull requests from this repository's branches.
 export function openPullRequestBranches(): string[] {
-  return JSON.parse(
-    sh(process.cwd(), "gh", "pr", "list", "--state", "open", "--limit", "1000", "--json", "headRefName", "--jq", "[.[].headRefName]"),
-  ) as string[];
+  const listed = JSON.parse(
+    sh(process.cwd(), "gh", "pr", "list", "--state", "open", "--limit", "1000", "--json", "headRefName,isCrossRepository"),
+  ) as ListedPullRequest[];
+  return sameRepository(listed).map((pr) => pr.headRefName);
 }
 
 export function commentOnIssue(issue: number, body: string): void {
@@ -140,7 +152,10 @@ export function commentOnIssue(issue: number, body: string): void {
 // has. A draft is never merged, so a person reviews the agents' work and marks
 // it ready.
 export function openPullRequest(cwd: string, branch: string, title: string, body: string): string {
-  const existing = sh(cwd, "gh", "pr", "list", "--head", branch, "--state", "open", "--json", "url", "--jq", ".[0].url");
+  const listed = JSON.parse(
+    sh(cwd, "gh", "pr", "list", "--head", branch, "--state", "open", "--json", "headRefName,isCrossRepository,url"),
+  ) as ListedPullRequest[];
+  const existing = sameRepository(listed)[0]?.url;
   if (existing) return existing;
   return execFileSync(
     "gh",
