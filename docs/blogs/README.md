@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-10-09 | [fix(sandcastle): Keep agent-written code from running on the host](2026-10-09-pr-314-fix-sandcastle-keep-agent-written-code-from-running-on-the-host.md) | release,automation |
 | 2026-10-08 | [chore(deps): Bump Aspire's MongoDB, Redis packages and AppHost SDK to 13.6.1](2026-10-08-pr-312-chore-deps-bump-aspire-s-mongodb-redis-packages-and-apphost-sdk-to-13-6-1.md) | release,automation |
 | 2026-10-08 | [chore: Commit the Sandcastle setup](2026-10-08-pr-308-chore-commit-the-sandcastle-setup.md) | release,automation |
 | 2026-10-08 | [chore: Re-apply the repo-ci-baseline Template](2026-10-08-pr-309-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
