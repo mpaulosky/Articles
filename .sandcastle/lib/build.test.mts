@@ -154,8 +154,12 @@ describe("buildIssue", () => {
     const check = calls.execs.findIndex((command) => command.startsWith(".sandcastle/check.sh"));
     assert.ok(merge !== -1 && merge < check, calls.execs.join("\n"));
     // In the repository's commit format, so the reviewer doesn't hold it against the change.
-    // The subject leaves the branch out, so no branch name can push it past 72 characters.
-    assert.match(calls.execs[merge]!, /-m "chore: Merge origin\/main" -m "Brings feature\/7-add-search up to date/);
+    // The message leaves the branch name out, so no branch can push a line of
+    // it past the 72 characters git-commit-instructions.md allows.
+    const message = [...calls.execs[merge]!.matchAll(/-m "([^"]*)"/g)].map((match) => match[1]!);
+    assert.deepEqual(message, ["chore: Merge origin/main", "Brings the branch up to date with origin/main before it's checked."]);
+    for (const line of message) assert.ok(line.length <= 72, line);
+    assert.ok(!calls.execs[merge]!.includes(branch));
   });
 
   it("stops on a conflict merging main, aborts the merge and says why", async () => {
