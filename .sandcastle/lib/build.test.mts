@@ -150,9 +150,16 @@ describe("buildIssue", () => {
   it("merges main in before the first check", async () => {
     const { run, calls } = pipeline({});
     assert.equal((await run()).outcome, "published");
-    const merge = calls.execs.findIndex((command) => command.startsWith("git merge --no-edit origin/main"));
+    const merge = calls.execs.findIndex((command) => command.startsWith("git merge --no-edit"));
     const check = calls.execs.findIndex((command) => command.startsWith(".sandcastle/check.sh"));
     assert.ok(merge !== -1 && merge < check, calls.execs.join("\n"));
+    // In the repository's commit format, so the reviewer doesn't hold it against the change.
+    // The message leaves the branch name out, so no branch can push a line of
+    // it past the 72 characters git-commit-instructions.md allows.
+    const message = [...calls.execs[merge]!.matchAll(/-m "([^"]*)"/g)].map((match) => match[1]!);
+    assert.deepEqual(message, ["chore: Merge origin/main", "Brings the branch up to date with origin/main before it's checked."]);
+    for (const line of message) assert.ok(line.length <= 72, line);
+    assert.ok(!calls.execs[merge]!.includes(branch));
   });
 
   it("stops on a conflict merging main, aborts the merge and says why", async () => {

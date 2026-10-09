@@ -129,7 +129,7 @@ export async function buildIssue(
     // branch, or main moving during the build) is checked and reviewed as it
     // would merge, and its PR can merge. A conflict stops the issue: resolving
     // it is a person's call.
-    const merge = await sandbox.exec(`git merge --no-edit ${BASE_BRANCH} 2>&1`);
+    const merge = await sandbox.exec(`git merge --no-edit -m "chore: Merge ${BASE_BRANCH}" -m "Brings the branch up to date with ${BASE_BRANCH} before it's checked." ${BASE_BRANCH} 2>&1`);
     if (merge.exitCode !== 0) {
       await sandbox.exec("git merge --abort");
       return stop(
