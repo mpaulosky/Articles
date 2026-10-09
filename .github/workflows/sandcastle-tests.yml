@@ -1,0 +1,52 @@
+---
+name: Sandcastle Tests
+# Type-checks Sandcastle's orchestration code (.sandcastle/) and runs its tests
+# when a PR changes a Markdown file there, such as a *-prompt.md that
+# prompts.test.mts checks. ci.yml's Build Solution job runs the same tests
+# through .github/ci/prepare.sh, but Detect Changes counts every .md file as
+# docs, so a PR that only edits a prompt skips that job. This covers that case.
+#
+# Not a required check, and PR Auto-Merge doesn't re-evaluate when it finishes
+# (pr-automerge.yml and detect_changes.py are Owned by the repo-ci-baseline
+# Template). A failing run leaves the PR UNSTABLE, so it isn't merged; a
+# passing one is picked up by PR Auto-Merge's next scheduled sweep.
+
+"on":
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - ".sandcastle/**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sandcastle-tests:
+    name: Sandcastle tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      # Corepack provides the pnpm version pinned by "packageManager" in
+      # package.json.
+      - name: Install packages
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Type-check and test
+        run: pnpm run test:sandcastle

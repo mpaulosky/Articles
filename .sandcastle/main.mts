@@ -7,16 +7,17 @@
 //                     ones that can be built in parallel. The host names each
 //                     issue's branch (lib/branches.mts).
 //   Phase 2 (Build):  For each issue, in its own sandbox (lib/build.mts): the
-//                     implementer works the issue, the host runs
-//                     .sandcastle/check.sh, a reviewer refines the change and
-//                     returns an approve/reject verdict, and the host checks
-//                     again if the reviewer committed. An approved branch is
-//                     pushed and gets its own draft PR that fixes the issue;
+//                     implementer works the issue, main is merged in, the
+//                     host runs .sandcastle/check.sh, a reviewer refines the
+//                     change and returns an approve/reject verdict, and the
+//                     host checks again if the reviewer moved HEAD. An
+//                     approved branch is pushed, with git hooks off, and gets
+//                     its own draft PR that fixes the issue;
 //                     anything else gets a comment on the issue and isn't
 //                     pushed. All pipelines run concurrently.
 //
-// Nothing is merged locally and no issue is closed here: each change reaches
-// main through its PR and the checks in docs/PROCESS.md.
+// Nothing is merged into main locally and no issue is closed here: each change
+// reaches main through its PR and the checks in docs/PROCESS.md.
 //
 // The sandbox gets no GitHub token. Agents read the issue from their prompt,
 // and every GitHub write (comments, pushes, PRs) is made by the host, in code.
@@ -29,12 +30,13 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import * as sandcastle from "@ai-hero/sandcastle";
-import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { z } from "zod";
 import { fetchMain, prepareBranches, withoutOpenPullRequests } from "./lib/branches.mts";
 import { buildIssue } from "./lib/build.mts";
 import { MAX_ITERATIONS, MODEL } from "./lib/config.mts";
 import { listSandcastleIssues, openPullRequestBranches } from "./lib/github.mts";
+import { protectHostGit, sandbox } from "./lib/host-safety.mts";
+import { pickedIssues } from "./lib/plan.mts";
 import { plannerPromptArgs } from "./lib/prompts.mts";
 import { githubTokensIn } from "./lib/sandbox-env.mts";
 
@@ -46,6 +48,12 @@ if (leakedTokens.length > 0) {
       "Remove it: the host uses its own gh auth, and agents must not reach GitHub.",
   );
 }
+
+// Every git command this process starts, Sandcastle's included, runs with hooks
+// off and its config pinned to this repository's .git: agents can write hooks
+// and files that point git elsewhere. See lib/host-safety.mts, which also keeps
+// .git/config and .git/hooks read-only in every sandbox.
+protectHostGit();
 
 // The planner emits its plan as JSON inside <plan> tags; Output.object extracts
 // and validates it against this schema. There's no branch field: the host
@@ -70,7 +78,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   }
 
   const plan = await sandcastle.run({
-    sandbox: docker(),
+    sandbox: sandbox(),
     name: "planner",
     // Structured output requires maxIterations: 1.
     maxIterations: 1,
@@ -82,13 +90,11 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     output: sandcastle.Output.object({ tag: "plan", schema: planSchema }),
   });
 
-  // Keep only ids from the ready list, so a hallucinated or stale id can't
-  // start work on an issue that wasn't offered.
-  const picks = plan.output.issues.flatMap(({ id }) => {
-    const issue = ready.find((open) => String(open.number) === id);
-    if (!issue) console.warn(`  Skipping ${id}: it isn't one of the ready issues.`);
-    return issue ? [issue] : [];
-  });
+  // Each ready issue the planner picked, once (lib/plan.mts).
+  const picks = pickedIssues(
+    plan.output.issues.map(({ id }) => id),
+    ready,
+  );
 
   if (picks.length === 0) {
     console.log("No unblocked issues to work on. Exiting.");

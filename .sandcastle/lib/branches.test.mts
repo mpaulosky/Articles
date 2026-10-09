@@ -56,6 +56,12 @@ describe("isIssueBranch", () => {
     assert.ok(!isIssueBranch("fix/42-stop-the-crash", 4));
     assert.ok(!isIssueBranch("chore/4-add-search", 4));
   });
+
+  it("doesn't match a name outside the branch standard", () => {
+    assert.ok(!isIssueBranch("feature/4-$(touch${IFS}x)", 4));
+    assert.ok(!isIssueBranch("feature/4-Add-Search", 4));
+    assert.ok(!isIssueBranch("feature/4-", 4));
+  });
 });
 
 describe("branchFor", () => {

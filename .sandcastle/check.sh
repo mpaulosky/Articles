@@ -2,8 +2,9 @@
 # The check Sandcastle's agents run before they finish, and the host runs in
 # the sandbox before it publishes a branch: the exit code decides, never what
 # an agent reports. It builds the solution and runs every test project but the
-# ones that need Docker, which the sandbox doesn't have. The pre-push gate
-# (scripts/gate.sh) runs those when the host pushes, and CI runs everything.
+# ones that need Docker, which the sandbox doesn't have. CI runs everything on
+# the PR; the host pushes with git hooks off, so the pre-push gate doesn't run
+# the branch's code on the host (lib/host-safety.mts).
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
