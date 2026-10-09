@@ -154,7 +154,8 @@ describe("buildIssue", () => {
     const check = calls.execs.findIndex((command) => command.startsWith(".sandcastle/check.sh"));
     assert.ok(merge !== -1 && merge < check, calls.execs.join("\n"));
     // In the repository's commit format, so the reviewer doesn't hold it against the change.
-    assert.match(calls.execs[merge]!, /-m "chore: Merge origin\/main into feature\/7-add-search" origin\/main/);
+    // The subject leaves the branch out, so no branch name can push it past 72 characters.
+    assert.match(calls.execs[merge]!, /-m "chore: Merge origin\/main" -m "Brings feature\/7-add-search up to date/);
   });
 
   it("stops on a conflict merging main, aborts the merge and says why", async () => {
