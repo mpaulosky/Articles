@@ -35,7 +35,7 @@ import { fetchMain, prepareBranches, withoutOpenPullRequests } from "./lib/branc
 import { buildIssue } from "./lib/build.mts";
 import { MAX_ITERATIONS, MODEL } from "./lib/config.mts";
 import { listSandcastleIssues, openPullRequestBranches } from "./lib/github.mts";
-import { disableHostGitHooks, sandbox } from "./lib/host-safety.mts";
+import { protectHostGit, sandbox } from "./lib/host-safety.mts";
 import { pickedIssues } from "./lib/plan.mts";
 import { plannerPromptArgs } from "./lib/prompts.mts";
 import { githubTokensIn } from "./lib/sandbox-env.mts";
@@ -49,11 +49,11 @@ if (leakedTokens.length > 0) {
   );
 }
 
-// No git hook runs on the host, for any git command this process starts,
-// Sandcastle's included: hooks would run files the agents can write. See
-// lib/host-safety.mts, which also keeps .git/config and .git/hooks read-only in
-// every sandbox.
-disableHostGitHooks();
+// Every git command this process starts, Sandcastle's included, runs with hooks
+// off and its config pinned to this repository's .git: agents can write hooks
+// and files that point git elsewhere. See lib/host-safety.mts, which also keeps
+// .git/config and .git/hooks read-only in every sandbox.
+protectHostGit();
 
 // The planner emits its plan as JSON inside <plan> tags; Output.object extracts
 // and validates it against this schema. There's no branch field: the host

@@ -7,27 +7,27 @@
 // worktree a command runs in), and commands named in .git/config
 // (core.fsmonitor, credential helpers, core.sshCommand, aliases and more).
 //
-// A worktree also finds its repository through files agents can write: its
-// .git file, and commondir in its directory under .git/worktrees. Pointed at a
-// directory of the agent's making, they'd make git read a config the agent
-// wrote, so a git command run in the worktree isn't safe.
+// Git also finds the config it reads through files agents can write: a
+// commondir file, in .git itself or in a worktree's directory under
+// .git/worktrees, and a worktree's .git file. Pointed at a directory of the
+// agent's making, they'd make git read a config the agent wrote.
 //
-// So:
+// So, from protectHostGit() on:
 // - the host never runs a git hook (withoutGitHooks);
+// - every host git command, Sandcastle's included, takes its config, refs and
+//   objects from this repository's .git, whatever a commondir file says
+//   (GIT_COMMON_DIR, set by hostGitEnv);
 // - the sandbox can't change .git/config or .git/hooks (protectedGitMounts);
-// - the host runs git and gh only in the main checkout, whose .git directory
-//   is the repository itself, never in a worktree (lib/build.mts);
-// - Sandcastle does run git in a worktree, when it reuses one and when it
-//   removes one, so the host checks the worktree still points at this
-//   repository before either (worktreeLinkProblems), and leaves a worktree
-//   that doesn't for a person to look at.
+// - the host runs its own git and gh in the main checkout, never in a worktree
+//   (lib/build.mts);
+// - Sandcastle runs git in a worktree when it reuses one and when it removes
+//   one, so the host first checks the worktree still points at this repository
+//   (worktreeLinkProblems), and leaves one that doesn't for a person.
 //
-// What's left: pipelines run concurrently, so another issue's agent could
-// change a worktree's links between that check and Sandcastle's git command.
-// Closing that needs Sandcastle to mount the .git directory read-only but for
-// what a commit writes.
+// What's left: a worktree's own files (HEAD, index) can still be redirected,
+// which changes what git sees there but runs nothing, unless someone turned on
+// extensions.worktreeConfig, which reads a config.worktree from there.
 
-import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, readFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import type { MountConfig } from "@ai-hero/sandcastle";
@@ -48,10 +48,41 @@ export function withoutGitHooks(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   };
 }
 
-// Turn git hooks off for this process and everything it starts. Call before
-// the first git command.
-export function disableHostGitHooks(): void {
-  Object.assign(process.env, withoutGitHooks(process.env));
+// The environment every host git command runs in: hooks off, and the shared
+// .git directory pinned to `commonDir`. GIT_COMMON_DIR outranks any commondir
+// file, so a planted one can't point git at a config an agent wrote.
+export function hostGitEnv(env: NodeJS.ProcessEnv, commonDir: string): NodeJS.ProcessEnv {
+  return { ...withoutGitHooks(env), GIT_COMMON_DIR: commonDir };
+}
+
+// The main checkout's .git directory, which is this repository's shared one.
+// Found on disk rather than by asking git, since git would follow a planted
+// commondir. Throws when it isn't a real directory, or has a commondir file:
+// a main checkout never has one, so an agent planted it.
+export function mainGitDir(checkout: string): string {
+  const gitDir = resolve(checkout, ".git");
+  const stat = lstatSync(gitDir, { throwIfNoEntry: false });
+  if (!stat?.isDirectory()) {
+    throw new Error(`${gitDir} isn't a directory. Run Sandcastle from the root of the main checkout.`);
+  }
+  if (existsSync(join(gitDir, "commondir"))) {
+    throw new Error(`${gitDir}/commondir exists, so git would read another directory's config. Inspect it and remove it.`);
+  }
+  return gitDir;
+}
+
+let commonDir: string | undefined;
+
+// This repository's shared .git directory, read once.
+export function repoGitDir(): string {
+  commonDir ??= mainGitDir(process.cwd());
+  return commonDir;
+}
+
+// Protect this process and everything it starts (see hostGitEnv). Call before
+// the first git command and before any agent runs.
+export function protectHostGit(): void {
+  Object.assign(process.env, hostGitEnv(process.env, repoGitDir()));
 }
 
 // Read-only mounts over the parts of the shared .git directory that make git
@@ -63,15 +94,6 @@ export function protectedGitMounts(commonDir: string, exists: (path: string) => 
     .map((name) => join(commonDir, name))
     .filter((path) => exists(path))
     .map((path) => ({ hostPath: path, sandboxPath: path, readonly: true }));
-}
-
-// The repository's shared .git directory, as an absolute path.
-export function gitCommonDir(cwd: string = process.cwd()): string {
-  return execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
-    cwd,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "inherit"],
-  }).trim();
 }
 
 // What's wrong with how the worktree at `worktreePath` finds its repository,
@@ -109,14 +131,6 @@ export function worktreeLinkProblems(worktreePath: string, commonDir: string): s
     problems.push(`${commondirFile} doesn't lead back to ${commonDir}`);
   }
   return problems;
-}
-
-let commonDir: string | undefined;
-
-// This repository's shared .git directory, read once.
-export function repoGitDir(): string {
-  commonDir ??= gitCommonDir();
-  return commonDir;
 }
 
 // The Docker sandbox every agent runs in, with .git/config and .git/hooks
