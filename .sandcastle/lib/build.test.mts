@@ -150,9 +150,11 @@ describe("buildIssue", () => {
   it("merges main in before the first check", async () => {
     const { run, calls } = pipeline({});
     assert.equal((await run()).outcome, "published");
-    const merge = calls.execs.findIndex((command) => command.startsWith("git merge --no-edit origin/main"));
+    const merge = calls.execs.findIndex((command) => command.startsWith("git merge --no-edit"));
     const check = calls.execs.findIndex((command) => command.startsWith(".sandcastle/check.sh"));
     assert.ok(merge !== -1 && merge < check, calls.execs.join("\n"));
+    // In the repository's commit format, so the reviewer doesn't hold it against the change.
+    assert.match(calls.execs[merge]!, /-m "chore: Merge origin\/main into feature\/7-add-search" origin\/main/);
   });
 
   it("stops on a conflict merging main, aborts the merge and says why", async () => {
