@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.123](https://github.com/mpaulosky/Articles/releases/tag/v0.1.123) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-322-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.122](https://github.com/mpaulosky/Articles/releases/tag/v0.1.122) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-320-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.121](https://github.com/mpaulosky/Articles/releases/tag/v0.1.121) | 2026-10-09 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-318-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.120](https://github.com/mpaulosky/Articles/releases/tag/v0.1.120) | 2026-10-09 | fix(sandcastle): Give the host's merge of main a commit-format message | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-316-fix-sandcastle-give-the-host-s-merge-of-main-a-commit-format-message.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.116](https://github.com/mpaulosky/Articles/releases/tag/v0.1.116) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-309-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.115](https://github.com/mpaulosky/Articles/releases/tag/v0.1.115) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-306-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.114](https://github.com/mpaulosky/Articles/releases/tag/v0.1.114) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-304-chore-re-apply-the-repo-ci-baseline-template.md) |
-| [v0.1.113](https://github.com/mpaulosky/Articles/releases/tag/v0.1.113) | 2026-10-08 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-302-chore-re-apply-the-repo-ci-baseline-template.md) |
 
 <!-- RELEASES_END -->
 
