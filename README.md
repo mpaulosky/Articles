@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.127](https://github.com/mpaulosky/Articles/releases/tag/v0.1.127) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-330-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.126](https://github.com/mpaulosky/Articles/releases/tag/v0.1.126) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-328-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.125](https://github.com/mpaulosky/Articles/releases/tag/v0.1.125) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-326-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.124](https://github.com/mpaulosky/Articles/releases/tag/v0.1.124) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-324-chore-re-apply-the-repo-ci-baseline-template.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.120](https://github.com/mpaulosky/Articles/releases/tag/v0.1.120) | 2026-10-09 | fix(sandcastle): Give the host's merge of main a commit-format message | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-316-fix-sandcastle-give-the-host-s-merge-of-main-a-commit-format-message.md) |
 | [v0.1.119](https://github.com/mpaulosky/Articles/releases/tag/v0.1.119) | 2026-10-09 | fix(sandcastle): Keep agent-written code from running on the host | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-314-fix-sandcastle-keep-agent-written-code-from-running-on-the-host.md) |
 | [v0.1.118](https://github.com/mpaulosky/Articles/releases/tag/v0.1.118) | 2026-10-08 | chore(deps): Bump Aspire's MongoDB, Redis packages and AppHost SDK to 13.6.1 | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-312-chore-deps-bump-aspire-s-mongodb-redis-packages-and-apphost-sdk-to-13-6-1.md) |
-| [v0.1.117](https://github.com/mpaulosky/Articles/releases/tag/v0.1.117) | 2026-10-08 | chore: Commit the Sandcastle setup | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-08-pr-308-chore-commit-the-sandcastle-setup.md) |
 
 <!-- RELEASES_END -->
 
