@@ -13,6 +13,8 @@
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.MongoDB" />
 		<PackageReference Include="Aspire.Hosting.Redis" />
+		<!-- Lifts the MessagePack that Aspire brings in past GHSA-qhrr-8q5h-9q3h -->
+		<PackageReference Include="MessagePack" />
 	</ItemGroup>
 
 	<ItemGroup>
