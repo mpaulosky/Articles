@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.129](https://github.com/mpaulosky/Articles/releases/tag/v0.1.129) | 2026-10-16 | build(deps): Pin MessagePack 2.5.307 past GHSA-qhrr-8q5h-9q3h | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-16-pr-335-build-deps-pin-messagepack-2-5-307-past-ghsa-qhrr-8q5h-9q3h.md) |
 | [v0.1.128](https://github.com/mpaulosky/Articles/releases/tag/v0.1.128) | 2026-10-15 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-15-pr-333-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.127](https://github.com/mpaulosky/Articles/releases/tag/v0.1.127) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-330-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.126](https://github.com/mpaulosky/Articles/releases/tag/v0.1.126) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-328-chore-re-apply-the-repo-ci-baseline-template.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.122](https://github.com/mpaulosky/Articles/releases/tag/v0.1.122) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-320-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.121](https://github.com/mpaulosky/Articles/releases/tag/v0.1.121) | 2026-10-09 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-318-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.120](https://github.com/mpaulosky/Articles/releases/tag/v0.1.120) | 2026-10-09 | fix(sandcastle): Give the host's merge of main a commit-format message | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-316-fix-sandcastle-give-the-host-s-merge-of-main-a-commit-format-message.md) |
-| [v0.1.119](https://github.com/mpaulosky/Articles/releases/tag/v0.1.119) | 2026-10-09 | fix(sandcastle): Keep agent-written code from running on the host | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-09-pr-314-fix-sandcastle-keep-agent-written-code-from-running-on-the-host.md) |
 
 <!-- RELEASES_END -->
 
