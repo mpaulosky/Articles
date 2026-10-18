@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.133](https://github.com/mpaulosky/Articles/releases/tag/v0.1.133) | 2026-10-18 | chore(deps): Have Dependabot ignore claude-code-action | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-18-pr-345-chore-deps-have-dependabot-ignore-claude-code-action.md) |
 | [v0.1.132](https://github.com/mpaulosky/Articles/releases/tag/v0.1.132) | 2026-10-18 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-18-pr-341-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.131](https://github.com/mpaulosky/Articles/releases/tag/v0.1.131) | 2026-10-16 | build(deps): Update NuGet packages | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-16-pr-339-build-deps-update-nuget-packages.md) |
 | [v0.1.130](https://github.com/mpaulosky/Articles/releases/tag/v0.1.130) | 2026-10-16 | build(deps): Re-enable the NuGet audit warnings | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-16-pr-337-build-deps-re-enable-the-nuget-audit-warnings.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.126](https://github.com/mpaulosky/Articles/releases/tag/v0.1.126) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-328-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.125](https://github.com/mpaulosky/Articles/releases/tag/v0.1.125) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-326-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.124](https://github.com/mpaulosky/Articles/releases/tag/v0.1.124) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-324-chore-re-apply-the-repo-ci-baseline-template.md) |
-| [v0.1.123](https://github.com/mpaulosky/Articles/releases/tag/v0.1.123) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-322-chore-re-apply-the-repo-ci-baseline-template.md) |
 
 <!-- RELEASES_END -->
 
