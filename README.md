@@ -54,6 +54,7 @@ dotnet test --solution Articles.slnx
 
 | Version | Date | Title | Blog post |
 | ------- | ---- | ----- | --------- |
+| [v0.1.136](https://github.com/mpaulosky/Articles/releases/tag/v0.1.136) | 2026-10-20 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-20-pr-351-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.135](https://github.com/mpaulosky/Articles/releases/tag/v0.1.135) | 2026-10-20 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-20-pr-349-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.134](https://github.com/mpaulosky/Articles/releases/tag/v0.1.134) | 2026-10-18 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-18-pr-347-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.133](https://github.com/mpaulosky/Articles/releases/tag/v0.1.133) | 2026-10-18 | chore(deps): Have Dependabot ignore claude-code-action | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-18-pr-345-chore-deps-have-dependabot-ignore-claude-code-action.md) |
@@ -63,7 +64,6 @@ dotnet test --solution Articles.slnx
 | [v0.1.129](https://github.com/mpaulosky/Articles/releases/tag/v0.1.129) | 2026-10-16 | build(deps): Pin MessagePack 2.5.307 past GHSA-qhrr-8q5h-9q3h | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-16-pr-335-build-deps-pin-messagepack-2-5-307-past-ghsa-qhrr-8q5h-9q3h.md) |
 | [v0.1.128](https://github.com/mpaulosky/Articles/releases/tag/v0.1.128) | 2026-10-15 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-15-pr-333-chore-re-apply-the-repo-ci-baseline-template.md) |
 | [v0.1.127](https://github.com/mpaulosky/Articles/releases/tag/v0.1.127) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-330-chore-re-apply-the-repo-ci-baseline-template.md) |
-| [v0.1.126](https://github.com/mpaulosky/Articles/releases/tag/v0.1.126) | 2026-10-10 | chore: Re-apply the repo-ci-baseline Template | [Post](https://github.com/mpaulosky/Articles/blob/main/docs/blogs/2026-10-10-pr-328-chore-re-apply-the-repo-ci-baseline-template.md) |
 
 <!-- RELEASES_END -->
 
