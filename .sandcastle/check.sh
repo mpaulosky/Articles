@@ -36,6 +36,6 @@ for project in "${projects[@]}"; do
 done
 
 echo "▶ Sandcastle tests"
-pnpm run test:sandcastle
+pnpm run check:sandcastle
 
 echo "✅ Sandcastle check passed."

@@ -49,4 +49,4 @@ jobs:
           pnpm install --frozen-lockfile
 
       - name: Type-check and test
-        run: pnpm run test:sandcastle
+        run: pnpm run check:sandcastle

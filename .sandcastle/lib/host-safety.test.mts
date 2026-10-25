@@ -4,7 +4,7 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSy
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { hostGitEnv, mainGitDir, protectedGitMounts, withoutGitHooks, worktreeLinkProblems } from "./host-safety.mts";
+import { hostGitEnv, mainGitDir, protectedGitMounts, withoutGitHooks, worktreeLinkProblems, worktreePathFor } from "./host-safety.mts";
 
 describe("withoutGitHooks", () => {
   it("forces core.hooksPath to /dev/null through the environment", () => {
@@ -188,5 +188,11 @@ describe("mainGitDir", () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("worktreePathFor", () => {
+  it("puts a branch's worktree where Sandcastle does, with / turned into -", () => {
+    assert.equal(worktreePathFor("/repo", "feature/4-add-search"), "/repo/.sandcastle/worktrees/feature-4-add-search");
   });
 });

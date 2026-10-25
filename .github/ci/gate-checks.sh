@@ -32,7 +32,7 @@ changed() {
 if changed .sandcastle package.json pnpm-lock.yaml pnpm-workspace.yaml; then
   echo "Sandcastle type check and tests"
   pnpm install --frozen-lockfile
-  pnpm run test:sandcastle
+  pnpm run check:sandcastle
 else
   echo "No Sandcastle or root package changes to check."
 fi
