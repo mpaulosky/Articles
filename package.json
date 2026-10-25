@@ -2,8 +2,8 @@
   "name": "articles",
   "private": true,
   "scripts": {
-    "sandcastle": "tsx .sandcastle/main.mts",
-    "test:sandcastle": "tsc --noEmit -p .sandcastle && tsx --test \".sandcastle/**/*.test.mts\""
+    "check:sandcastle": "tsc --noEmit -p .sandcastle && tsx --test \".sandcastle/**/*.test.mts\"",
+    "sandcastle": "tsx .sandcastle/main.mts"
   },
   "devDependencies": {
     "@ai-hero/sandcastle": "^0.12.0",
