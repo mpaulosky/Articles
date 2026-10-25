@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-10-25 | [chore(sandcastle): Migrate to the Baseline Template's full pipeline](2026-10-25-pr-358-chore-sandcastle-migrate-to-the-baseline-template-s-full-pipeline.md) | release,automation |
 | 2026-10-20 | [chore: Re-apply the repo-ci-baseline Template](2026-10-20-pr-351-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-20 | [chore: Re-apply the repo-ci-baseline Template](2026-10-20-pr-349-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-18 | [chore: Re-apply the repo-ci-baseline Template](2026-10-18-pr-347-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
