@@ -73,6 +73,40 @@ export const GATE_COVERED_CHECKS: readonly string[] = ["Build Solution"];
 // directory's own tests, where scripts/gate.sh would run every test project.
 export const GATE_COMMAND = ".sandcastle/check.sh";
 
+// The committed file GATE_COMMAND runs. It is written in the worktree by the
+// agents whose work it judges, so a gate whose branch changes it fails without
+// running (lib/checkpoint.mts#gateScriptChange); a file that isn't committed at
+// the branch's base fails too. Name the script, not the interpreter or
+// arguments: `.sandcastle/check.sh` for `bash .sandcastle/check.sh`.
+export const GATE_SCRIPT = ".sandcastle/check.sh";
+
+// The paths whose files the gate and CI run: the scripts, the tests, the build
+// definition, and the workflows a `Sandcastle:local` build can change. An agent that edits one can make its own checks pass, so a PR
+// whose branch changes a file under them lists it in its body for the reviewer
+// (lib/build.mts#publish). Folders end in a slash. List every place the gate
+// reads its checks from, not only where its script sits.
+export const CHECK_PATHS: readonly string[] = [".sandcastle/", "scripts/", ".github/ci/", ".github/workflows/", "package.json"];
+
+// This repository as OWNER/REPO, which the pre-push-review skill gives every gh
+// command as GH_REPO (`scripts/review.sh repo`): in a clone whose only remote is
+// a fork, gh's default repository is the fork. Keep both this and
+// NOT_OWNED_BASELINE_PATHS as a one-line `export const NAME` or `export let NAME`: Apply and
+// scripts/review.sh look for them that way.
+export const REPO_SLUG = "mpaulosky/Articles";
+
+// The files under an Owned Baseline pattern (see OWNED_PATHS in
+// lib/review-ledger.mts) that are this repository's own, not the Template's:
+// its own workflows, scripts and Sandcastle tests. A re-Apply that changes only
+// Owned files passes the local review's check, so a file listed here is
+// reviewed like any other.
+export const NOT_OWNED_BASELINE_PATHS: readonly string[] = [
+  ".github/instructions/blazor.instructions.md",
+  ".github/instructions/copilot-instructions.md",
+  ".github/instructions/dotnet-project.instructions.md",
+  ".github/instructions/mongo-dba.instructions.md",
+  ".github/workflows/sandcastle-tests.yml",
+];
+
 // The Template's Owned folder and the Owned files the repo carries copies of
 // at the same path from its root, which lib/overlap.mts counts as one path
 // with their Template file. Only a repo that holds the Template itself lists
