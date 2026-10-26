@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-10-26 | [chore: Re-apply the repo-ci-baseline Template](2026-10-26-pr-365-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-26 | [chore: Re-apply the repo-ci-baseline Template](2026-10-26-pr-363-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-26 | [chore: Re-apply the repo-ci-baseline Template](2026-10-26-pr-362-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-26 | [chore(sandcastle): Add the names the local review and the Owned modules read](2026-10-26-pr-360-chore-sandcastle-add-the-names-the-local-review-and-the-owned-modules-read.md) | release,automation |
