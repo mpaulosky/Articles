@@ -4,6 +4,7 @@ This directory contains concise release-review posts for merged PR releases.
 
 | Date | Title | Tags |
 | ---- | ----- | ---- |
+| 2026-11-01 | [chore(web): Replace SVG favicon with PNG](2026-11-01-pr-370-chore-web-replace-svg-favicon-with-png.md) | release,automation |
 | 2026-10-26 | [chore: Re-apply the repo-ci-baseline Template](2026-10-26-pr-365-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-26 | [chore: Re-apply the repo-ci-baseline Template](2026-10-26-pr-363-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
 | 2026-10-26 | [chore: Re-apply the repo-ci-baseline Template](2026-10-26-pr-362-chore-re-apply-the-repo-ci-baseline-template.md) | release,automation |
