@@ -15,6 +15,10 @@
 		<PackageReference Include="Aspire.Hosting.Redis" />
 		<!-- Lifts the MessagePack that Aspire brings in past GHSA-qhrr-8q5h-9q3h -->
 		<PackageReference Include="MessagePack" />
+		<PackageReference Include="MongoDB.Bson" />
+		<PackageReference Include="MongoDB.Driver" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" />
 	</ItemGroup>
 
 	<ItemGroup>
