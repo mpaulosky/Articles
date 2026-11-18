@@ -7,8 +7,8 @@
     "watch:css": "tailwindcss -i ./wwwroot/app.tailwind.css -o ./wwwroot/app.css --watch"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.11",
-    "tailwindcss": "^4.1.11"
+    "@tailwindcss/cli": "^4.3.5",
+    "tailwindcss": "^4.3.5"
   },
   "engines": {
     "npm": "please-use-pnpm"
