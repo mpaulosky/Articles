@@ -26,10 +26,11 @@ Use the commands for each stack the issue touches:
 ## The gate
 
 In the sandbox, `.sandcastle/sandbox-gate.sh` is the definition of "ready to push". The sandbox has no Docker daemon, so it leaves out the test projects that start containers,
-which `scripts/gate.sh` and CI run. It lints the Markdown, YAML, workflow and shell files the branch changed, runs the repo's own checks in
-`.github/ci/gate-checks.sh` (Sandcastle's check among them, when `.sandcastle/` or its packages changed), builds the solution with warnings as errors, then runs every test
-project. Run it rather than the individual lint and test commands.
+which `scripts/gate.sh` and CI run. It builds the solution with warnings as errors, runs every test project that doesn't need Docker, then runs Sandcastle's own
+type check and tests. It doesn't lint: lint the Markdown, YAML and shell files you change yourself. Run it rather than the individual build and test commands.
 
+- Where a role prompt tells you to run `scripts/gate.sh`, or says the host ran it, in the sandbox that means `.sandcastle/sandbox-gate.sh` (this file's own mentions of
+  `scripts/gate.sh` name the real script): `scripts/gate.sh` runs the Docker test projects, which the sandbox can't, so run or read the sandbox gate instead.
 - If you committed anything, run `.sandcastle/sandbox-gate.sh` once as your last step, before `<promise>COMPLETE</promise>`, and fix what it reports.
 - The tester is exempt, because its tests are red on purpose. It still lints the files it changed.
 - The architect is exempt too. It commits at most one ADR, and lints that file with `markdownlint-cli2 <file>`.

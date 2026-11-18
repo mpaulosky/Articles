@@ -69,7 +69,7 @@ export const GATE_COVERED_CHECKS: readonly string[] = ["Build Solution"];
 
 // The command the host runs in the sandbox as the gate. The sandbox has no
 // Docker daemon, so this is .sandcastle/sandbox-gate.sh, which builds and runs the test
-// projects that don't start containers, keeps the lints, and runs this
+// projects that don't start containers (it runs no lints), and runs this
 // directory's own tests, where scripts/gate.sh would run every test project.
 export const GATE_COMMAND = ".sandcastle/sandbox-gate.sh";
 
