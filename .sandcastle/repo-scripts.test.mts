@@ -20,17 +20,20 @@ describe("the sandbox gate", () => {
     assert.deepEqual(names, [expected, expected]);
   });
 
-  it("the gate script is committed and the old check.sh name is gone", () => {
+  it("the gate script is committed, and it isn't the Template's Owned check.sh", () => {
     // Arrange
     const gate = new URL(GATE_SCRIPT, root);
 
     // Act
-    const present = [existsSync(gate), existsSync(new URL(".sandcastle/check.sh", root))];
+    const committed = existsSync(gate);
 
     // Assert
-    assert.deepEqual(present, [true, false]);
+    // The next re-Apply writes the Template's own .sandcastle/check.sh beside this gate, so only the name is pinned.
+    assert.ok(committed, `${GATE_SCRIPT} is missing`);
+    assert.notEqual(GATE_SCRIPT, ".sandcastle/check.sh");
   });
 
+  // A guard for later edits to CHECK_PATHS: the rename itself doesn't change what it covers.
   it("CHECK_PATHS covers the gate script, so a PR that changes it is listed for the reviewer", () => {
     // Arrange
     const covers = (path: string) => GATE_SCRIPT === path || GATE_SCRIPT.startsWith(path.endsWith("/") ? path : `${path}/`);
